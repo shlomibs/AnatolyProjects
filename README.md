@@ -20,3 +20,4 @@ Few rules:
 
 - Feel free to discuss about any considerations regarding the directory structure.
 
+Cool readme message !
