@@ -1,5 +1,6 @@
 def function(n):
-	sum = 0
-	while(n != 0):
-		sum *= n
-		n = n-1
+    if (n == 0):
+        return 1
+    return n * (function(n-1))
+	
+print function(4)
