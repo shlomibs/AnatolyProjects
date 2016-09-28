@@ -9,3 +9,11 @@ class LowLevelCommunicator:
 		raise Exception("Not implemented exception")
 	def recievingThread():
 		raise Exception("Not implemented exception") # sniff and filter packets
+	def sendTo(self, msg, to):
+		if type(to) == type(list()):
+			for node in to:
+				self.__sendTo(msg, Node)
+		else:
+			self.__sendTo(msg, to)
+	def __sendTo(msg, to):
+		raise Exception("Not implemented exception")
