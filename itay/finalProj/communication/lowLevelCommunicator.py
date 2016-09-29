@@ -7,7 +7,10 @@ class LowLevelCommunicator:
 	def startPortProtectionService(self, port):
 		# if self.ports is not defined create it
 		self.ports.append(port)
-
+		if !self.__portProtectionStarted:
+			# new thread...
+		raise Exception("Not implemented exception")
+	def portProtectionService(self, port):
 		raise Exception("Not implemented exception")
 	def startRecievingThread(port):
 		raise Exception("Not implemented exception")

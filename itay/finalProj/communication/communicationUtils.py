@@ -7,6 +7,3 @@ def defaultPort():
 
 def isPortTaken():
 	raise Exception("Not implemented exception")
-
-def startPortProtectionService(port):
-	raise Exception("Not implemented exception")

@@ -12,7 +12,7 @@ class communication:
 		self.communicator.startPortProtectionService(self.port)
 		self.communicator.startRecievingThread(self.port)
 	def sendQuery(self, qry):
-		
+		self.communicator.sendTo(self.__encodeQuerry(qry),)
 		raise("Not implemented execption")
 	def recieve(self):#getRecievedQuerriesAndTasks():
 		QandT = self.communicator.getRecievedQuerriesAndTasks()
