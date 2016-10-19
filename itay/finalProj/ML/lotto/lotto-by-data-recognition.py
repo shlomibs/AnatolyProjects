@@ -4,14 +4,6 @@ from sklearn import datasets, svm
 import matplotlib.pyplot as plt
 #import numpy as np
 
-
-#
-#
-# not yet implemented -> currently hand writting recognition software
-#
-#
-#
-
 def lstToFloat(lst):
 	finalStr = ""
 	for i in lst:
@@ -38,12 +30,14 @@ y = [dataTable[i][2:-2] for i in range(len(dataTable) - 1)]
 
 y = [lstToFloat(i) for i in y]
 
-print x
-print y
+#print x
+#print y
 
 clf = svm.SVC(gamma=0.001, C=100)
 
 clf.fit(x[2:], y[2:]) # data, corresponding true result
+
+print "data length: ", len(x[2:])
 
 print "prediction: ", str(clf.predict(x[1])), "true: ", y[1]
 print "prediction: ", str(clf.predict(x[0])), "true: ", y[0]

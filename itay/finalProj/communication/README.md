@@ -1,3 +1,8 @@
 under construction:
 
-the node communication lib
+communication lib
+
+communication methods (not encoding or decoding) almost finished
+PEACH OUT
+
+
