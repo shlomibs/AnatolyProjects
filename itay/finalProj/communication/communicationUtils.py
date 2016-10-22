@@ -8,3 +8,7 @@ def defaultPort():
 
 def isPortTaken(port): # FIN
 	return port in [i.laddr[1] for i in psutil.net_connections()]
+
+def getDirServerAddr():
+	dirServers = urllib.urlopen("http://dirser.honor.es/dirSer/status.php").read().split("\n")[1:]
+	return tuple(dirServers[random.randint(0, len(dirServers))].split(",")) # getting random server

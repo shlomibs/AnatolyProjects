@@ -11,9 +11,10 @@ class LowLevelCommunicator:
 	optional: using scapy for communicating hiddenly
 	for now: communicate via socket
 	"""
-	def __init__(self, port, holePunchingIp, ID):
+	def __init__(self, port, holePunchingIp, ID, communicationKey):
+		self.encoder = Encoder(communicationKey)
 		self.port = port
-		self.recived = [] # item in recieved is (IDfrom, 
+		self.recived = [] # item in recieved is (IDfrom, id
 		self.sendedAndNotResponded = []
 		self.sniffed = []
 		self.pacTimeout = 5 # 5 = default
@@ -51,12 +52,18 @@ class LowLevelCommunicator:
 		while !self.shutdown:
 			# TODO: check the packets are valid
 			# then extract data to recData
-			self.recieved.append(recData)
+			
+			for pac in self.sniffed:
+				pac[Raw].split(",")................
+				
+			
+			#if recData is recievedRespone: elf.sendedAndNotResponded.remove(response)
+			#else: self.recieved.append(recData)
 			sleep(0.1)
 		raise Exception("Not implemented exception") # sniff and filter packets
 	
 	def __sniffingThread(self): #(): # FIN
-		sniff(prn=self.sniffed.append)
+		sniff(lfilter = lambda p:p.haslayer(UDP) and p[UDP].dport == self.port, prn = self.sniffed.append)
 		
 	def sendTo(self, msg, toIP): # FIN
 		if type(to) == type(list()):
@@ -66,12 +73,15 @@ class LowLevelCommunicator:
 			self.__sendTo(msg, to)
 
 	def __sendedValidationThread():
+		"""
+		re-send packets that havn't recieved or recieved incorrectly
+		"""
 		while !self.shutdown:
 			for i in self.sendedAndNotResponded: # i = (seq, time(), pac)
 				if time() - i[1] >= self.pacTimeout:
 					sendp(i[2])
 					i[1] = time()
-				sleep(0.2)
+			sleep(0.2)
 
 	def __sendTo(self, msg, toID): # FIN
 		# to = ID #(ip, port)
@@ -96,6 +106,11 @@ class LowLevelCommunicator:
 		self.__incSeq()
 		sendp(tosend)
 		self.sendedAndNotResponded.append(self.seq, time(), toSend[-1])
+
+	def __sendRecievedResponse(self, pac):
+		splt = pac.split(",")
+		to = self.getAddrById(int(split[0]))
+		IP(dst=to[0])/UDP(dport=to[1])/raw
 
 	def getAddrById(ID):
 		raise Exception("Not implemented exception")
