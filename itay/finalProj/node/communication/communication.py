@@ -2,12 +2,12 @@
 import communicationUtils
 
 class communication:
-	def __init__(self, ID, communicationKey, holePunchingIp = "8.8.8.8"):
+	def __init__(self, ID, communicationKey, holePunchingAddr = communicationUtils.getDirServerAddr()):
 		port = defaultPort()
 		while isPortTaken(self.port):
 			port += 1
 			if port >= 2^16: port = 2000
-		self.communicator = LowlevelCommunicator(port, holePunchingIp, ID, communicationKey)
+		self.communicator = LowlevelCommunicator(port, holePunchingAddr, ID, communicationKey)
 		self.communicator.startPortProtectionService()
 		self.communicator.startRecievingThread(self.port)
 

@@ -5,13 +5,14 @@ from socket import *
 from scapy.all import *
 from time import sleep, time
 from encoder import Encoder
+import communicationUtils
 
 class LowLevelCommunicator:
 	"""
 	optional: using scapy for communicating hiddenly
 	for now: communicate via socket
 	"""
-	def __init__(self, port, holePunchingIp, ID, communicationKey):
+	def __init__(self, port, holePunchingAddr, ID, communicationKey):
 		self.encoder = Encoder(communicationKey)
 		self.port = port
 		self.recived = [] # item in recieved is (IDfrom, id
@@ -21,7 +22,7 @@ class LowLevelCommunicator:
 		self.isPortProtectionServiceStarted = False
 		self.isRecievingThreadStarted = False
 		self.shutdown = False
-		self.holePunchingIp = holePunchingIp
+		self.holePunchingAddr = holePunchingAddr
 		self.ID = ID
 		self.seq = 0
 		self.EOM = "<EOF>" # end of message
@@ -37,8 +38,8 @@ class LowLevelCommunicator:
 		next: maybe block any connection that attemps to bind or use that port
 		"""
 		while !self.shutdown:
-			holePunchPac = IP(dst=self.holePunchingIp)/UDP(dport=port)
-			sendp(holePunchPacs)
+			holePunchPac = IP(dst=self.holePunchingAddr[0])/UDP(sport=self.port, dport=holePunchingAddr[1])/str(self.ID)
+			send(holePunchPacs)
 			sleep(gapBetweenPunches)
 		#raise Exception("Not implemented exception")
 
@@ -54,8 +55,12 @@ class LowLevelCommunicator:
 			# then extract data to recData
 			
 			for pac in self.sniffed:
-				pac[Raw].split(",")................
-				
+				splt = pac[Raw].split(",")
+				if splt[2] == "r": # recieved response => remove from self.sendedAndNotResponded
+					for i in self.sendedAndNotResponded:
+						if i[0] == str(self.seq): # remove
+							self.sendedAndNotResponded.remove(i)
+							break
 			
 			#if recData is recievedRespone: elf.sendedAndNotResponded.remove(response)
 			#else: self.recieved.append(recData)
@@ -79,7 +84,7 @@ class LowLevelCommunicator:
 		while !self.shutdown:
 			for i in self.sendedAndNotResponded: # i = (seq, time(), pac)
 				if time() - i[1] >= self.pacTimeout:
-					sendp(i[2])
+					send(i[2])
 					i[1] = time()
 			sleep(0.2)
 
@@ -95,24 +100,28 @@ class LowLevelCommunicator:
 			# ID,Seq,data
 			# the response address would be found by the ID
 			raw = str(self.ID) + "," + str(self.seq) + "," + msg[i*dataPerPac:(i+1)*dataPerPac]
-			toSend.append(IP(dst=to[0])/UDP(dport=to[1])/raw)
+			toSend.append(IP(dst=to[0])/UDP(sport=self.port, dport=to[1])/raw)
 			self.sendedAndNotResponded.append(self.seq, time(), toSend[-1])
 			self.__incSeq()
-		toSend.append(IP(dst=to[0])/UDP(dport=to[1])/(str(self.ID) + "," + str(self.seq) + "," + msg[(numToSend-1)*dataPerPac:])) # last data packet
+		toSend.append(IP(dst=to[0])/UDP(sport=self.port, dport=to[1])/
+			(str(self.ID) + "," + str(self.seq) + "," + msg[(numToSend-1)*dataPerPac:])) # last data packet
 		self.sendedAndNotResponded.append(self.seq, time(), toSend[-1])
 		self.__incSeq()
-		toSend.append(IP(dst=to[0])/UDP(dport=to[1])/str(self.ID) + "," + str(self.seq) + "," + self.EOM) # end message
+		toSend.append(IP(dst=to[0])/UDP(sport=self.port, dport=to[1])/str(self.ID) + "," + str(self.seq) + "," + self.EOM) # end message
 		self.sendedAndNotResponded.append(self.seq, time(), toSend[-1])
 		self.__incSeq()
-		sendp(tosend)
+		send(tosend)
 		self.sendedAndNotResponded.append(self.seq, time(), toSend[-1])
 
 	def __sendRecievedResponse(self, pac):
 		splt = pac.split(",")
-		to = self.getAddrById(int(split[0]))
-		IP(dst=to[0])/UDP(dport=to[1])/raw
+		to = self.getAddrById(int(splt[0]))
+		# ID,Seq,"r",recPacSeq
+		raw = str(self.ID) + "," + str(self.seq) + ",r," + splt[1] #r=recieved 
+		send(IP(dst=to[0])/UDP(sport=self.port, dport=to[1])/raw)
 
 	def getAddrById(ID):
+		dirSerAddr = communicationUtils.getDirServerAddr()
 		raise Exception("Not implemented exception")
 
 	def __incSeq(self): # FIN

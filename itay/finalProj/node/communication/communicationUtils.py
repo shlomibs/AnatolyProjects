@@ -11,4 +11,6 @@ def isPortTaken(port): # FIN
 
 def getDirServerAddr():
 	dirServers = urllib.urlopen("http://dirser.honor.es/dirSer/status.php").read().split("\n")[1:]
-	return tuple(dirServers[random.randint(0, len(dirServers))].split(",")) # getting random server
+	addr = dirServers[random.randint(0, len(dirServers))].split(",") # getting random server
+	addr[1] = int(addr[1]) # port to integer
+	return tuple(addr[0:2]) # [0:2] for future developments like adding ID's and more
