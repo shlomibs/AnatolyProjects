@@ -40,13 +40,12 @@ def upload(sp): # sp = is subprocess?
 	try:
 		ftp = FTP('dirser.honor.es','u140460863','1346798255')
 		ftp.cwd("dirSer")
-		myPath = os.getcwd() 
+		myPath = os.getcwd() + "/upload"
+		# upload the ../upload folder to dirSer # upload full dir for future updates
 		uploadDir(myPath, ftp, sp) # now call the recursive function
 		if sp:
 			return True
 		print 'success'
-		if sp
-			return True
 	except Exception as e:
 		print "connection failed!!!\nerr: " + str(e)
 		if sp:

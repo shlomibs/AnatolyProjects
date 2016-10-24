@@ -5,13 +5,28 @@ from time import time
 
 class Server:
 	def __init__(self):
+		self.uploadAddr()
+		self.port = 13013
 		self.s = socket(AF_INET, SOCK_DGRAM)
-		self.s.bind(("0.0.0.0", port))
+		self.s.bind(("0.0.0.0", self.port))
 		self.isShutdown = False
 		self.clients = [] # (ID, address)
 		self.clientsLastCommunication = {} # class
 		self.MAX_NODES_NUM = 20 # to fit to one packet
 		self.CLIENT_TIMEOUT = 3 * 4
+
+	def uploadAddr(self):
+		# get current status
+		upToDateStatus = urllib.urlopen("http://dirser.honor.es/dirSer/status.php").read().replace("\r", "") # turn \r\n to \n
+		f = open("upload/status.php", "w")
+		f.write(upToDateStatus + "\n" + self.getMyIP() + "," + str(self.port))
+		f.close()
+		if !upload(True): # upload and not verbose
+			for i in range(2): # try 2 more times
+				if upload(True): # break
+					break
+				if i == 1:
+					raise Exception("upload failed")
 
 	def start(self): # FIN
 		start_new_thread(self.run, ())
@@ -25,7 +40,7 @@ class Server:
 		while !self.Shutdown:
 			data, addr = self.s.recvfrom(1024) # data = ID
 			#if ">" in data: # want nodes list data = [ID]>[node type] # => data.split(">") = [ID, node type]
-			if data[-1] == ">"
+			if data[-1] == ">" # request for nodes list
 				self.s.sendTo(self.getContacts(data[:-1], addr)
 			else: # regular notification (usually hole punching)
 				if (data,addr) not in self.clients:
@@ -43,11 +58,27 @@ class Server:
 					i += 1
 			sleep(0.2)
 
+	def getMyIP(self):
+	checkIpSock = socket(AF_INET, SOCK_DGRAM)
+	checkIpSock.connect(('8.8.8.8', 0))  # connecting to a UDP address doesn't send packets
+	return checkIpSock.getsockname()[0]
+
 	def getContacts(self, ID):
 		raise("Not Implemented exception")
 
 	def shutdown(self): # FIN
 		self.isShutdown = True
+		upToDateStatus = urllib.urlopen("http://dirser.honor.es/dirSer/status.php").read()
+		upToDateStatus = upToDateStatus.replace("\n" + self.getMyIP() + "," + str(self.port), "") # remove this addr
+		f = open("upload/status.php", "w")
+		f.write(upToDateStatus)
+		f.close()
+		if !upload(True): # upload and not verbose
+			for i in range(2): # try 2 more times
+				if upload(True): # break
+					break
+				if i == 1:
+					raise Exception("upload failed")
 		sleep(0.5)
 
 
