@@ -5,22 +5,24 @@ from time import time
 
 class Server:
 	def __init__(self):
-		self.uploadAddr()
 		self.port = 13013
 		self.s = socket(AF_INET, SOCK_DGRAM)
 		self.s.bind(("0.0.0.0", self.port))
+		self.uploadAddr()
 		self.isShutdown = False
 		self.clients = [] # (ID, address)
 		self.clientsLastCommunication = {} # class
 		self.MAX_NODES_NUM = 20 # to fit to one packet
 		self.CLIENT_TIMEOUT = 3 * 4
 
-	def uploadAddr(self):
+	def uploadAddr(self): # FIN
 		# get current status
 		upToDateStatus = urllib.urlopen("http://dirser.honor.es/dirSer/status.php").read().replace("\r", "") # turn \r\n to \n
+		# edit status file
 		f = open("upload/status.php", "w")
-		f.write(upToDateStatus + "\n" + self.getMyIP() + "," + str(self.port))
+		f.write(upToDateStatus + "\n" + self.getMyIp() + "," + str(self.port))
 		f.close()
+		# then upload status
 		if !upload(True): # upload and not verbose
 			for i in range(2): # try 2 more times
 				if upload(True): # break
@@ -58,12 +60,13 @@ class Server:
 					i += 1
 			sleep(0.2)
 
-	def getMyIP(self):
-	checkIpSock = socket(AF_INET, SOCK_DGRAM)
-	checkIpSock.connect(('8.8.8.8', 0))  # connecting to a UDP address doesn't send packets
-	return checkIpSock.getsockname()[0]
+	def getMyIp(self): # FIN
+		checkIpSock = socket(AF_INET, SOCK_DGRAM)
+		checkIpSock.connect(('8.8.8.8', 0))  # connecting to a UDP address doesn't send packets
+		return checkIpSock.getsockname()[0]
 
 	def getContacts(self, ID):
+		# send list of ID's and addresses of nodes that this node[ID] can send to
 		raise("Not Implemented exception")
 
 	def shutdown(self): # FIN
@@ -83,15 +86,20 @@ class Server:
 
 
 
-def main():
+def main(): # FIN
 	# upload external address and port ..
 	server = Server()
 	server.start()
+	print ">> started"
+	cmds = ["shutdown", "exit", "close", "quit"]
 	while True:
 		inp = raw_input()
-		if inp in ["shutdown", "exit", "close", "quit"]:
+		if inp in cmds
 			print "shutting down . . ."
 			server.shutdown()
+		else:
+			print "illigal command, avalivablr commands: " + ", ".join(cmds)
+		
 
 if __name__ == "__main__":
 	main()
