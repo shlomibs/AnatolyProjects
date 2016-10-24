@@ -11,11 +11,17 @@ class communication:
 		self.communicator.startPortProtectionService()
 		self.communicator.startRecievingThread(self.port)
 
-	def sendQuery(self, qry):
-		toID = self.__getBest...
+	def sendQuery(self, qry): # FIN
+		toID = self.getBestContactId(qry)
 		self.communicator.sendTo(self.communicator.encoder.encodeQuerry(qry), toID) # to = (host,port)
-		raise("Not implemented execption")
+
+	def sendQuery(self, task): # FIN
+		toID = self.getBestContactId(task)
+		self.communicator.sendTo(self.communicator.encoder.encodeTask(task), toID) # to = (host,port)
 
 	def recieve(self):#getRecievedQuerriesAndTasks(): # FIN
 		QandT = self.communicator.getRecievedQuerriesAndTasks()
 		return self.communicator.encoder.decode(QandT)
+
+	def getBestContactId(self, qry):
+		raise("Not implemented execption")

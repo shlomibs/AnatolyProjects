@@ -53,7 +53,6 @@ class LowLevelCommunicator:
 		while !self.shutdown:
 			# TODO: check the packets are valid
 			# then extract data to recData
-			
 			for pac in self.sniffed:
 				splt = pac[Raw].split(",")
 				if splt[2] == "r": # recieved response => remove from self.sendedAndNotResponded
@@ -61,6 +60,8 @@ class LowLevelCommunicator:
 						if i[0] == str(self.seq): # remove
 							self.sendedAndNotResponded.remove(i)
 							break
+				if pac[IP].src == communicationUtils.getDirServerAddr()[0]: # dir server ip
+					# its the node connections data... use it, save it to list or ID
 			
 			#if recData is recievedRespone: elf.sendedAndNotResponded.remove(response)
 			#else: self.recieved.append(recData)
@@ -77,11 +78,11 @@ class LowLevelCommunicator:
 		else: # to single node
 			self.__sendTo(msg, to)
 
-	def __sendedValidationThread():
+	def __sendedValidationThread(): # FIN
 		"""
 		re-send packets that havn't recieved or recieved incorrectly
 		"""
-		while !self.shutdown:
+		while not self.shutdown:
 			for i in self.sendedAndNotResponded: # i = (seq, time(), pac)
 				if time() - i[1] >= self.pacTimeout:
 					send(i[2])
@@ -113,7 +114,7 @@ class LowLevelCommunicator:
 		send(tosend)
 		self.sendedAndNotResponded.append(self.seq, time(), toSend[-1])
 
-	def __sendRecievedResponse(self, pac):
+	def __sendRecievedResponse(self, pac): # FIN
 		splt = pac.split(",")
 		to = self.getAddrById(int(splt[0]))
 		# ID,Seq,"r",recPacSeq

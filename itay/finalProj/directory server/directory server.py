@@ -1,7 +1,8 @@
 from uploadToDirSer import upload
 from socket import *
+import urllib
 from thread import start_new_thread
-from time import time
+from time import time, sleep
 
 class Server:
 	def __init__(self):
@@ -23,12 +24,12 @@ class Server:
 		f.write(upToDateStatus + "\n" + self.getMyIp() + "," + str(self.port))
 		f.close()
 		# then upload status
-		if !upload(True): # upload and not verbose
+		if not upload(True): #True): # upload and not verbose
 			for i in range(2): # try 2 more times
 				if upload(True): # break
 					break
 				if i == 1:
-					raise Exception("upload failed")
+					pass#raise Exception("upload failed")
 
 	def start(self): # FIN
 		start_new_thread(self.run, ())
@@ -39,18 +40,18 @@ class Server:
 		self.recvThread()
 
 	def recvThread(self): # FIN
-		while !self.Shutdown:
+		while not self.isShutdown:
 			data, addr = self.s.recvfrom(1024) # data = ID
 			#if ">" in data: # want nodes list data = [ID]>[node type] # => data.split(">") = [ID, node type]
-			if data[-1] == ">" # request for nodes list
-				self.s.sendTo(self.getContacts(data[:-1], addr)
+			if data[-1] == ">": # request for nodes list
+				self.s.sendTo(self.getContacts(data[:-1], addr))
 			else: # regular notification (usually hole punching)
 				if (data,addr) not in self.clients:
 					self.clients.append((data, addr))
 				self.clientsLastCommunication[(data, addr)] = time()
 
-	def checkConnectionThread(): # FIN
-		while !self.shutdown:
+	def checkConnectionThread(self): # FIN
+		while not self.isShutdown:
 			i=0
 			while i < len(self.clients):
 				if time() - self.clientsLastCommunication[self.clients[i]] > self.CLIENT_TIMEOUT: # remove if connection timed out
@@ -72,16 +73,16 @@ class Server:
 	def shutdown(self): # FIN
 		self.isShutdown = True
 		upToDateStatus = urllib.urlopen("http://dirser.honor.es/dirSer/status.php").read()
-		upToDateStatus = upToDateStatus.replace("\n" + self.getMyIP() + "," + str(self.port), "") # remove this addr
+		upToDateStatus = upToDateStatus.replace("\n" + self.getMyIp() + "," + str(self.port), "") # remove this addr
 		f = open("upload/status.php", "w")
 		f.write(upToDateStatus)
 		f.close()
-		if !upload(True): # upload and not verbose
+		if not upload(True): # upload and not verbose
 			for i in range(2): # try 2 more times
 				if upload(True): # break
 					break
 				if i == 1:
-					raise Exception("upload failed")
+					pass#raise Exception("upload failed")
 		sleep(0.5)
 
 
@@ -94,9 +95,10 @@ def main(): # FIN
 	cmds = ["shutdown", "exit", "close", "quit"]
 	while True:
 		inp = raw_input()
-		if inp in cmds
+		if inp in cmds:
 			print "shutting down . . ."
 			server.shutdown()
+			break
 		else:
 			print "illigal command, avalivablr commands: " + ", ".join(cmds)
 		

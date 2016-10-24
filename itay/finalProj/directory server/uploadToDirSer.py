@@ -21,7 +21,7 @@ def uploadDir(path, ftp, sp): # sp = is subprocess?
 			ftp.storbinary('STOR %s' % f, fh)
 			fh.close()
 			write("               uploaded\n", sp)
-		elif os.path.isdir(path + '/' + f):ft
+		elif os.path.isdir(path + '/' + f):
 			exist = False
 			for file1 in filelist:
 				if f in file1:
@@ -53,12 +53,13 @@ def upload(sp): # sp = is subprocess?
 	for i in range(3):
 		write(".", sp)
 		time.sleep(1)
+		return True
 
 def write(string, sp): #sp = subprocess
-	if !sp: print string,
+	if not sp: print string,
 
 if __name__ == "__main__": # debugging or uploading manually
-	if(len(sys.argv) > 1 && sys.argv[1] in ["subprocess","sp","SP"]):
+	if(len(sys.argv) > 1 and sys.argv[1] in ["subprocess","sp","SP"]):
 		upload(True)
 	else:
 		upload(False)
