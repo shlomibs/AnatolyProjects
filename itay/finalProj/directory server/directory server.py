@@ -9,11 +9,10 @@ class Server:
 		self.port = 13013
 		self.s = socket(AF_INET, SOCK_DGRAM)
 		self.s.bind(("0.0.0.0", self.port))
-		self.uploadAddr()
 		self.isShutdown = False
 		self.clients = [] # (ID, address)
 		self.clientsLastCommunication = {} # class
-		self.MAX_NODES_NUM = 20 # to fit to one packet
+		self.MAX_NODES_NUM_TO_SEND = 20 # to fit to one packet
 		self.CLIENT_TIMEOUT = 3 * 4
 
 	def uploadAddr(self): # FIN
@@ -32,7 +31,10 @@ class Server:
 					pass#raise Exception("upload failed")
 
 	def start(self): # FIN
-		start_new_thread(self.run, ())
+		if not self.uploadAddr(): # upload the address
+			return False # fail
+		start_new_thread(self.run, ()) # then start the server
+		return True # success
 
 	def run(self): # FIN
 		start_new_thread(self.checkConnectionThread, ())
@@ -90,12 +92,14 @@ class Server:
 def main(): # FIN
 	# upload external address and port ..
 	server = Server()
-	server.start()
-	print ">> started"
+	if not server.start():
+		print "failure!\n exiting . . ."
+		return
+	print ">> started . . ."
 	cmds = ["shutdown", "exit", "close", "quit"]
 	while True:
-		inp = raw_input()
-		if inp in cmds:
+		inp = raw_input(">> ")
+		if inp.lower() in cmds: # to lower case
 			print "shutting down . . ."
 			server.shutdown()
 			break

@@ -25,3 +25,7 @@ class communication:
 
 	def getBestContactId(self, qry):
 		raise("Not implemented execption")
+
+	def getAddrById(ID):
+		dirSerAddr = communicationUtils.getDirServerAddr()
+		raise Exception("Not implemented exception")

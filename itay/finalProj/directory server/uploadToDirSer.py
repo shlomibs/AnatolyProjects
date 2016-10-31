@@ -1,5 +1,5 @@
 from ftplib import FTP
-import time, os
+import time, os, sys
 
 # file is FIN ! 
 
@@ -38,7 +38,8 @@ def uploadDir(path, ftp, sp): # sp = is subprocess?
 # sp = false for debugging or uploading manually
 def upload(sp): # sp = is subprocess?
 	try:
-		ftp = FTP('dirser.honor.es','u140460863','1346798255')
+		#ftp = FTP('dirser.honor.es','u140460863','1346798255')
+		ftp = FTP('dirser.honor.es','nurealnetwork','1346798255')
 		ftp.cwd("dirSer")
 		myPath = os.getcwd() + "/upload"
 		# upload the ../upload folder to dirSer # upload full dir for future updates
