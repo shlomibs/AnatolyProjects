@@ -4,7 +4,6 @@ from thread import start_new_thread
 from socket import *
 from scapy.all import *
 from time import sleep, time
-from encoder import Encoder
 import communicationUtils
 
 class LowLevelCommunicator:
@@ -12,8 +11,7 @@ class LowLevelCommunicator:
 	optional: using scapy for communicating hiddenly
 	for now: communicate via socket
 	"""
-	def __init__(self, port, holePunchingAddr, ID, communicationKey):
-		self.encoder = Encoder(communicationKey)
+	def __init__(self, port, holePunchingAddr, ID,):
 		self.port = port
 		self.recived = [] # item in recieved is (IDfrom, id
 		self.sendedAndNotResponded = []
@@ -50,18 +48,22 @@ class LowLevelCommunicator:
 
 	def __recievingThread(self): #():
 		start_new_thread(self.__sniffingThread,())
-		while !self.shutdown:
+		while not self.shutdown:
 			# TODO: check the packets are valid
 			# then extract data to recData
 			for pac in self.sniffed:
-				splt = pac[Raw].split(",")
-				if splt[2] == "r": # recieved response => remove from self.sendedAndNotResponded
-					for i in self.sendedAndNotResponded:
-						if i[0] == str(self.seq): # remove
-							self.sendedAndNotResponded.remove(i)
-							break
-				if pac[IP].src == communicationUtils.getDirServerAddr()[0]: # dir server ip
-					# its the node connections data... use it, save it to list or ID
+				try:
+					splt = pac[Raw].split(",")
+					if splt[2] == "r": # recieved response => remove from self.sendedAndNotResponded
+						for i in self.sendedAndNotResponded:
+							if i[0] == str(self.seq): # remove
+								self.sendedAndNotResponded.remove(i)
+								break
+					if pac[IP].src == communicationUtils.getDirServerAddr()[0]: # dir server ip
+						# its the node connections data... use it, save it to list or ID
+				except Exception as e:
+					print "recieving Thread err: illegal packet"
+					print "packet: \n" + str(e)
 			
 			#if recData is recievedRespone: elf.sendedAndNotResponded.remove(response)
 			#else: self.recieved.append(recData)
@@ -92,32 +94,33 @@ class LowLevelCommunicator:
 	def __sendTo(self, msg, to): # FIN
 		# to = (ip, port)
 		#to = self.getAddrById(toID)
+		msgIndicatorLen = len("m,") # indicates thats a message
 		maxIdAndSeqLen = len(str(2^32)) + len(str(2^16))
 		maxPortLength = len(str(2^16))
-		dataPerPac = (508 - maxIdAndSeqLen - maxPortLength) # 508 = for sure safe length
+		dataPerPac = (508 - maxIdAndSeqLen - maxPortLength - msgIndicatorLen) # 508 = for sure safe length
 		numToSend = int(len(msg) / dataPerPac) + 1 # roud down + 1 =~ round up
 		toSend = []
 		for i in xrange(numToSend - 1): # split data to packets with max len of "dataPerPac"
-			# ID,Seq,data
+			# ID,Seq,messageIndicator,data
 			# the response address would be found by the ID
-			raw = str(self.ID) + "," + str(self.seq) + "," + msg[i*dataPerPac:(i+1)*dataPerPac]
+			raw = str(self.ID) + "," + str(self.seq) + ",m," + msg[i*dataPerPac:(i+1)*dataPerPac]
 			toSend.append(IP(dst=to[0])/UDP(sport=self.port, dport=to[1])/raw)
 			self.sendedAndNotResponded.append(self.seq, time(), toSend[-1])
 			self.__incSeq()
 		toSend.append(IP(dst=to[0])/UDP(sport=self.port, dport=to[1])/
-			(str(self.ID) + "," + str(self.seq) + "," + msg[(numToSend-1)*dataPerPac:])) # last data packet
+			(str(self.ID) + "," + str(self.seq) + ",m," + msg[(numToSend-1)*dataPerPac:])) # last data packet
 		self.sendedAndNotResponded.append(self.seq, time(), toSend[-1])
 		self.__incSeq()
-		toSend.append(IP(dst=to[0])/UDP(sport=self.port, dport=to[1])/str(self.ID) + "," + str(self.seq) + "," + self.EOM) # end message
+		toSend.append(IP(dst=to[0])/UDP(sport=self.port, dport=to[1])/(str(self.ID) + "," + str(self.seq) + ",m," + self.EOM) # end message
 		self.sendedAndNotResponded.append(self.seq, time(), toSend[-1])
 		self.__incSeq()
 		send(tosend)
-		self.sendedAndNotResponded.append(self.seq, time(), toSend[-1])
+		#self.sendedAndNotResponded.append(self.seq, time(), toSend[-1])
 
 	def __sendRecievedResponse(self, pac): # FIN
 		splt = pac.split(",")
 		to = self.getAddrById(int(splt[0]))
-		# ID,Seq,"r",recPacSeq
+		# ID,Seq,recvResponseIndicator,recPacSeq
 		raw = str(self.ID) + "," + str(self.seq) + ",r," + splt[1] #r=recieved 
 		send(IP(dst=to[0])/UDP(sport=self.port, dport=to[1])/raw)
 

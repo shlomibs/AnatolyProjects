@@ -1,5 +1,6 @@
 #!/usr/bin/python
 import communicationUtils
+from encoder import Encoder
 
 class communication:
 	def __init__(self, ID, communicationKey, holePunchingAddr = communicationUtils.getDirServerAddr()):
@@ -7,21 +8,22 @@ class communication:
 		while isPortTaken(self.port):
 			port += 1
 			if port >= 2^16: port = 2000
-		self.communicator = LowlevelCommunicator(port, holePunchingAddr, ID, communicationKey)
+		self.encoder = Encoder(communicationKey)
+		self.communicator = LowlevelCommunicator(port, holePunchingAddr, ID)
 		self.communicator.startPortProtectionService()
 		self.communicator.startRecievingThread(self.port)
 
 	def sendQuery(self, qry): # FIN
 		toID = self.getBestContactId(qry)
-		self.communicator.sendTo(self.communicator.encoder.encodeQuerry(qry), toID) # to = (host,port)
+		self.communicator.sendTo(self.encoder.encodeQuerry(qry), toID) # to = (host,port)
 
 	def sendQuery(self, task): # FIN
 		toID = self.getBestContactId(task)
-		self.communicator.sendTo(self.communicator.encoder.encodeTask(task), toID) # to = (host,port)
+		self.communicator.sendTo(self.encoder.encodeTask(task), toID) # to = (host,port)
 
 	def recieve(self):#getRecievedQuerriesAndTasks(): # FIN
 		QandT = self.communicator.getRecievedQuerriesAndTasks()
-		return self.communicator.encoder.decode(QandT)
+		return self.encoder.decode(QandT)
 
 	def getBestContactId(self, qry):
 		raise("Not implemented execption")
