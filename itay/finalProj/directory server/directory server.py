@@ -1,3 +1,4 @@
+#!/usr/bin/python
 from uploadToDirSer import upload
 from socket import *
 import urllib

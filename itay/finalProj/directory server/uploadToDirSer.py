@@ -1,3 +1,4 @@
+#!/usr/bin/python
 from ftplib import FTP
 import time, os, sys
 
@@ -51,10 +52,12 @@ def upload(sp): # sp = is subprocess?
 		print "connection failed!!!\nerr: " + str(e)
 		if sp:
 			return False
+	if sp:
+		return True;
 	for i in range(3):
 		write(".", sp)
 		time.sleep(1)
-		return True
+	return True
 
 def write(string, sp): #sp = subprocess
 	if not sp: print string,
