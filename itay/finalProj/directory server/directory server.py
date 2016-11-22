@@ -15,10 +15,11 @@ class Server:
 		self.clientsLastCommunication = {} # class
 		self.MAX_NODES_NUM_TO_SEND = 20 # to fit to one packet
 		self.CLIENT_TIMEOUT = 3 * 4
+		self.SERVER = "dirser.atwebpages.com"
 
 	def uploadAddr(self): # FIN
 		# get current status
-		upToDateStatus = urllib.urlopen("http://dirser.honor.es/dirSer/status.php").read().replace("\r", "") # turn \r\n to \n
+		upToDateStatus = urllib.urlopen("http://" + self.SERVER + "/dirSer/status.php").read().replace("\r", "") # turn \r\n to \n
 		# edit status file
 		f = open("upload/status.php", "w")
 		f.write(upToDateStatus + "\n" + self.getMyIp() + "," + str(self.port))
@@ -29,7 +30,8 @@ class Server:
 				if upload(True): # break
 					break
 				if i == 1:
-					pass#raise Exception("upload failed")
+					return False #raise Exception("upload failed")
+		return True
 
 	def start(self): # FIN
 		if not self.uploadAddr(): # upload the address
@@ -47,7 +49,8 @@ class Server:
 			data, addr = self.s.recvfrom(1024) # data = ID
 			#if ">" in data: # want nodes list data = [ID]>[node type] # => data.split(">") = [ID, node type]
 			if data[-1] == ">": # request for nodes list
-				self.s.sendTo(self.getContacts(data[:-1], addr))
+				self.s.sendTo("0,0,d," + self.getContacts(data[:-1], addr)) # dirSer ID is 0
+				self.s.sendTo("0,1,d," + self.getContacts(data[:-1], addr)) # 1 = next seq
 			else: # regular notification (usually hole punching)
 				if (data,addr) not in self.clients:
 					self.clients.append((data, addr))
@@ -75,7 +78,7 @@ class Server:
 
 	def shutdown(self): # FIN
 		self.isShutdown = True
-		upToDateStatus = urllib.urlopen("http://dirser.honor.es/dirSer/status.php").read()
+		upToDateStatus = urllib.urlopen("http://" + self.SERVER + "/dirSer/status.php").read()
 		upToDateStatus = upToDateStatus.replace("\n" + self.getMyIp() + "," + str(self.port), "") # remove this addr
 		f = open("upload/status.php", "w")
 		f.write(upToDateStatus)
@@ -85,7 +88,7 @@ class Server:
 				if upload(True): # break
 					break
 				if i == 1:
-					pass#raise Exception("upload failed")
+					raise Exception("upload failed")
 		sleep(0.5)
 
 

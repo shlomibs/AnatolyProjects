@@ -11,7 +11,9 @@ def uploadDir(path, ftp, sp): # sp = is subprocess?
 	files = os.listdir(path)
 	os.chdir(path)
 	filelist = [] #to store all files
-	ftp.retrlines('LIST',filelist.append)    # append to list
+	#ftp.retrlines('LIST',filelist.append)    # append to list
+	ftp.dir(filelist.append)
+	filelist = [i[55:] for i in filelist[2:]] # by format
 	for f in files:
 		if f == "upload to dirSer.py":
 			write(f + " skipped\n", sp)
@@ -40,7 +42,9 @@ def uploadDir(path, ftp, sp): # sp = is subprocess?
 def upload(sp): # sp = is subprocess?
 	try:
 		#ftp = FTP('dirser.honor.es','u140460863','1346798255')
-		ftp = FTP('dirser.honor.es','nurealnetwork','1346798255')
+		#ftp = FTP('dirser.honor.es','nurealnetwork','1346798255')
+		ftp = FTP('dirser.atwebpages.com','2242349','Iitay1346')
+		ftp.cwd("dirser.atwebpages.com")
 		ftp.cwd("dirSer")
 		myPath = os.getcwd() + "/upload"
 		# upload the ../upload folder to dirSer # upload full dir for future updates

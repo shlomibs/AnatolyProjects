@@ -16,10 +16,11 @@ class LowLevelCommunicator:
 		self.recived = [] # item in recieved is (IDfrom, id
 		self.sendedAndNotResponded = []
 		self.sniffed = []
+		self.rawMessages = {}
 		self.pacTimeout = 5 # 5 = default
 		self.isPortProtectionServiceStarted = False
 		self.isRecievingThreadStarted = False
-		self.shutdown = False
+		self.__shutdown = False
 		self.holePunchingAddr = holePunchingAddr
 		self.ID = ID
 		self.seq = 0
@@ -27,15 +28,15 @@ class LowLevelCommunicator:
 
 	def startPortsProtectionService(self): # FIN
 		if self.isPortProtectionServiceStarted: return # already started
-		start_new_thread(portProtectionService, (3,)) # 3 = default
+		start_new_thread(self.__portProtectionService, (3,)) # 3 = default
 		self.isPortProtectionServiceStarted = True
 
 	def __portProtectionService(self, gapBetweenPunches): # FIN (for now)
 		"""
 		hole punching only for now
 		"""
-		while !self.shutdown:
-		next: maybe block any connection that attemps to bind or use that port
+		while not self.__shutdown:
+		#next: maybe block any connection that attemps to bind or use that port
 			holePunchPac = IP(dst=self.holePunchingAddr[0])/UDP(sport=self.port, dport=holePunchingAddr[1])/str(self.ID)
 			send(holePunchPacs)
 			sleep(gapBetweenPunches)
@@ -48,7 +49,7 @@ class LowLevelCommunicator:
 
 	def __recievingThread(self): #():
 		start_new_thread(self.__sniffingThread,())
-		while not self.shutdown:
+		while not self.__shutdown:
 			# TODO: check the packets are valid
 			# then extract data to recData
 			for pac in self.sniffed:
@@ -59,20 +60,26 @@ class LowLevelCommunicator:
 							if i[0] == str(self.seq): # remove
 								self.sendedAndNotResponded.remove(i)
 								break
-					if pac[IP].src == communicationUtils.getDirServerAddr()[0]: # dir server ip
+					#elif pac[IP].src == communicationUtils.getDirServerAddr()[0]: # dir server ip
 						# its the node connections data... use it, save it to list or ID
+					elif splt[2] == "m": # msg
+						if (splt[0], splt[1]) not in self.RawMessages.keys() # not recieved yet
+							self.rawMessages[(int(splt[0]), int(splt[1]))] = splt[3] # dict[ID, Seq] = data
+						self.__sendRecievedResponse(pac[3])
+					else: # unimplemented packet type
+						raise Exception("not implemented packet type (LLC reached to else statment)")
 				except Exception as e:
 					print "recieving Thread err: illegal packet"
-					print "packet: \n" + str(e)
+					print "err data: " + str(e)
+					print "packet: \n"
+					pac.show()
 			
-			#if recData is recievedRespone: elf.sendedAndNotResponded.remove(response)
-			#else: self.recieved.append(recData)
 			sleep(0.1)
 		raise Exception("Not implemented exception") # sniff and filter packets
 	
 	def __sniffingThread(self): #(): # FIN
 		sniff(lfilter = lambda p:p.haslayer(UDP) and p[UDP].dport == self.port, prn = self.sniffed.append)
-		
+
 	def sendTo(self, msg, to): # FIN
 		if type(to) == type(list()):
 			for node in to:
@@ -80,16 +87,46 @@ class LowLevelCommunicator:
 		else: # to single node
 			self.__sendTo(msg, to)
 
+	def getRecievedMessages(self):
+		messages = []
+		sortedRawMessagesKeys = list(sorted(self.rawMessages.keys)) # sort by (primaryElement, secondaryElement)
+		isMsgValid = True
+		lastSeqId = sortedRawMessagesKeys[0][0] # first key[0] = first key id
+		lastKeys = [sortedRawMessagesKeys[0]] # initialize with the first key
+		msgParts = [self.rawMessages[sortedRawMessagesKeys[0]]]
+		for i in sortedRawMessagesKeys[1:]:
+			if lastSeqId[0] == i[0] and lastSeqId[1] + 1 == i[1] and self.rawMessages[i] == self.EOM:
+				if isMsgValid:
+					messages.append((i[0], "".join(msgParts))) # ID, msg
+					for key in lastKeys: # remove "used" raw messages
+						self.rawMessages.pop(key)
+				else:
+					isMsgValid = True # reinitialize for the next msg
+				lastKeys = [] # reinitialize for the next msg
+				msgParts = [] # reinitialize for the next msg
+			else if lastSeqId[0] == i[0] and lastSeqId[1] + 1 == i[1]: # same id and next seq
+				msgParts.append(self.rawMessages[i])
+			else if lastSeqId[0] != i[0]: # start of msg from another node
+				isMsgValid = True # reinitialize for the msg
+				lastSeqId[0] = i[0]
+				lastKeys = [] # reinitialize for the next msg
+				# msgParts = [] # reinitialize for next the msg
+				# msgParts.append(self.rawMessages[i])
+				msgParts = [self.rawMessages[i]] # reinitialize for the next msg
+			else: # lastSeqId[0] == i[0] and lastSeqId[1] + 1 != i[1]
+				isMsgValid = False
+		return messages # in the format (ID, msg)
+
 	def __sendedValidationThread(): # FIN
 		"""
 		re-send packets that havn't recieved or recieved incorrectly
 		"""
-		while not self.shutdown:
+		while not self.__shutdown:
 			for i in self.sendedAndNotResponded: # i = (seq, time(), pac)
 				if time() - i[1] >= self.pacTimeout:
 					send(i[2])
 					i[1] = time()
-			sleep(0.2)
+			sleep(0.2)# reinitialize for the msg
 
 	def __sendTo(self, msg, to): # FIN
 		# to = (ip, port)
@@ -117,8 +154,8 @@ class LowLevelCommunicator:
 		send(tosend)
 		#self.sendedAndNotResponded.append(self.seq, time(), toSend[-1])
 
-	def __sendRecievedResponse(self, pac): # FIN
-		splt = pac.split(",")
+	def __sendRecievedResponse(self, pacData): # FIN
+		splt = pacData.split(",")
 		to = self.getAddrById(int(splt[0]))
 		# ID,Seq,recvResponseIndicator,recPacSeq
 		raw = str(self.ID) + "," + str(self.seq) + ",r," + splt[1] #r=recieved 
@@ -128,6 +165,10 @@ class LowLevelCommunicator:
 		""" icrease sequence indicator """
 		self.seq += 1
 		if self.seq >= 2^16: self.seq = 0 # reset seq
+	
+	def shutdown():
+		self.__shutdown = True
+
 
 
 
