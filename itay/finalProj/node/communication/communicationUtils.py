@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import random
 import psutil
+import netifaces
 
 def defaultPort():
 	return random.randint(2048,65535) # 2**16-1
@@ -18,3 +19,8 @@ def getDirServerAddr(): # FIN
 		return tuple(addr[0:2]) # [0:2] for future developments like adding ID's and more
 	except: # Exception as e:
 		raise Exception("could not get directory server addr")
+
+def GetMachineInternalIps(): # its a generator !!
+	for interface in netifaces.interfaces():
+		for link in netifaces.ifaddresses(interface)[netifaces.AF_INET]:
+			yield link['addr']

@@ -1,14 +1,15 @@
 #!/usr/bin/python
-import lowLevelCommunicator
+import sys
+from lowLevelCommunicator import LowLevelCommunicator # = *
 
-com = LowLevelCommunicator(9999, "192.168.1.176", input("ID"))
+com = LowLevelCommunicator(int(sys.argv[1]), ("10.0.0.138", 12345), sys.argv[0])
 com.startPortProtectionService()
-com.startRecievingThread(self.port)
+com.startRecievingThread()
 
 
 while True:
-	toSend = raw_input("ip:port:data")
+	toSend = raw_input("ip:port:data >> ")
 	com.sendTo(":".join(toSend.split(":")[2:]), (toSend.split(":")[0],int(toSend.split(":")[1])))
-	rec = getRecievedMessages()
+	rec = com.getRecievedMessages()
 	rec = [str(i) for i in rec]
 	print "recieved: " + "\n".join(rec)
