@@ -13,6 +13,7 @@ class communication:
 		self.communicator = LowlevelCommunicator(port, holePunchingAddr, ID)
 		self.communicator.startPortProtectionService()
 		self.communicator.startRecievingThread(self.port)
+		self.connectedNodes = []
 
 	def sendQuery(self, qry): # FIN
 		toID = self.getBestContactId(qry)

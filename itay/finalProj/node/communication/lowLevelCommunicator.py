@@ -47,7 +47,7 @@ class LowLevelCommunicator:
 		start_new_thread(self.__recievingThread, ())
 		self.isRecievingThreadStarted = True
 
-	def __recievingThread(self): #():
+	def __recievingThread(self): # FIN
 		start_new_thread(self.__sniffingThread,())
 		while not self.__shutdown:
 			# TODO: check the packets are valid
@@ -64,7 +64,7 @@ class LowLevelCommunicator:
 						# its the node connections data... use it, save it to list or ID
 					elif splt[2] == "m": # msg
 						if (splt[0], splt[1]) not in self.RawMessages.keys() # not recieved yet
-							self.rawMessages[(int(splt[0]), int(splt[1]))] = splt[3] # dict[ID, Seq] = data
+							self.rawMessages[(int(splt[0]), int(splt[1]))] = ",".join(splt[3:] # dict[ID, Seq] = data
 						self.__sendRecievedResponse(pac[3])
 					else: # unimplemented packet type
 						raise Exception("not implemented packet type (LLC reached to else statment)")

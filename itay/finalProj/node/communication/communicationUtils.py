@@ -16,7 +16,5 @@ def getDirServerAddr(): # FIN
 		# change to get from all
 		addr[1] = int(addr[1]) # port to integer
 		return tuple(addr[0:2]) # [0:2] for future developments like adding ID's and more
-	except: # Eexception as e:
+	except: # Exception as e:
 		raise Exception("could not get directory server addr")
-		return (,) 
-		

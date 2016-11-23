@@ -47,14 +47,16 @@ class Server:
 	def recvThread(self): # FIN
 		while not self.isShutdown:
 			data, addr = self.s.recvfrom(1024) # data = ID
+			splt = data.split(",")
 			#if ">" in data: # want nodes list data = [ID]>[node type] # => data.split(">") = [ID, node type]
-			if data[-1] == ">": # request for nodes list
-				self.s.sendTo("0,0,d," + self.getContacts(data[:-1], addr)) # dirSer ID is 0
-				self.s.sendTo("0,1,d," + self.getContacts(data[:-1], addr)) # 1 = next seq
-			else: # regular notification (usually hole punching)
-				if (data,addr) not in self.clients:
-					self.clients.append((data, addr))
-				self.clientsLastCommunication[(data, addr)] = time()
+			if splt[3] == ">": # request for nodes list
+				# can be also regular notification (usually hole punching) -> that's what the if is for
+				self.s.sendTo("0,0,m," + self.getContacts(splt[0], addr)) # directory servers ID's are all 0
+				self.s.sendTo("0,1,m," + self.getContacts(splt[0], addr)) # 1 = next seq
+			# regular notification (usually hole punching)
+			if (splt[0],addr) not in self.clients:
+				self.clients.append((splt[0], addr)) # ID, ADDR
+			self.clientsLastCommunication[(splt[0], addr)] = time()
 
 	def checkConnectionThread(self): # FIN
 		while not self.isShutdown:
@@ -69,7 +71,7 @@ class Server:
 
 	def getMyIp(self): # FIN
 		checkIpSock = socket(AF_INET, SOCK_DGRAM)
-		checkIpSock.connect(('8.8.8.8', 0))  # connecting to a UDP address doesn't send packets
+		checkIpSock.connect(('8.8.8.8', 0)) # connecting to a UDP address doesn't send packets
 		return checkIpSock.getsockname()[0]
 
 	def getContacts(self, ID):
