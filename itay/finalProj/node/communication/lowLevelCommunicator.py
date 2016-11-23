@@ -11,7 +11,7 @@ class LowLevelCommunicator:
 	optional: using scapy for communicating hiddenly
 	for now: communicate via socket
 	"""
-	def __init__(self, port, holePunchingAddr, ID,):
+	def __init__(self, port, holePunchingAddr, ID):
 		self.port = port
 		self.recived = [] # item in recieved is (IDfrom, id
 		self.sendedAndNotResponded = []
@@ -63,7 +63,7 @@ class LowLevelCommunicator:
 					#elif pac[IP].src == communicationUtils.getDirServerAddr()[0]: # dir server ip
 						# its the node connections data... use it, save it to list or ID
 					elif splt[2] == "m": # msg
-						if (splt[0], splt[1]) not in self.RawMessages.keys() # not recieved yet
+						if (splt[0], splt[1]) not in self.RawMessages.keys(): # not recieved yet
 							self.rawMessages[(int(splt[0]), int(splt[1]))] = ",".join(splt[3:] # dict[ID, Seq] = data
 						self.__sendRecievedResponse(pac[3])
 					else: # unimplemented packet type

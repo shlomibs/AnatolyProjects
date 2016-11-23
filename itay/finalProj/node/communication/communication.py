@@ -2,7 +2,7 @@
 import communicationUtils
 from encoder import Encoder
 
-class communication:
+class Communication:
 	def __init__(self, ID, communicationKey, holePunchingAddr = communicationUtils.getDirServerAddr()):
 		port = defaultPort()
 		while isPortTaken(self.port): # take over a port
