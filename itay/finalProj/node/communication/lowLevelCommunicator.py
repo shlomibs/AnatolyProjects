@@ -85,7 +85,7 @@ class LowLevelCommunicator:
 	
 	def __sniffingThread(self): # FIN
 		myIntIps = communicationUtils.GetMachineInternalIps()
-		print "My internal Ips: " + str([i for i in myIntIps])
+		# print "My internal Ips: " + str([i for i in myIntIps])
 		pacFilter = lambda p: p.haslayer(UDP) and p[UDP].dport == self.port and p.haslayer(IP) and p[IP].dst in myIntIps
 		stopFilter = lambda x: self.__shutdown
 		sniff(lfilter = pacFilter, prn = self.sniffed.append, stop_filter = stopFilter)

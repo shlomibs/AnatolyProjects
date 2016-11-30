@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import sys
 from lowLevelCommunicator import LowLevelCommunicator # = *
+import communicationUtils
 
 com = LowLevelCommunicator(int(sys.argv[2]), ("10.0.0.138", 12345), sys.argv[1])
 com.startPortProtectionService()
