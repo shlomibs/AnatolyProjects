@@ -7,6 +7,9 @@ com.startPortProtectionService()
 com.startRecievingThread()
 
 
+myIntIps = communicationUtils.GetMachineInternalIps()
+print "My internal Ips: " + str([i for i in myIntIps])
+
 while True:
 	toSend = raw_input("ip:port:data >> ")
 	if toSend == "exit": break
