@@ -27,6 +27,7 @@ class LowLevelCommunicator:
 		self.seq = 0
 		self.EOM = "<EOF>" # end of message
 		self.MAX_SEQ = 2^16
+		# self.pcapWriter = PcapWriter("sniffLog" + str(ID) + ".pcap", append=True, sync=True) for debugging
 
 	def startPortProtectionService(self): # FIN
 		if self.isPortProtectionServiceStarted: return # already started
@@ -52,15 +53,12 @@ class LowLevelCommunicator:
 	def __recievingThread(self): # FIN
 		start_new_thread(self.__sniffingThread,())
 		while not self.__shutdown:
-			if len(self.sniffed) > 0:
-				print "sniffed: ",
-				print self.sniffed
 			# TODO: check the packets are valid
 			# then extract data to recData
 			for pac in self.sniffed:
-				try:
-					splt = pac[Raw].split(",")
-					recvFromAddr[splt[0]] = (pac[IP].src, pac[UDP].sport) # add to addresses by ID's dictionary
+				#try:
+					splt = pac[Raw].load.split(",")
+					self.recvFromAddr[splt[0]] = (pac[IP].src, pac[UDP].sport) # add to addresses by ID's dictionary
 					if splt[2] == "r": # recieved response => remove from self.sendedAndNotResponded
 						for i in self.sendedAndNotResponded:
 							if i[0] == str(self.seq): # remove
@@ -69,16 +67,16 @@ class LowLevelCommunicator:
 					#elif pac[IP].src == communicationUtils.getDirServerAddr()[0]: # dir server ip
 						# its the node connections data... use it, save it to list or ID
 					elif splt[2] == "m": # msg
-						if (splt[0], splt[1]) not in self.RawMessages.keys(): # not recieved yet
+						if (splt[0], splt[1]) not in self.rawMessages.keys(): # not recieved yet
 							self.rawMessages[(int(splt[0]), int(splt[1]))] = ",".join(splt[3:]) # dict[ID, Seq] = data
-						self.__sendRecievedResponse(splt[3])
+						self.__sendRecievedResponse(splt)
 					else: # unimplemented packet type
 						raise Exception("not implemented packet type (LLC reached to else statment)")
-				except Exception as e:
-					print "recieving Thread err: illegal packet"
-					print "err data: " + str(e)
-					print "packet: \n"
-					pac.show()
+				#except Exception as e:
+					#print "recieving Thread err: illegal packet"
+					#print "err data: " + str(e)
+					#print "packet: \n"
+					#pac.show()
 			self.sniffed = []
 			sleep(0.1)
 		#raise Exception("Not implemented exception") # sniff and filter packets
@@ -88,9 +86,20 @@ class LowLevelCommunicator:
 		# print "My internal Ips: " + str([i for i in myIntIps])
 		pacFilter = lambda p: p.haslayer(UDP) and p[UDP].dport == self.port and p.haslayer(IP) #and p[IP].dst in myIntIps
 		stopFilter = lambda x: self.__shutdown
-		sniff(lfilter = pacFilter, prn = self.sniffed.append, stop_filter = stopFilter)
+		sniff(lfilter=pacFilter, prn=self.__appendSniffedPac, stop_filter=stopFilter)
 		print "sniffed unexpectly exited"
 
+	# for debugging:
+	#def __demoFilter(self, p):
+	#	if p.haslayer(UDP) and p[UDP].dport == self.port and p.haslayer(IP): #and p[IP].dst in myIntIps
+	#		self.pcapWriter.write(p) # for debugging
+	#	return p.haslayer(UDP) and p[UDP].dport == self.port and p.haslayer(IP) #and p[IP].dst in myIntIps
+	
+	def __appendSniffedPac(self, p):
+		#print "appended: ",
+		#p.summary()
+		self.sniffed.append(p)
+	
 	def sendTo(self, msg, to): # FIN
 		if type(to) == type(list()):
 			for node in to:
@@ -99,17 +108,16 @@ class LowLevelCommunicator:
 			self.__sendTo(msg, to)
 
 	def getRecievedMessages(self): # FIN
-		print "sniffed: ",
-		print self.sniffed
 		if len(self.rawMessages) == 0: # if raw messages empty exit
 			return []
 		messages = []
 		sortedRawMessagesKeys = list(sorted(self.rawMessages.keys())) # sort by (primaryElement, secondaryElement)
 		isMsgValid = True
-		lastSeqId = sortedRawMessagesKeys[0][0] # first key[0] = first key id
+		lastSeqId = sortedRawMessagesKeys[0] # first key[0] = first key id
 		lastKeys = [sortedRawMessagesKeys[0]] # initialize with the first key
 		msgParts = [self.rawMessages[sortedRawMessagesKeys[0]]]
 		for i in sortedRawMessagesKeys[1:]:
+			#print "i: ", type(i), " last: ", type(lastSeqId)
 			if lastSeqId[0] == i[0] and (lastSeqId[1] + 1) % self.MAX_SEQ == i[1] and self.rawMessages[i] == self.EOM:
 				lastKeys.append(i)
 				if isMsgValid:
@@ -120,18 +128,21 @@ class LowLevelCommunicator:
 					isMsgValid = True # reinitialize for the next msg
 				lastKeys = [] # reinitialize for the next msg
 				msgParts = [] # reinitialize for the next msg
-			elif lastSeqId[0] == i[0] and lastSeqId[1] + 1 == i[1]: # same id and next seq
+				lastSeqId = i
+			elif lastSeqId[0] == i[0] and (lastSeqId[1] + 1) % self.MAX_SEQ == i[1]: # same id and next seq
 				msgParts.append(self.rawMessages[i])
 				lastKeys.append(i)
-			elif lastSeqId[0] != i[0]: # start of msg from another node
+				lastSeqId = i
+			elif lastSeqId[0] != i[0]: # start of a msg from another node, ID changed
 				isMsgValid = True # reinitialize for the msg
-				lastSeqId[0] = i[0]
-				lastKeys = [] # reinitialize for the next msg
+				lastSeqId = i
+				lastKeys = [i] # reinitialize for the next msg
 				# msgParts = [] # reinitialize for next the msg
 				# msgParts.append(self.rawMessages[i])
 				msgParts = [self.rawMessages[i]] # reinitialize for the next msg
 			else: # lastSeqId[0] == i[0] and lastSeqId[1] + 1 != i[1]
 				isMsgValid = False
+				lastSeqId = i
 		return messages # in the format (ID, msg)
 
 	def __sendedValidationThread(): # FIN
@@ -168,27 +179,29 @@ class LowLevelCommunicator:
 		toSend.append(IP(dst=to[0])/UDP(sport=self.port, dport=to[1])/(str(self.ID) + "," + str(self.seq) + ",m," + self.EOM)) # end message
 		self.sendedAndNotResponded.append((self.seq, time(), toSend[-1]))
 		self.__incSeq()
-		print "tosend: " + str(toSend)
-		send(toSend) #, verbose = False)
+		#print "tosend: " + str(toSend) # fir debugging
+		send(toSend, verbose = False)
 		#self.sendedAndNotResponded.append(self.seq, time(), toSend[-1])
 
-	def __sendRecievedResponse(self, pacData): # FIN
-		splt = pacData.split(",")
+	def __sendRecievedResponse(self, pacDataSplt): # FIN
+		splt = pacDataSplt # pacData.split(",")
 		try:
-			to = recvFromAddr[splt[0]] # self.getAddrById(int(splt[0]))
+			to = self.recvFromAddr[splt[0]] # self.getAddrById(int(splt[0]))
 		except Exception as e:
 			print "send recv response err: " + str(e)
 		# ID,Seq,recvResponseIndicator,recPacSeq
-		raw = str(self.ID) + "," + str(self.seq) + ",r," + splt[1] #r=recieved 
-		send(IP(dst=to[0])/UDP(sport=self.port, dport=to[1])/raw)
+		raw = str(self.ID) + "," + str(self.seq) + ",r," + splt[1] #r=recieved , splt[1] = other node's seq
+		#print "sending resp: " + raw # for debugging
+		send(IP(dst=to[0])/UDP(sport=self.port, dport=to[1])/raw, verbose = False)
 
 	def __incSeq(self): # FIN
 		""" icrease sequence indicator """
 		self.seq += 1
 		if self.seq >= self.MAX_SEQ: self.seq = 0 # reset seq # like % but faster
 	
-	def shutdown():
+	def shutdown(self):
 		self.__shutdown = True
+		sleep(1)
 
 
 
