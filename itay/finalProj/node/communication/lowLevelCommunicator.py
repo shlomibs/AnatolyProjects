@@ -26,6 +26,7 @@ class LowLevelCommunicator:
 		self.ID = ID
 		self.seq = 0
 		self.EOM = "<EOF>" # end of message
+		self.MAX_SEQ = 2^16
 
 	def startPortProtectionService(self): # FIN
 		if self.isPortProtectionServiceStarted: return # already started
@@ -39,7 +40,7 @@ class LowLevelCommunicator:
 		while not self.__shutdown:
 		#next: maybe block any connection that attemps to bind or use that port
 			holePunchPac = IP(dst=self.holePunchingAddr[0])/UDP(sport=self.port, dport=self.holePunchingAddr[1])/str(self.ID)
-			send(holePunchPac, verbose = False)
+			send(holePunchPac, verbose=False)
 			sleep(gapBetweenPunches)
 		#raise Exception("Not implemented exception")
 
@@ -51,6 +52,9 @@ class LowLevelCommunicator:
 	def __recievingThread(self): # FIN
 		start_new_thread(self.__sniffingThread,())
 		while not self.__shutdown:
+			if len(self.sniffed) > 0:
+				print "sniffed: ",
+				print self.sniffed
 			# TODO: check the packets are valid
 			# then extract data to recData
 			for pac in self.sniffed:
@@ -75,13 +79,17 @@ class LowLevelCommunicator:
 					print "err data: " + str(e)
 					print "packet: \n"
 					pac.show()
+			self.sniffed = []
 			sleep(0.1)
 		#raise Exception("Not implemented exception") # sniff and filter packets
 	
 	def __sniffingThread(self): # FIN
 		myIntIps = communicationUtils.GetMachineInternalIps()
-		pacFilter = lambda p:p.haslayer(UDP) and p[UDP].dport == self.port and p.haslayer(IP) and p[IP].dst in myIntIps
-		sniff(lfilter = pacFilter, prn = self.sniffed.append)
+		print "My internal Ips: " + str([i for i in myIntIps])
+		pacFilter = lambda p:True#p.haslayer(UDP) and p[UDP].dport == self.port and p.haslayer(IP) and p[IP].dst in myIntIps
+		stopFilter = lambda x: self.__shutdown
+		sniff(lfilter = pacFilter, prn = self.sniffed.append, stop_filter = stopFilter)
+		print "sniffed unexpectly exited"
 
 	def sendTo(self, msg, to): # FIN
 		if type(to) == type(list()):
@@ -91,6 +99,8 @@ class LowLevelCommunicator:
 			self.__sendTo(msg, to)
 
 	def getRecievedMessages(self): # FIN
+		print "sniffed: ",
+		print self.sniffed
 		if len(self.rawMessages) == 0: # if raw messages empty exit
 			return []
 		messages = []
@@ -100,7 +110,7 @@ class LowLevelCommunicator:
 		lastKeys = [sortedRawMessagesKeys[0]] # initialize with the first key
 		msgParts = [self.rawMessages[sortedRawMessagesKeys[0]]]
 		for i in sortedRawMessagesKeys[1:]:
-			if lastSeqId[0] == i[0] and lastSeqId[1] + 1 == i[1] and self.rawMessages[i] == self.EOM:
+			if lastSeqId[0] == i[0] and (lastSeqId[1] + 1) % self.MAX_SEQ == i[1] and self.rawMessages[i] == self.EOM:
 				lastKeys.append(i)
 				if isMsgValid:
 					messages.append((i[0], "".join(msgParts))) # ID, msg
@@ -139,7 +149,7 @@ class LowLevelCommunicator:
 		# to = (ip, port)
 		#to = self.getAddrById(toID)
 		msgIndicatorLen = len("m,") # indicates thats a message
-		maxIdAndSeqLen = len(str(2^32)) + len(str(2^16))
+		maxIdAndSeqLen = len(str(2^32)) + len(str(self.MAX_SEQ))
 		maxPortLength = len(str(2^16))
 		dataPerPac = (508 - maxIdAndSeqLen - maxPortLength - msgIndicatorLen) # 508 = for sure safe length
 		numToSend = int(len(msg) / dataPerPac) + 1 # roud down + 1 =~ round up
@@ -158,7 +168,8 @@ class LowLevelCommunicator:
 		toSend.append(IP(dst=to[0])/UDP(sport=self.port, dport=to[1])/(str(self.ID) + "," + str(self.seq) + ",m," + self.EOM)) # end message
 		self.sendedAndNotResponded.append((self.seq, time(), toSend[-1]))
 		self.__incSeq()
-		send(toSend) #, verbose = False)
+		print "tosend: " + str(toSend)
+		sendp(toSend) #, verbose = False)
 		#self.sendedAndNotResponded.append(self.seq, time(), toSend[-1])
 
 	def __sendRecievedResponse(self, pacData): # FIN
@@ -174,7 +185,7 @@ class LowLevelCommunicator:
 	def __incSeq(self): # FIN
 		""" icrease sequence indicator """
 		self.seq += 1
-		if self.seq >= 2^16: self.seq = 0 # reset seq
+		if self.seq >= self.MAX_SEQ: self.seq = 0 # reset seq # like % but faster
 	
 	def shutdown():
 		self.__shutdown = True
