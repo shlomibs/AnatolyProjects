@@ -169,7 +169,7 @@ class LowLevelCommunicator:
 		self.sendedAndNotResponded.append((self.seq, time(), toSend[-1]))
 		self.__incSeq()
 		print "tosend: " + str(toSend)
-		sendp(toSend) #, verbose = False)
+		send(toSend) #, verbose = False)
 		#self.sendedAndNotResponded.append(self.seq, time(), toSend[-1])
 
 	def __sendRecievedResponse(self, pacData): # FIN
