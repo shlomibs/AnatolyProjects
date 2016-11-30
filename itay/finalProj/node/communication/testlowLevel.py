@@ -1,9 +1,12 @@
 #!/usr/bin/python
 import sys
+from py_compile import compile
+compile("communicationUtils.py")
+compile("lowLevelCommunicator.py")
 from lowLevelCommunicator import LowLevelCommunicator # = *
 import communicationUtils
 
-com = LowLevelCommunicator(int(sys.argv[2]), ("192.168.0.2", 12345), sys.argv[1])
+com = LowLevelCommunicator(int(sys.argv[2]), ("192.168.0.1", 12345), sys.argv[1])
 com.startPortProtectionService()
 com.startRecievingThread()
 
