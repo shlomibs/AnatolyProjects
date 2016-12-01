@@ -9,9 +9,7 @@ import communicationUtils
 gateway = "10.0.0.138" #"192.168.11.254"
 
 com = LowLevelCommunicator(int(sys.argv[2]), (gateway, 12345), sys.argv[1])
-com.startPortProtectionService()
-com.startRecievingThread()
-
+com.start()
 
 myIntIps = communicationUtils.GetMachineInternalIps()
 print "My internal Ips: " + str([i for i in myIntIps])
