@@ -6,7 +6,7 @@ compile("lowLevelCommunicator.py")
 from lowLevelCommunicator import LowLevelCommunicator # = *
 import communicationUtils
 
-gateway = "10.0.0.138" #"192.168.11.254"
+gateway = "192.168.0.1"
 
 com = LowLevelCommunicator(int(sys.argv[2]), (gateway, 12345), sys.argv[1])
 com.start()
