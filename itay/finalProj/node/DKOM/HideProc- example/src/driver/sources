@@ -1,0 +1,8 @@
+TARGETNAME=hideproc
+TARGETTYPE=DRIVER
+TARGETPATH=obj
+
+
+INCLUDES=..\..\inc
+
+SOURCES = driver.c

