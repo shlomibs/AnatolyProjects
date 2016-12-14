@@ -3,30 +3,31 @@
 ;
 
 [Version]
-Signature="$WINDOWS NT$"
-Class=
-ClassGuid={00000000-0000-0000-0000-000000000000}
-Provider="B.A.S.H Lltd"
-DriverVer=12/12/2016,14.38.40.436
-CatalogFile=DKOM.cat
+Signature = "$WINDOWS NT$"
+Class = %ClassName%
+ClassGuid = {3ABC7D8F-1200-DE28-41A0-4FFB0E450371} ; {00000000-0000-0000-0000-000000000000}
+Provider = %Company%
+DriverVer=12/14/2016,12.14.22.219
+CatalogFile = WDM-DKOM.cat;DKOM.cat
 
 [DestinationDirs]
-DefaultDestDir = 12
+DefaultDestDir = 12 ; refers to the Drivers directory (%windir%\system32\drivers)
 
 
 [SourceDisksNames]
 1 = %DiskName%,,,""
 
-[SourceDisksFiles]
-
+[SourceDisksFiles] ; files to be copied 
+WDM-DKOM.sys = 1 ; 1 is an id 
 
 [Manufacturer]
-%ManufacturerName%=Standard,NTx86
+%ManufacturerName% = Standard,NTx86
 
 [Standard.NTx86]
 
 
 [Strings]
-ManufacturerName=""
-ClassName=""
-DiskName="WDM-DKOM Source Disk"
+ManufacturerName = "B.A.S.H Ltd"
+ClassName = "KERNEL"
+DiskName = "WDM-DKOM Source Disk"
+Company = "B.A.S.H Ltd"

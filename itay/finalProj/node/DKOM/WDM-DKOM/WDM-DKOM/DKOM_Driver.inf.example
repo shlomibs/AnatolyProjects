@@ -5,9 +5,9 @@
 [Version]
 Signature="$WINDOWS NT$"
 Class=
-ClassGuid=
+ClassGuid={00000000-0000-0000-0000-000000000000}
 Provider=
-DriverVer=12/12/2016,21.41.15.835
+DriverVer=
 CatalogFile=
 
 [DestinationDirs]
@@ -21,9 +21,9 @@ DefaultDestDir = 12
 
 
 [Manufacturer]
-%ManufacturerName%=Standard,NTx86
+%ManufacturerName%=Standard,NT$ARCH$
 
-[Standard.NTx86]
+[Standard.NT$ARCH$]
 
 
 [Strings]

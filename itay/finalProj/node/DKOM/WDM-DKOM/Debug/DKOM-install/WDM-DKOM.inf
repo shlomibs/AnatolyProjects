@@ -7,7 +7,7 @@ Signature = "$WINDOWS NT$"
 Class = %ClassName%
 ClassGuid = {3ABC7D8F-1200-DE28-41A0-4FFB0E450371} ; {00000000-0000-0000-0000-000000000000}
 Provider = %Company%
-DriverVer = 1/1/2017,1.0.0.0
+DriverVer=12/13/2016,13.18.1.948
 CatalogFile = WDM-DKOM.cat;DKOM.cat
 
 [DestinationDirs]
@@ -21,9 +21,9 @@ DefaultDestDir = 12 ; refers to the Drivers directory (%windir%\system32\drivers
 WDM-DKOM.sys = 1 ; 1 is an id 
 
 [Manufacturer]
-%ManufacturerName% = Standard,NT$ARCH$
+%ManufacturerName% = Standard,NTx86
 
-[Standard.NT$ARCH$]
+[Standard.NTx86]
 
 
 [Strings]
