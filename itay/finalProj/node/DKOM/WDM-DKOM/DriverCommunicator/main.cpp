@@ -57,6 +57,8 @@ bool util_load_sysfile(char* driverName, char* displayName)
 		NULL, // Dependencies
 		NULL, // Service Start Name
 		NULL); // Password
+
+	printf("rh handled\n");
 	if (!rh)
 	{
 		if (GetLastError() == ERROR_SERVICE_EXISTS)
@@ -76,6 +78,7 @@ bool util_load_sysfile(char* driverName, char* displayName)
 			return false;
 		}
 	}
+	printf("rh isnt null\n");
 
 	// start the Driver
 	if (0 == StartService(rh, 0, NULL) && ERROR_SERVICE_ALREADY_RUNNING != GetLastError())
