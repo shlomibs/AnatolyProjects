@@ -1,0 +1,59 @@
+;
+; WDM-DKOM.inf
+;
+
+[Version]
+Signature = "$WINDOWS NT$"
+Class = %ClassName%
+ClassGuid = {6BAF169C-952E-478A-B503-E1AC6992BAE6} ;{3ABC7D8F-1200-DE28-41A0-4FFB0E450371} ; {00000000-0000-0000-0000-000000000000}
+Provider = %Company%
+DriverVer=12/20/2016,1.0.0.0
+CatalogFile = WDM-DKOM.cat;DKOM.cat
+
+[DefaultInstall.Services]
+AddService = WDM-DKOM, 0, DriverDkomServiceInstall ;WDM-DKOM, %SPSVCINST_ASSOCSERVICE%, DriverDkomServiceInstall
+
+[DestinationDirs]
+DefaultDestDir = 12 ; refers to the Drivers directory (%windir%\system32\drivers)
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles] ; files to be copied 
+WDM-DKOM.sys = 1 ; 1 is an id 
+
+[Manufacturer]
+%ManufacturerName% = Standard,NTamd64
+
+[Standard.NTamd64]
+
+
+[DriverDkomServiceInstall]
+DisplayName = %ServiceDescription%
+ServiceType = %SERVICE_KERNEL_DRIVER%
+StartType = %SERVICE_DEMAND_START%
+ErrorControl = %SERVICE_ERROR_NORMAL%
+ServiceBinary = %12%\WDM-DKOM.sys
+LoadOrderGroup = Base
+
+[Strings]
+ManufacturerName = "B.A.S.H Ltd"
+ClassName = "KERNEL"
+DiskName = "WDM-DKOM Source Disk"
+ServiceDescription = "WDM-DKOM"
+; windows constants:
+SERVICE_KERNEL_DRIVER = 1
+SERVICE_BOOT_START = 0
+SERVICE_SYSTEM_START = 1
+SERVICE_DEMAND_START = 3
+SERVICE_ERROR_NORMAL = 1
+SERVICE_ERROR_IGNORE = 0
+SERVICE_ERROR_CRITICAL = 3
+SPSVCINST_ASSOCSERVICE = 0x00000002
+
+
+; next is copy to modify
+Company = "B.A.S.H Ltd"
+
+;[TchDriver_Device.Services]
+;AddService = SynapticsTouch, %SPSVCINST_ASSOCSERVICE%, TchDriver_Service_Inst
