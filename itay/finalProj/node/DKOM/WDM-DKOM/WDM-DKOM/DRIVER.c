@@ -27,7 +27,7 @@ VOID Unload(PDRIVER_OBJECT pDriverObj)
 	IoDeleteDevice(pDriverObj->DeviceObject);
 }
 
-// thia is the "MJ_WRITE" method:
+// this is the "MJ_WRITE" method:
 NTSTATUS HideProcess(PDEVICE_OBJECT pDeviceObj, PIRP irp) // pointer to device object and pointer to irp (IO request packet)
 {
 	UNREFERENCED_PARAMETER(pDeviceObj);
@@ -112,7 +112,6 @@ NTSTATUS NotSupportedOperation(PDEVICE_OBJECT pDeviceObj, PIRP irp)
 {
 	UNREFERENCED_PARAMETER(pDeviceObj);
 
-	NTSTATUS NtStatus = STATUS_NOT_SUPPORTED;
 	DbgPrint("Not Supported Operation Called\n");
 	DbgPrint("not supported Major Function (%#x)\n", IoGetCurrentIrpStackLocation(irp)->MajorFunction);
 	WCHAR buff[50];
@@ -121,7 +120,7 @@ NTSTATUS NotSupportedOperation(PDEVICE_OBJECT pDeviceObj, PIRP irp)
 		DbgPrint("Could not cast major function to string\n");
 	// sprintf(buff, "Major function: %lu\n", IoGetCurrentIrpStackLocation(irp)->MajorFunction); // get major function code and cast to string
 	DbgPrint((PCSTR)buff); // Dbgprint the above
-	return NtStatus;
+	return STATUS_NOT_SUPPORTED;
 }
 
 NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObj, PUNICODE_STRING pRegistryPath)
@@ -129,11 +128,12 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObj, PUNICODE_STRING pRegistryPath)
 	//UNREFERENCED_PARAMETER(pDeviceObject);
 	UNREFERENCED_PARAMETER(pRegistryPath);
 
-	RtlInitUnicodeString(&DeviceName, L"\\Devices\\DKOM"); // copy unicode to string
+	RtlInitUnicodeString(&DeviceName, L"\\Devices\\DKOM"); // copy unicode string
 	RtlInitUnicodeString(&dosDeviceName, L"\\DosDevices\\DKOM");
 	
 	IoCreateDevice(pDriverObj, 0, &DeviceName, FILE_DEVICE_UNKNOWN, FILE_DEVICE_SECURE_OPEN, FALSE, &ptrDeviceObj);
 	IoCreateSymbolicLink(&dosDeviceName, &DeviceName); // create symbolic link between the dos name and NT name in the object manager
+	// With this Symbolic link, we can open a handle using the string “\\.\myDevice”
 
 	pDriverObj->DriverUnload = Unload;
 
