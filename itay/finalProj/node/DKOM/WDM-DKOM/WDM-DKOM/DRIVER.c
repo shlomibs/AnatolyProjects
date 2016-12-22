@@ -116,13 +116,13 @@ NTSTATUS NotSupportedOperation(PDEVICE_OBJECT pDeviceObj, PIRP irp)
 	DbgPrint("not supported Major Function (%#x)\n", IoGetCurrentIrpStackLocation(irp)->MajorFunction);
 	WCHAR buff[50];
 	// the next method is like sprinf: RtlStringCbPrintf
-	if(!NT_SUCCESS(RtlStringCbPrintf(buff, 50 * sizeof(WCHAR), L"Major function: %lu\n", IoGetCurrentIrpStackLocation(irp)->MajorFunction))) // get major function code and cast to string
-		DbgPrint("Could not cast major function to string\n");
-	else
-		DbgPrint((PCSTR)buff); // Dbgprint the above
+	//if(!NT_SUCCESS(RtlStringCbPrintf(buff, 50 * sizeof(WCHAR), L"Major function: %lu\n", IoGetCurrentIrpStackLocation(irp)->MajorFunction))) // get major function code and cast to string
+	//	DbgPrint("Could not cast major function to string\n");
+	//else
+	//	DbgPrint((PCSTR)buff); // Dbgprint the above
 	// sprintf(buff, "Major function: %lu\n", IoGetCurrentIrpStackLocation(irp)->MajorFunction); // get major function code and cast to string
 	
-	return STATUS_NOT_SUPPORTED;
+	return STATUS_SUCCESS;//STATUS_NOT_SUPPORTED;
 }
 
 NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObj, PUNICODE_STRING pRegistryPath)
