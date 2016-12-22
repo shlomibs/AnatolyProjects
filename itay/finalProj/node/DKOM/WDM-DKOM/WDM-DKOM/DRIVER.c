@@ -127,7 +127,7 @@ NTSTATUS NotSupportedOperation(PDEVICE_OBJECT pDeviceObj, PIRP irp)
 
 NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObj, PUNICODE_STRING pRegistryPath)
 {
-	//UNREFERENCED_PARAMETER(pDeviceObject);
+	//UNREFERENCED_PARAMETER(pDeviceObject);;
 	UNREFERENCED_PARAMETER(pRegistryPath);
 
 	RtlInitUnicodeString(&DeviceName, L"\\Devices\\DKOM"); // copy unicode string
