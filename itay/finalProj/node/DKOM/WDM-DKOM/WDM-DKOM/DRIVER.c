@@ -118,8 +118,10 @@ NTSTATUS NotSupportedOperation(PDEVICE_OBJECT pDeviceObj, PIRP irp)
 	// the next method is like sprinf: RtlStringCbPrintf
 	if(!NT_SUCCESS(RtlStringCbPrintf(buff, 50 * sizeof(WCHAR), L"Major function: %lu\n", IoGetCurrentIrpStackLocation(irp)->MajorFunction))) // get major function code and cast to string
 		DbgPrint("Could not cast major function to string\n");
+	else
+		DbgPrint((PCSTR)buff); // Dbgprint the above
 	// sprintf(buff, "Major function: %lu\n", IoGetCurrentIrpStackLocation(irp)->MajorFunction); // get major function code and cast to string
-	DbgPrint((PCSTR)buff); // Dbgprint the above
+	
 	return STATUS_NOT_SUPPORTED;
 }
 
