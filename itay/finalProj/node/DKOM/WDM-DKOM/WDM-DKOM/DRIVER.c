@@ -113,7 +113,7 @@ NTSTATUS NotSupportedOperation(PDEVICE_OBJECT pDeviceObj, PIRP irp)
 	UNREFERENCED_PARAMETER(pDeviceObj);
 
 	DbgPrint("Not Supported Operation Called\n");
-	DbgPrint("not supported Major Function (%#x)\n", IoGetCurrentIrpStackLocation(irp)->MajorFunction);
+	//DbgPrint("not supported Major Function (%#x)\n", IoGetCurrentIrpStackLocation(irp)->MajorFunction);
 	WCHAR buff[50];
 	// the next method is like sprinf: RtlStringCbPrintf
 	//if(!NT_SUCCESS(RtlStringCbPrintf(buff, 50 * sizeof(WCHAR), L"Major function: %lu\n", IoGetCurrentIrpStackLocation(irp)->MajorFunction))) // get major function code and cast to string

