@@ -17,9 +17,9 @@ int main(int argc, char *argv[])
 	//	printf("Not enougth arguments");
 	//else
 	char* driverName = "DKOM";
-	char* displayName = "ntkrnl"; // friendly name
+	char* displayName = "DKOM"; // friendly name
 	if (util_load_sysfile(driverName, displayName))//"friendly driver"))//argv[1]);
-		hideProcess(driverName, 4); //(int)argv[1]);
+		printf("success");//hideProcess(driverName, 4); //(int)argv[1]);
 	else
 		printf("failure\n");
 	char s[100];
@@ -78,7 +78,7 @@ bool util_load_sysfile(char* driverName, char* displayName)
 			return false;
 		}
 	}
-	printf("rh isnt null\n");
+	printf("rh isn't null\n");
 
 	// start the Driver
 	if (0 == StartService(rh, 0, NULL) && ERROR_SERVICE_ALREADY_RUNNING != GetLastError())
