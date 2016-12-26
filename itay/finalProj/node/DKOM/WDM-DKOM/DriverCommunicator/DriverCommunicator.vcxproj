@@ -35,7 +35,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="log.cpp" />
     <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="log.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{35CB170E-765C-4FE4-B226-4793868E09A3}</ProjectGuid>
@@ -104,6 +108,11 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <TreatWarningAsError>false</TreatWarningAsError>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <TreatWarningAsError>false</TreatWarningAsError>
     </ClCompile>
