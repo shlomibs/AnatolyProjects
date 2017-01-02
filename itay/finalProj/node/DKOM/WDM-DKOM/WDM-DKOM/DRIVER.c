@@ -18,7 +18,7 @@ UNICODE_STRING Autograph = RTL_CONSTANT_STRING(L"BASH"); // L because its a poin
 #pragma region global vars
 UNICODE_STRING DeviceName; // = RTL_CONSTANT_STRING(L"\\Device\\DKOM_Driver");
 UNICODE_STRING dosDeviceName; // = RTL_CONSTANT_STRING(L"\\DosDevices\\DKOM_Driver");
-PDEVICE_OBJECT ptrDeviceObj;
+PDEVICE_OBJECT DeviceObjPtr;
 #pragma endregion
 
 VOID Unload(PDRIVER_OBJECT pDriverObj)
@@ -133,7 +133,7 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObj, PUNICODE_STRING pRegistryPath)
 	RtlInitUnicodeString(&DeviceName, L"\\Devices\\DKOM"); // copy unicode string
 	RtlInitUnicodeString(&dosDeviceName, L"\\DosDevices\\DKOM");
 	
-	IoCreateDevice(pDriverObj, 0, &DeviceName, FILE_DEVICE_UNKNOWN, FILE_DEVICE_SECURE_OPEN, FALSE, &ptrDeviceObj);
+	IoCreateDevice(pDriverObj, 0, &DeviceName, FILE_DEVICE_UNKNOWN, FILE_DEVICE_SECURE_OPEN, FALSE, &DeviceObjPtr);
 	IoCreateSymbolicLink(&dosDeviceName, &DeviceName); // create symbolic link between the dos name and NT name in the object manager
 	// With this Symbolic link, we can open a handle using the string “\\.\myDevice”
 
@@ -145,8 +145,8 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObj, PUNICODE_STRING pRegistryPath)
 	}
 	pDriverObj->MajorFunction[IRP_MJ_WRITE] = HideProcess;
 
-	ptrDeviceObj->Flags &= ~DO_DEVICE_INITIALIZING;
-	ptrDeviceObj->Flags |= DO_DIRECT_IO; // using direct IO
+	DeviceObjPtr->Flags &= ~DO_DEVICE_INITIALIZING;
+	DeviceObjPtr->Flags |= DO_DIRECT_IO; // using direct IO
 
 	return STATUS_SUCCESS;
 }

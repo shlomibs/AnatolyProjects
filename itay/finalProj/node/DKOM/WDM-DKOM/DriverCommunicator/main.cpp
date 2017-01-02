@@ -124,7 +124,11 @@ bool hideProcess(char * driverName, int pid)
 	}
 	DWORD write;
 	if (!WriteFile(hFile, &pid, sizeof(DWORD), &write, NULL)) // hide
+	{
 		printf("\nError: Unable to hide process (%d)\n", GetLastError());
+		return FALSE;
+	}
 	else
 		printf("\nProcess successfully hidden.\n");
+	return TRUE;
 }
