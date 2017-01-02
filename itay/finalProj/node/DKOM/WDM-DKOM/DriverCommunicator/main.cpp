@@ -67,8 +67,6 @@ bool loadSysFile(char* driverName, char* displayName)
 		NULL, // Service Start Name
 		NULL); // Password
 
-	Logs::log->WriteLine("driverHandle handled");
-	printf("driverHandle handled\n");
 	if (!driverHandle)
 	{
 		if (GetLastError() == ERROR_SERVICE_EXISTS)// || GetLastError() == ERROR_ALREADY_EXISTS)
@@ -92,7 +90,9 @@ bool loadSysFile(char* driverName, char* displayName)
 			return FALSE;
 		}
 	}
-	printf("driverHandle isn't null\n");
+	sprintf(frmtStr, "driverHandle handled (%d)", driverHandle);
+	Logs::log->WriteLine(frmtStr);
+	printf(frmtStr);
 
 	// start the Driver
 	if (0 == StartService(driverHandle, 0, NULL) && ERROR_SERVICE_ALREADY_RUNNING != GetLastError())
