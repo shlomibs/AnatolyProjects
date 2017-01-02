@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
 	else
 		printf("failure\n");
 	char s[100];
-	std::cin >> s;
+	//std::cin >> s;
 
 	return 0;
 }
