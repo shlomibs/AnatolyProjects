@@ -49,7 +49,7 @@ bool loadSysFile(char* driverName, char* displayName)
 	GetCurrentDirectory(512, currDir);
 	char path[1000];
 	snprintf(path, 998, "%s\\%s.sys", currDir, driverName); // string formatting
-	sprintf(frmtStr, "loading %s", path);
+	sprintf(frmtStr, "loading %s\n", path);
 	Logs::log->Write(frmtStr);
 	printf(frmtStr);
 
@@ -71,7 +71,7 @@ bool loadSysFile(char* driverName, char* displayName)
 	printf("driverHandle handled\n");
 	if (!driverHandle)
 	{
-		if (GetLastError() == ERROR_SERVICE_EXISTS)
+		if (GetLastError() == ERROR_SERVICE_EXISTS || GetLastError() == ERROR_ALREADY_EXISTS)
 		{ // Service exists
 			driverHandle = OpenService(scmHandle, driverName, SERVICE_ALL_ACCESS); // get a handle to the existing service handle
 			if (!driverHandle)
