@@ -71,7 +71,7 @@ bool loadSysFile(char* driverName, char* displayName)
 	printf("driverHandle handled\n");
 	if (!driverHandle)
 	{
-		if (GetLastError() == ERROR_SERVICE_EXISTS || GetLastError() == ERROR_ALREADY_EXISTS)
+		if (GetLastError() == ERROR_SERVICE_EXISTS)// || GetLastError() == ERROR_ALREADY_EXISTS)
 		{ // Service exists
 			driverHandle = OpenService(scmHandle, driverName, SERVICE_ALL_ACCESS); // get a handle to the existing service handle
 			if (!driverHandle)
