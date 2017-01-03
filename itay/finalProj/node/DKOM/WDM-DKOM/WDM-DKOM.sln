@@ -6,6 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WDM-DKOM", "WDM-DKOM\WDM-DKOM.vcxproj", "{606C4F8B-CBB3-4AB8-9EC9-AA7B38EE9489}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DriverCommunicator", "DriverCommunicator\DriverCommunicator.vcxproj", "{35CB170E-765C-4FE4-B226-4793868E09A3}"
+	ProjectSection(ProjectDependencies) = postProject
+		{606C4F8B-CBB3-4AB8-9EC9-AA7B38EE9489} = {606C4F8B-CBB3-4AB8-9EC9-AA7B38EE9489}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
