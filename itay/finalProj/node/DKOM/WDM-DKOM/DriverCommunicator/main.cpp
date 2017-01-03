@@ -10,8 +10,13 @@ namespace Logs
 	Log* log;
 }
 
-bool loadSysFile(char* driverName, char* displayName);
+bool loadSysFileSCM(char* driverName, char* displayName);
+bool cmdLoadSysFile(char* driverName, char* displayName);
+//bool loadSysFile(char* driverName, char* displayName);
 bool hideProcess(char* driverName, int pid);
+
+#define loadSysFile cmdLoadSysFile
+//#define loadSysFile loadSysFileSCM
 
 int main(int argc, char *argv[])
 {
@@ -32,8 +37,12 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-bool loadSysFile(char* driverName, char* displayName)
+#pragma region loadSysFile
+
+bool loadSysFileSCM(char* driverName, char* displayName) // load manually with scm
 {
+	printf("loading via SCM\n");
+	Logs::log->WriteLine("loading via SCM");
 	char* frmtStr = new char[1024];
 	// Open a handle to the SCM
 	SC_HANDLE scmHandle = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
@@ -46,13 +55,13 @@ bool loadSysFile(char* driverName, char* displayName)
 	}
 
 	char currDir[515];
-	GetCurrentDirectory(512, currDir);
+	GetCurrentDirectory(512, currDir); // get the .sys file location
 	char path[1000];
 	snprintf(path, 998, "%s\\%s.sys", currDir, driverName); // string formatting
 	sprintf(frmtStr, "loading %s\n", path);
 	Logs::log->Write(frmtStr);
 	printf(frmtStr);
-
+	
 	SC_HANDLE driverHandle = CreateService(scmHandle, // Handle to SCManager
 		driverName, // Service Name
 		displayName, // Display Name
@@ -111,9 +120,47 @@ bool loadSysFile(char* driverName, char* displayName)
 	return TRUE;
 }
 
+bool cmdLoadSysFile(char* driverName, char* displayName) // load with cmd command
+{
+	Logs::log->WriteLine("loading via cmd");
+	printf("loading via cmd\n");
+
+	// get .sys file location
+	char currDir[515];
+	GetCurrentDirectory(512, currDir); // get the .sys file location
+	char path[1000];
+	snprintf(path, 998, "%s\\%s.sys", currDir, driverName); // string formatting
+	char frmtStr[1024];
+	sprintf(frmtStr, "loading %s\n", path);
+	Logs::log->Write(frmtStr);
+	printf(frmtStr);
+
+	char buff[1024];
+	//sc create[service name] binPath = [path to your.sys file] type = kernel
+	sprintf(buff, "sc create %s binPath=%s type=kernel", displayName, path);
+	if (system(buff)) // execute as cmd commant
+	{
+		sprintf(frmtStr, "could not load driver (%d)\n", GetLastError());
+		Logs::log->Write(frmtStr);
+		printf(frmtStr);
+	}
+	//sc start[service name]
+	sprintf(buff, "sc start %s", displayName);
+	if (system(buff))
+	{
+		sprintf(frmtStr, "could not start service (%d)\n", GetLastError());
+		Logs::log->Write(frmtStr);
+		printf(frmtStr);
+	}
+
+	return TRUE;
+}
+
+#pragma endregion
+
 bool hideProcess(char * driverName, int pid)
 {
-	char* driverToOpen = new char[1024];
+	char* driverToOpen = new char[100];
 	sprintf(driverToOpen, "\\\\.\\", driverName); // "\\\\.\\DKOM" for example
 	HANDLE hFile = CreateFile(driverToOpen, GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL); // open driver
 
