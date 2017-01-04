@@ -20,6 +20,7 @@ bool hideProcess(char* driverName, int pid);
 
 int main(int argc, char *argv[])
 {
+	printf("lasterr: %d", GetLastError());
 	Logs::log = new Log();
 	Logs::log->WriteLine("\n\nstarted...\n");
 	//if (argc < 2)
@@ -138,23 +139,30 @@ bool cmdLoadSysFile(char* driverName, char* displayName) // load with cmd comman
 	char buff[1024];
 	//sc create[service name] binPath = [path to your.sys file] type = kernel
 	sprintf(buff, "sc create %s binPath=%s type=kernel", displayName, path);
-	if (system(buff)) // execute as cmd command
+	sprintf(frmtStr, "command: \"%s\"\n", buff);
+	Logs::log->Write(frmtStr);
+	printf(frmtStr);
+	int ret = system(buff); // execute as cmd command
+	if (ret) // if returns 0 its ok
 	{
-		sprintf(frmtStr, "could not load driver (%d)\n", GetLastError());
+		sprintf(frmtStr, "could not load driver (%d), lasterr: (%d)\n", ret, GetLastError());
 		Logs::log->Write(frmtStr);
 		printf(frmtStr);
 		return FALSE;
 	}
 	//sc start[service name]
 	sprintf(buff, "sc start %s", displayName);
-	if (system(buff))
+	sprintf(frmtStr, "command: \"%s\"\n", buff);
+	Logs::log->Write(frmtStr);
+	printf(frmtStr);
+	ret = system(buff);
+	if (ret) // if returns 0 its ok
 	{
-		sprintf(frmtStr, "could not start service (%d)\n", GetLastError());
+		sprintf(frmtStr, "could not start service (%d), lasterr: (%d)\n", ret, GetLastError());
 		Logs::log->Write(frmtStr);
 		printf(frmtStr);
 		return FALSE;
 	}
-
 	return TRUE;
 }
 
