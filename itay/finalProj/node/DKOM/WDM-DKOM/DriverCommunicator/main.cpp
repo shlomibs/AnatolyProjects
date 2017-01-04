@@ -83,6 +83,8 @@ bool loadSysFileSCM(char* driverName, char* displayName) // load manually with s
 	{
 		if (GetLastError() == ERROR_SERVICE_EXISTS)// || GetLastError() == ERROR_ALREADY_EXISTS)
 		{ // Service exists
+			Logs::log->Write("service exists\n");
+			printf("service exists\n");
 			driverHandle = OpenService(scmHandle, driverName, SERVICE_ALL_ACCESS); // get a handle to the existing service handle
 			if (!driverHandle)
 			{
