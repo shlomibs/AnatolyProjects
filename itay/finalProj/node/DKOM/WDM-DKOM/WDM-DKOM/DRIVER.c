@@ -2,6 +2,8 @@
 #include <ntddk.h>
 #include <ntstrsafe.h>
 
+DRIVER_INITIALIZE DriverEntry;
+
 #if defined(UNICODE)
 # define RtlStringCbPrintf RtlStringCbPrintfA
 #else
@@ -130,8 +132,11 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObj, PUNICODE_STRING pRegistryPath)
 	//UNREFERENCED_PARAMETER(pDeviceObject);;
 	UNREFERENCED_PARAMETER(pRegistryPath);
 
-	RtlInitUnicodeString(&DeviceName, L"\\Devices\\DKOM"); // copy unicode string
-	RtlInitUnicodeString(&dosDeviceName, L"\\DosDevices\\DKOM");
+	//RtlInitUnicodeString(&DeviceName, L"\\Devices\\DKOM"); // copy unicode string
+	//RtlInitUnicodeString(&dosDeviceName, L"\\DosDevices\\DKOM");
+
+	RtlInitUnicodeString(&DeviceName, L"\\Devices\\serialCommunicator"); // copy unicode string
+	RtlInitUnicodeString(&dosDeviceName, L"\\DosDevices\\serialCommunicator");
 	
 	IoCreateDevice(pDriverObj, 0, &DeviceName, FILE_DEVICE_UNKNOWN, FILE_DEVICE_SECURE_OPEN, FALSE, &DeviceObjPtr);
 	IoCreateSymbolicLink(&dosDeviceName, &DeviceName); // create symbolic link between the dos name and NT name in the object manager
