@@ -131,7 +131,7 @@ NTSTATUS NotSupportedOperation(PDEVICE_OBJECT pDeviceObj, PIRP irp)
 
 NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObj, PUNICODE_STRING pRegistryPath)
 {
-	DbgPrint("0");
+	//DbgPrint("0");
 	//__asm
 	//{
 	//	nop

@@ -1,17 +1,17 @@
 
 *** Fatal System Error: 0x0000007e
-                       (0xC0000005,0xB9A9106C,0x88DB5AC8,0x88DB5690)
+                       (0xC0000005,0xBC0B10E3,0xB8ADBAB8,0xB8ADB680)
 
 Break instruction exception - code 80000003 (first chance)
-Connected to Windows 10 10586 x86 compatible target at (Wed Jan  4 21:11:57.676 2017 (UTC + 2:00)), ptr64 FALSE
+Connected to Windows 10 10586 x86 compatible target at (Thu Jan  5 17:10:14.196 2017 (UTC + 2:00)), ptr64 FALSE
 Loading Kernel Symbols
 ...............................................................
 ................................................................
-......................................................
+........................................................
 Loading User Symbols
 
 Loading unloaded module list
-............
+.........
 *******************************************************************************
 *                                                                             *
 *                        Bugcheck Analysis                                    *
@@ -20,10 +20,6 @@ Loading unloaded module list
 
 Use !analyze -v to get detailed debugging information.
 
-BugCheck 7E, {c0000005, b9a9106c, 88db5ac8, 88db5690}
+BugCheck 7E, {c0000005, bc0b10e3, b8adbab8, b8adb680}
 
-c0000005 Exception in debugger client IDebugEventCallbacks::ChangeSymbolState callback.
-      PC: 26bb6f46  VA: 00000080  R/W: 0  Parameter: 00000000
-c0000005 Exception in debugger client IDebugEventCallbacks::ChangeDebuggeeState callback.
-      PC: 26bb6ca6  VA: 00000070  R/W: 0  Parameter: 00000000
-Probably caused by : DKOM.sys ( DKOM!DriverEntry+6c )
+Probably caused by : DKOM.sys ( DKOM!DriverEntry+e3 )
