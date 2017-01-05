@@ -3,6 +3,8 @@
 #include <ntstrsafe.h>
 
 DRIVER_INITIALIZE DriverEntry;
+typedef unsigned int uint;
+
 
 #if defined(UNICODE)
 # define RtlStringCbPrintf RtlStringCbPrintfA
@@ -124,34 +126,50 @@ NTSTATUS NotSupportedOperation(PDEVICE_OBJECT pDeviceObj, PIRP irp)
 	//	DbgPrint((PCSTR)buff); // Dbgprint the above
 	// sprintf(buff, "Major function: %lu\n", IoGetCurrentIrpStackLocation(irp)->MajorFunction); // get major function code and cast to string
 	
-	return STATUS_SUCCESS;//STATUS_NOT_SUPPORTED;
+	return STATUS_NOT_SUPPORTED;
 }
 
 NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObj, PUNICODE_STRING pRegistryPath)
 {
+	//__asm
+	//{
+	//	nop
+	//	nop
+	//	nop
+	//	nop
+	//	nop
+	//	nop
+	//	nop
+	//	nop
+	//}; // for debugging (finding the start of the method in assembly)
+
 	//UNREFERENCED_PARAMETER(pDeviceObject);;
 	UNREFERENCED_PARAMETER(pRegistryPath);
 
 	//RtlInitUnicodeString(&DeviceName, L"\\Devices\\DKOM"); // copy unicode string
 	//RtlInitUnicodeString(&dosDeviceName, L"\\DosDevices\\DKOM");
-
+	DbgPrint("1");
 	RtlInitUnicodeString(&DeviceName, L"\\Devices\\serialCommunicator"); // copy unicode string
 	RtlInitUnicodeString(&dosDeviceName, L"\\DosDevices\\serialCommunicator");
-	
+	DbgPrint("2");
 	IoCreateDevice(pDriverObj, 0, &DeviceName, FILE_DEVICE_UNKNOWN, FILE_DEVICE_SECURE_OPEN, FALSE, &DeviceObjPtr);
+	DbgPrint("3");
 	IoCreateSymbolicLink(&dosDeviceName, &DeviceName); // create symbolic link between the dos name and NT name in the object manager
 	// With this Symbolic link, we can open a handle using the string “\\.\myDevice”
-
+	DbgPrint("4");
 	pDriverObj->DriverUnload = Unload;
-
-	for(short i = 0; i < IRP_MJ_MAXIMUM_FUNCTION; i++)
+	DbgPrint("5");
+	for(/*short*/ uint i = 0; i < IRP_MJ_MAXIMUM_FUNCTION; i++)
 	{
+		DbgPrint("6:%d", i);
 		pDriverObj->MajorFunction[i] = NotSupportedOperation; // handle all not supported operations
 	}
+	DbgPrint("7");
 	pDriverObj->MajorFunction[IRP_MJ_WRITE] = HideProcess;
-
+	DbgPrint("8");
 	DeviceObjPtr->Flags &= ~DO_DEVICE_INITIALIZING;
+	DbgPrint("9");
 	DeviceObjPtr->Flags |= DO_DIRECT_IO; // using direct IO
-
+	DbgPrint("10");
 	return STATUS_SUCCESS;
 }

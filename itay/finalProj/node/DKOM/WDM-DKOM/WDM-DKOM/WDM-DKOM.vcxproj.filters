@@ -23,4 +23,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="lasterrors.err">
+      <Filter>Driver Files</Filter>
+    </None>
+  </ItemGroup>
 </Project>
