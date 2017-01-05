@@ -156,8 +156,8 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObj, PUNICODE_STRING pRegistryPath)
 	NTSTATUS createDevStatus = IoCreateDevice(pDriverObj, 0, &DeviceName, FILE_DEVICE_UNKNOWN, FILE_DEVICE_SECURE_OPEN, FALSE, &DeviceObjPtr);
 	if (!NT_SUCCESS(createDevStatus))
 	{
-		DbgPrintEx(DPFLTR_CONFIG_ID, DPFLTR_ERROR_LEVEL, "Error: Unable to create device object (%s)", createDevStatus);
-		DbgPrint("Error: Unable to create device object (%s)", createDevStatus);
+		DbgPrintEx(DPFLTR_CONFIG_ID, DPFLTR_ERROR_LEVEL, "Error: Unable to create device object (%d)", createDevStatus);
+		DbgPrint("Error: Unable to create device object (%d)", createDevStatus);
 		return createDevStatus;
 	}
 	IoCreateSymbolicLink(&dosDeviceName, &DeviceName); // create symbolic link between the dos name and NT name in the object manager
