@@ -150,9 +150,16 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObj, PUNICODE_STRING pRegistryPath)
 	//RtlInitUnicodeString(&DeviceName, L"\\Devices\\DKOM"); // copy unicode string
 	//RtlInitUnicodeString(&dosDeviceName, L"\\DosDevices\\DKOM");
 	DbgPrint("1");
+	DbgPrintEx(DPFLTR_CONFIG_ID, DPFLTR_INFO_LEVEL, "1");
 	RtlInitUnicodeString(&DeviceName, L"\\Devices\\serialCommunicator"); // copy unicode string
 	RtlInitUnicodeString(&dosDeviceName, L"\\DosDevices\\serialCommunicator");
-	IoCreateDevice(pDriverObj, 0, &DeviceName, FILE_DEVICE_UNKNOWN, FILE_DEVICE_SECURE_OPEN, FALSE, &DeviceObjPtr);
+	NTSTATUS createDevStatus = IoCreateDevice(pDriverObj, 0, &DeviceName, FILE_DEVICE_UNKNOWN, FILE_DEVICE_SECURE_OPEN, FALSE, &DeviceObjPtr);
+	if (!NT_SUCCESS(createDevStatus))
+	{
+		DbgPrintEx(DPFLTR_CONFIG_ID, DPFLTR_ERROR_LEVEL, "Error: Unable to create device object (%s)", createDevStatus);
+		DbgPrint("Error: Unable to create device object (%s)", createDevStatus);
+		return createDevStatus;
+	}
 	IoCreateSymbolicLink(&dosDeviceName, &DeviceName); // create symbolic link between the dos name and NT name in the object manager
 	// With this Symbolic link, we can open a handle using the string “\\.\myDevice”
 	pDriverObj->DriverUnload = Unload;
