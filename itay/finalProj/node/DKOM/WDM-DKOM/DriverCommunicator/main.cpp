@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
 	//	printf("Not enougth arguments");
 	//else
 	char* driverName = "DKOM";
-	char* displayName = "\"serial communicator\""; // friendly name
+	char* displayName = "SerialCommunicator"; // friendly name
 	if (loadSysFile(driverName, displayName))//"friendly driver"))//argv[1]);
 		printf("success");//hideProcess(driverName, 4); //(int)argv[1]);
 	else
