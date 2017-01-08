@@ -116,7 +116,8 @@ NTSTATUS NotSupportedOperation(PDEVICE_OBJECT pDeviceObj, PIRP irp)
 {
 	UNREFERENCED_PARAMETER(pDeviceObj);
 
-	DbgPrint("Not Supported Operation Called\n");
+	//DbgPrint("Not Supported Operation Called\n");
+	DbgPrintEx(DPFLTR_CONFIG_ID, DPFLTR_ERROR_LEVEL, "Not Supported Operation Called\n");
 	//DbgPrint("not supported Major Function (%#x)\n", IoGetCurrentIrpStackLocation(irp)->MajorFunction);
 	WCHAR buff[50];
 	// the next method is like sprinf: RtlStringCbPrintf
