@@ -162,7 +162,7 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObj, PUNICODE_STRING pRegistryPath)
 	KIRQL currIrql = KeGetCurrentIrql();
 	DbgPrintEx(DPFLTR_CONFIG_ID, DPFLTR_ERROR_LEVEL, "irql: %d", currIrql);
 	DbgPrintEx(DPFLTR_CONFIG_ID, DPFLTR_INFO_LEVEL, "1");
-	RtlInitUnicodeString(&DeviceName, L"\\Devices\\SerialCommunicator"); // copy unicode string
+	RtlInitUnicodeString(&DeviceName, L"\\Device\\SerialCommunicator"); // copy unicode string
 	RtlInitUnicodeString(&dosDeviceName, L"\\DosDevices\\SerialCommunicator");
 	NTSTATUS createDevStatus = IoCreateDevice(pDriverObj, 0, &DeviceName, FILE_DEVICE_UNKNOWN, FILE_DEVICE_SECURE_OPEN, FALSE, &DeviceObjPtr);
 	if (!NT_SUCCESS(createDevStatus))
