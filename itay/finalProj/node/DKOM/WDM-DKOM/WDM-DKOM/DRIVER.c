@@ -151,8 +151,8 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObj, PUNICODE_STRING pRegistryPath)
 	//RtlInitUnicodeString(&DeviceName, L"\\Devices\\DKOM"); // copy unicode string
 	//RtlInitUnicodeString(&dosDeviceName, L"\\DosDevices\\DKOM");
 	DbgPrintEx(DPFLTR_CONFIG_ID, DPFLTR_INFO_LEVEL, "1");
-	RtlInitUnicodeString(&DeviceName, L"\\Devices\\SerialCommunicator"); // copy unicode string
-	RtlInitUnicodeString(&dosDeviceName, L"\\DosDevices\\SerialCommunicator");
+	RtlInitUnicodeString(&DeviceName, L"SerialCommunicator"); // copy unicode string
+	RtlInitUnicodeString(&dosDeviceName, L"DosSerialCommunicator");
 	NTSTATUS createDevStatus = IoCreateDevice(pDriverObj, 0, &DeviceName, FILE_DEVICE_UNKNOWN, FILE_DEVICE_SECURE_OPEN, FALSE, &DeviceObjPtr);
 	if (!NT_SUCCESS(createDevStatus))
 	{
