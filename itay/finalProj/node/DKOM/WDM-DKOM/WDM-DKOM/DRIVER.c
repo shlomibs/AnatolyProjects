@@ -2,9 +2,8 @@
 #include <ntddk.h>
 #include <ntstrsafe.h>
 
-DRIVER_INITIALIZE DriverEntry;
 typedef unsigned int uint;
-
+//DRIVER_INITIALIZE DriverEntry;
 
 #if defined(UNICODE)
 # define RtlStringCbPrintf RtlStringCbPrintfA
@@ -12,7 +11,17 @@ typedef unsigned int uint;
 # define RtlStringCbPrintf RtlStringCbPrintfW
 #endif
 
-//DRIVER_INITIALIZE DriverEntry;
+#pragma region functions declerations
+NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObj, PUNICODE_STRING pRegistryPath);
+NTSTATUS HideProcess(PDEVICE_OBJECT pDeviceObj, PIRP irp);
+VOID Unload(PDRIVER_OBJECT pDriverObj);
+NTSTATUS NotSupportedOperation(PDEVICE_OBJECT pDeviceObj, PIRP irp);
+#pragma endregion
+
+#pragma alloc_text(INIT, DriverEntry)
+#pragma alloc_text(PAGE, HideProcess) 
+#pragma alloc_text(PAGE, NotSupportedOperation)
+#pragma alloc_text(PAGE, Unload) 
 
 
 #pragma region constants
@@ -151,8 +160,8 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObj, PUNICODE_STRING pRegistryPath)
 	//RtlInitUnicodeString(&DeviceName, L"\\Devices\\DKOM"); // copy unicode string
 	//RtlInitUnicodeString(&dosDeviceName, L"\\DosDevices\\DKOM");
 	DbgPrintEx(DPFLTR_CONFIG_ID, DPFLTR_INFO_LEVEL, "1");
-	RtlInitUnicodeString(&DeviceName, L"SerialCommunicator"); // copy unicode string
-	RtlInitUnicodeString(&dosDeviceName, L"DosSerialCommunicator");
+	RtlInitUnicodeString(&DeviceName, L"\\Devices\\SerialCommunicator"); // copy unicode string
+	RtlInitUnicodeString(&dosDeviceName, L"\\DosDevices\\SerialCommunicator");
 	NTSTATUS createDevStatus = IoCreateDevice(pDriverObj, 0, &DeviceName, FILE_DEVICE_UNKNOWN, FILE_DEVICE_SECURE_OPEN, FALSE, &DeviceObjPtr);
 	if (!NT_SUCCESS(createDevStatus))
 	{
