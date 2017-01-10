@@ -150,7 +150,6 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObj, PUNICODE_STRING pRegistryPath)
 
 	//RtlInitUnicodeString(&DeviceName, L"\\Devices\\DKOM"); // copy unicode string
 	//RtlInitUnicodeString(&dosDeviceName, L"\\DosDevices\\DKOM");
-	DbgPrint("1");
 	DbgPrintEx(DPFLTR_CONFIG_ID, DPFLTR_INFO_LEVEL, "1");
 	RtlInitUnicodeString(&DeviceName, L"\\Devices\\SerialCommunicator"); // copy unicode string
 	RtlInitUnicodeString(&dosDeviceName, L"\\DosDevices\\SerialCommunicator");
