@@ -66,7 +66,7 @@ bool loadSysFileSCM(char* driverName, char* displayName) // load manually with s
 	printf(frmtStr);
 	
 	SC_HANDLE driverHandle = CreateService(scmHandle, // Handle to SCManager
-		driverName, // Service Name
+		displayName,//driverName, // Service Name
 		displayName, // Display Name
 		SERVICE_ALL_ACCESS, // Desired Access
 		SERVICE_KERNEL_DRIVER, // Service Type
@@ -85,7 +85,7 @@ bool loadSysFileSCM(char* driverName, char* displayName) // load manually with s
 		{ // Service exists
 			Logs::log->Write("service exists\n");
 			printf("service exists\n");
-			driverHandle = OpenService(scmHandle, driverName, SERVICE_ALL_ACCESS); // get a handle to the existing service handle
+			driverHandle = OpenService(scmHandle, displayName/*driverName*/, SERVICE_ALL_ACCESS); // get a handle to the existing service handle
 			if (!driverHandle)
 			{
 				sprintf(frmtStr, "couldn't get existing service handle(%d)\n", GetLastError());
