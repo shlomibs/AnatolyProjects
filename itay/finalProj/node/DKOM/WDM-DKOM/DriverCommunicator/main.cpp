@@ -30,11 +30,6 @@ int main(int argc, char *argv[])
 	//else
 	char* driverName = "DKOM";
 	char* displayName = "SerialCommunicator"; // friendly name
-	char driverToOpen[512];
-	sprintf(driverToOpen, "\\\\.\\", driverName); // "\\\\.\\DKOM" for example
-	CreateFile(driverToOpen, GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL); // open driver
-	sprintf(driverToOpen, "\\\\.\\", displayName); // "\\\\.\\DKOM" for example
-	CreateFile(driverToOpen, GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL); // open driver
 	if (loadSysFile(driverName, displayName))//"friendly driver"))//argv[1]);
 		printf("success");//hideProcess(driverName, 4); //(int)argv[1]);
 	else
