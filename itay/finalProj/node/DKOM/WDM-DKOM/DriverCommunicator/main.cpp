@@ -86,8 +86,10 @@ int main(int argc, char *argv[])
 
 bool loadSysFileSCM(char* driverName, char* displayName, char* serviceName) // load manually with scm
 {
+#ifdef DEBUG
 	printf("loading via SCM\n");
 	Logs::log->WriteLine("loading via SCM");
+#endif
 	char* frmtStr = new char[1024];
 	// Open a handle to the SCM
 	SC_HANDLE scmHandle = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
