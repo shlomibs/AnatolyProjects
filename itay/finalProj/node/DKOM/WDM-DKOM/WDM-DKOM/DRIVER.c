@@ -18,10 +18,10 @@ VOID Unload(PDRIVER_OBJECT pDriverObj);
 NTSTATUS NotSupportedOperation(PDEVICE_OBJECT pDeviceObj, PIRP irp);
 #pragma endregion
 
-#pragma alloc_text(INIT, DriverEntry)
-#pragma alloc_text(PAGE, HideProcess) 
-#pragma alloc_text(PAGE, NotSupportedOperation)
-#pragma alloc_text(PAGE, Unload) 
+//#pragma alloc_text(INIT, DriverEntry)
+//#pragma alloc_text(PAGE, HideProcess) 
+//#pragma alloc_text(PAGE, NotSupportedOperation)
+//#pragma alloc_text(PAGE, Unload) 
 
 
 #pragma region constants
