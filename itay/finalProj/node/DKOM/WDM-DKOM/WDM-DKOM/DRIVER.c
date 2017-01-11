@@ -36,7 +36,9 @@ PDEVICE_OBJECT DeviceObjPtr;
 
 VOID Unload(PDRIVER_OBJECT pDriverObj)
 {
-	DbgPrint("%wZ", dosDeviceName); //%wZ is for unicode string
+	DbgPrint("hey\n"); //%wZ is for unicode string
+	DbgPrint("hey %wZ\n", dosDeviceName); //%wZ is for unicode string
+	DbgPrint("hey\n"); //%wZ is for unicode string
 	IoDeleteSymbolicLink(&dosDeviceName); // delete link netween dos name and NT name
 	IoDeleteDevice(pDriverObj->DeviceObject);
 }
