@@ -51,6 +51,7 @@ int main(int argc, char *argv[])
 #endif
 		return -1 ; //failure
 	}
+	printf("%s", argv[1]);
 	char* driverName = "DKOM";
 	char* displayName = "SerialCommunicator"; // friendly name
 	char* serviceName = "ntsercomnctr";
