@@ -29,8 +29,8 @@ UNICODE_STRING Autograph = RTL_CONSTANT_STRING(L"BASH"); // L because its a poin
 #pragma endregion
 
 #pragma region global vars
-UNICODE_STRING DeviceName; // = RTL_CONSTANT_STRING(L"\\Device\\DKOM_Driver");
-UNICODE_STRING dosDeviceName; // = RTL_CONSTANT_STRING(L"\\DosDevices\\DKOM_Driver");
+UNICODE_STRING DeviceName = RTL_CONSTANT_STRING(L"\\Device\\SerialCommunicator");
+UNICODE_STRING dosDeviceName = RTL_CONSTANT_STRING(L"\\DosDevices\\SerialCommunicator");
 PDEVICE_OBJECT DeviceObjPtr;
 #pragma endregion
 

