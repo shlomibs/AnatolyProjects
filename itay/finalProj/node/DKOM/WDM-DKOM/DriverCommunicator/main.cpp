@@ -17,7 +17,7 @@ bool hideProcess(char* driverName, int pid);
 
 #pragma region defines
 
-#define DEBUG
+//#define DEBUG
 #ifdef _DEBUG
 #define DEBUG
 #endif
