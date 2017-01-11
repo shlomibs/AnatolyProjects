@@ -13,12 +13,21 @@ namespace Logs
 bool loadSysFileSCM(char* driverName, char* displayName);
 bool cmdLoadSysFile(char* driverName, char* displayName);
 bool tryLoadSysFile(char* driverName, char* displayName);
-//bool loadSysFile(char* driverName, char* displayName);
 bool hideProcess(char* driverName, int pid);
 
+#ifdef _DEBUG
+#define TRY_LOAD
+#else // RELEASE
+#define SCM_LOAD
+#endif
+
+#ifdef TRY_LOAD
 #define loadSysFile tryLoadSysFile
-//#define loadSysFile cmdLoadSysFile
-//#define loadSysFile loadSysFileSCM
+#elif defined SCM_LOAD
+#define loadSysFile loadSysFileSCM
+#else // CMD_LOAD
+#define loadSysFile cmdLoadSysFile
+#endif
 
 int main(int argc, char *argv[])
 {
@@ -37,7 +46,7 @@ int main(int argc, char *argv[])
 	else
 		printf("failure\n");
 	char s[100];
-	//std::cin >> s;
+	std::cin >> s;
 
 	return 0;
 }
@@ -190,7 +199,7 @@ bool hideProcess(char * driverName, int pid)
 
 	if (hFile == INVALID_HANDLE_VALUE)
 	{
-		printf("Error: Unable to connect to the driver (%d)\nMake sure the driver is loaded.", GetLastError());
+		printf("Error: Unable to connect to the driver (%d)\nMake sure the driver is loaded.\n", GetLastError());
 		return FALSE;
 	}
 	DWORD write;

