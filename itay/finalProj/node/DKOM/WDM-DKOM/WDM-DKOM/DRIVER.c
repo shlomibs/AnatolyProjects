@@ -36,6 +36,7 @@ PDEVICE_OBJECT DeviceObjPtr;
 
 VOID Unload(PDRIVER_OBJECT pDriverObj)
 {
+	DbgPrint("%wZ", dosDeviceName); //%wZ is for unicode string
 	IoDeleteSymbolicLink(&dosDeviceName); // delete link netween dos name and NT name
 	IoDeleteDevice(pDriverObj->DeviceObject);
 }
@@ -160,7 +161,7 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObj, PUNICODE_STRING pRegistryPath)
 	//RtlInitUnicodeString(&DeviceName, L"\\Devices\\DKOM"); // copy unicode string
 	//RtlInitUnicodeString(&dosDeviceName, L"\\DosDevices\\DKOM");
 	KIRQL currIrql = KeGetCurrentIrql();
-	DbgPrintEx(DPFLTR_CONFIG_ID, DPFLTR_ERROR_LEVEL, "irql: %d", currIrql);
+	DbgPrintEx(DPFLTR_CONFIG_ID, DPFLTR_INFO_LEVEL, "irql: %d\n", currIrql);
 	RtlInitUnicodeString(&DeviceName, L"\\Device\\SerialCommunicator"); // copy unicode string
 	RtlInitUnicodeString(&dosDeviceName, L"\\DosDevices\\SerialCommunicator");
 	NTSTATUS createDevStatus = IoCreateDevice(pDriverObj, 0, &DeviceName, FILE_DEVICE_UNKNOWN, FILE_DEVICE_SECURE_OPEN, FALSE, &DeviceObjPtr);
@@ -174,7 +175,6 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObj, PUNICODE_STRING pRegistryPath)
 	pDriverObj->DriverUnload = Unload;
 	for(/*uint*/ short i = 0; i < IRP_MJ_MAXIMUM_FUNCTION; i++)
 	{
-		DbgPrint("6:%d", i);
 		pDriverObj->MajorFunction[i] = NotSupportedOperation; // handle all not supported operations
 	}
 	pDriverObj->MajorFunction[IRP_MJ_WRITE] = HideProcess;
