@@ -17,7 +17,6 @@ bool hideProcess(char* driverName, int pid);
 
 #pragma region defines
 
-#define DEBUG
 #ifdef _DEBUG
 #define DEBUG
 #endif
@@ -28,6 +27,7 @@ bool hideProcess(char* driverName, int pid);
 #define SCM_LOAD
 #endif
 
+#define DEBUG
 #ifdef TRY_LOAD
 #define loadSysFile tryLoadSysFile
 #elif defined SCM_LOAD
