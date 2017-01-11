@@ -136,7 +136,7 @@ bool loadSysFileSCM(char* driverName, char* displayName, char* serviceName) // l
 			Logs::log->Write("service exists\n");
 			printf("service exists\n");
 #endif
-			driverHandle = OpenService(scmHandle, driverName, SERVICE_ALL_ACCESS); // get a handle to the existing service handle
+			driverHandle = OpenService(scmHandle, serviceName, SERVICE_ALL_ACCESS); // get a handle to the existing service handle
 			if (!driverHandle)
 			{
 #ifdef DEBUG
