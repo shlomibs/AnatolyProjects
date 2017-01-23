@@ -11,6 +11,8 @@ namespace Manager
         static void Main(string[] args)
         {
             // act according to args
+            ProcessManager pM = new ProcessManager();
+            pM.Run();
         }
     }
 }

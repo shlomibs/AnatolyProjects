@@ -1,8 +1,8 @@
 #!/usr/bin/python
 #import threading
+from scapy.all import *
 from thread import start_new_thread
 from socket import *
-from scapy.all import *
 from time import sleep, time
 import communicationUtils
 

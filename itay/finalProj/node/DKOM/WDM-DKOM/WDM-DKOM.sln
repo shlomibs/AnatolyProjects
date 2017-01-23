@@ -12,6 +12,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DriverCommunicator", "Drive
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Manager", "Manager\Manager.csproj", "{CC6E4F10-0A0B-4C47-ABB1-F76ADC2AED78}"
 EndProject
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "Communication", "..\..\communication\Communication.pyproj", "{228FD0D3-EB10-4F7B-A10D-B698117E5426}"
+EndProject
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "DirectoryServer", "..\..\..\directory server\DirectoryServer.pyproj", "{1CE8FFC8-9A83-4C4F-B107-6D2E1BE857F6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -89,6 +93,26 @@ Global
 		{CC6E4F10-0A0B-4C47-ABB1-F76ADC2AED78}.Release|x64.Build.0 = Release|Any CPU
 		{CC6E4F10-0A0B-4C47-ABB1-F76ADC2AED78}.Release|x86.ActiveCfg = Release|Any CPU
 		{CC6E4F10-0A0B-4C47-ABB1-F76ADC2AED78}.Release|x86.Build.0 = Release|Any CPU
+		{228FD0D3-EB10-4F7B-A10D-B698117E5426}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{228FD0D3-EB10-4F7B-A10D-B698117E5426}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{228FD0D3-EB10-4F7B-A10D-B698117E5426}.Debug|ARM64.ActiveCfg = Debug|Any CPU
+		{228FD0D3-EB10-4F7B-A10D-B698117E5426}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{228FD0D3-EB10-4F7B-A10D-B698117E5426}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{228FD0D3-EB10-4F7B-A10D-B698117E5426}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{228FD0D3-EB10-4F7B-A10D-B698117E5426}.Release|ARM.ActiveCfg = Release|Any CPU
+		{228FD0D3-EB10-4F7B-A10D-B698117E5426}.Release|ARM64.ActiveCfg = Release|Any CPU
+		{228FD0D3-EB10-4F7B-A10D-B698117E5426}.Release|x64.ActiveCfg = Release|Any CPU
+		{228FD0D3-EB10-4F7B-A10D-B698117E5426}.Release|x86.ActiveCfg = Release|Any CPU
+		{1CE8FFC8-9A83-4C4F-B107-6D2E1BE857F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1CE8FFC8-9A83-4C4F-B107-6D2E1BE857F6}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{1CE8FFC8-9A83-4C4F-B107-6D2E1BE857F6}.Debug|ARM64.ActiveCfg = Debug|Any CPU
+		{1CE8FFC8-9A83-4C4F-B107-6D2E1BE857F6}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{1CE8FFC8-9A83-4C4F-B107-6D2E1BE857F6}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1CE8FFC8-9A83-4C4F-B107-6D2E1BE857F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1CE8FFC8-9A83-4C4F-B107-6D2E1BE857F6}.Release|ARM.ActiveCfg = Release|Any CPU
+		{1CE8FFC8-9A83-4C4F-B107-6D2E1BE857F6}.Release|ARM64.ActiveCfg = Release|Any CPU
+		{1CE8FFC8-9A83-4C4F-B107-6D2E1BE857F6}.Release|x64.ActiveCfg = Release|Any CPU
+		{1CE8FFC8-9A83-4C4F-B107-6D2E1BE857F6}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -20,7 +20,11 @@ def getDirServerAddr(): # FIN
 	except: # Exception as e:
 		raise Exception("could not get directory server addr")
 
+# returns the IPv4 address
 def GetMachineInternalIps(): # its a generator !!
 	for interface in netifaces.interfaces():
-		for link in netifaces.ifaddresses(interface)[netifaces.AF_INET]:
-			yield link['addr']
+		try:
+			for link in netifaces.ifaddresses(interface)[netifaces.AF_INET]:
+				yield link['addr']
+		except: # no IPv4 address
+			pass

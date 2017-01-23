@@ -29,7 +29,7 @@ class Server:
 			for i in range(2): # try 2 more times
 				if upload(True): # break
 					break
-				if i == 1:
+				if i == 1: # third try failed
 					return False #raise Exception("upload failed")
 		return True
 
