@@ -1,18 +1,25 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Manager
 {
     class Program
     {
+        private static ProcessManager pM;
+        private const string PROG_NAME = "Manager.exe";
         static void Main(string[] args)
         {
             // act according to args
-            ProcessManager pM = new ProcessManager();
+            AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
+            pM = new ProcessManager();
             pM.Run();
+        }
+
+        private static void CurrentDomain_ProcessExit(object sender, EventArgs e)
+        {
+            pM.Shutdown();
+            Process.Start(PROG_NAME); // now restart the program
         }
     }
 }

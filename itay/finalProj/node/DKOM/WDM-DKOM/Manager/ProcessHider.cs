@@ -28,6 +28,8 @@ namespace Manager
             if (ProcessHider.isActive)
                 return true;
             Process p = StartVisibleProcess(processHiderPath, "load");
+            if (p == null)
+                throw new Exception("driver communicator not in current directory");
             p.WaitForExit();
             return p.ExitCode == 0;
         }
@@ -79,8 +81,13 @@ namespace Manager
             p.StartInfo = new ProcessStartInfo(path, args);
             p.StartInfo.UseShellExecute = false;
             p.StartInfo.RedirectStandardOutput = true;
+            p.StartInfo.RedirectStandardError = true;
+            p.StartInfo.RedirectStandardInput = true;
+            p.StartInfo.CreateNoWindow = true;
+            p.EnableRaisingEvents = true;
             if (!p.Start())
                 return null;
+            p.StandardInput.AutoFlush = true;
             return p;
         }
 
@@ -96,8 +103,9 @@ namespace Manager
             Process p = new Process();
             p.StartInfo = new ProcessStartInfo(path, args);
             p.StartInfo.UseShellExecute = false;
-            p.StartInfo.RedirectStandardError = true;
             p.StartInfo.RedirectStandardOutput = true;
+            p.StartInfo.RedirectStandardError = true;
+            p.StartInfo.RedirectStandardInput = true;
             p.StartInfo.CreateNoWindow = true;
             p.EnableRaisingEvents = true;
             p.OutputDataReceived += outputHandler;
@@ -105,6 +113,7 @@ namespace Manager
             p.Exited += new EventHandler(OnEventedProcessExit);
             if (!p.Start())
                 return null;
+            p.StandardInput.AutoFlush = true;
             p.BeginOutputReadLine(); // to enable the output redirection event
             p.BeginErrorReadLine();
             return p;

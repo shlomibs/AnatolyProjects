@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ProcessHandler.cs" />
     <Compile Include="ProcessHider.cs" />
     <Compile Include="ProcessManager.cs" />
     <Compile Include="Program.cs" />

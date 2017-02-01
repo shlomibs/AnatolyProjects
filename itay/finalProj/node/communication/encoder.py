@@ -8,7 +8,7 @@ class Encoder:
 		self.key = key
 		
 	def decode(self, QuerriesAndTasks): # FIN
-		if(type(QuerriesAndTasks) == type(list()))
+		if(type(QuerriesAndTasks) == type(list())):
 			retLst = []
 			for item in QuerriesAndTasks:
 				retLst.append(self.__decode(item))
