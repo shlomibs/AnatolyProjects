@@ -44,6 +44,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="db.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>db.xsd</DependentUpon>
+    </Compile>
     <Compile Include="ProcessHandler.cs" />
     <Compile Include="ProcessHider.cs" />
     <Compile Include="ProcessManager.cs" />
@@ -52,6 +57,17 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="db.xsc">
+      <DependentUpon>db.xsd</DependentUpon>
+    </None>
+    <None Include="db.xsd">
+      <SubType>Designer</SubType>
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>db.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="db.xss">
+      <DependentUpon>db.xsd</DependentUpon>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
