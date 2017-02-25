@@ -6,7 +6,7 @@
     <ProjectGuid>ddcf8716-2945-4d11-bd85-ea946d54a83d</ProjectGuid>
     <ProjectHome>
     </ProjectHome>
-    <StartupFile>DataBase.py</StartupFile>
+    <StartupFile>database.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -23,7 +23,8 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="DataBase.py" />
+    <Compile Include="database.py" />
+    <Compile Include="databaseHandler.py" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

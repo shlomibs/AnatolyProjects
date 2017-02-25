@@ -3,9 +3,7 @@
 // if DKOM will work on 64bit OS then undefine it
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 
 namespace Manager
 {
@@ -70,9 +68,9 @@ namespace Manager
         /// </summary>
         /// <param name="cmd"> command from decision maker </param>
         /// <returns> true if operation succeeded </returns>
-        public bool StartProcess(string cmd)
+        public bool StartProcess(string cmd, ProcessHandler outputProcess)
         {
-            string[] splt = cmd.Split(',');
+            string[] splt = cmd.Split(','); // {taskId, filename, args}
             if (splt.Length != 3)
                 throw new Exception("wrong format command");
             //return false;
@@ -81,7 +79,8 @@ namespace Manager
             DataReceivedEventHandler outputHandler = (s, e) =>
             {
                 if (!String.IsNullOrEmpty(e.Data))
-                    this.SendData(ProcessManager.PROCESS_DATA_CODE + e.Data);
+                    lock (outputProcess)
+                        outputProcess.SendData(ProcessManager.PROCESS_DATA_CODE + splt[0] /* task id */ + "," + e.Data);
             };
 
 
@@ -97,15 +96,38 @@ namespace Manager
         }
 
         /// <summary>
-        ///  add output handler to procss
+        ///  add output handler to the process
         /// </summary>
         /// <param name="outputHandler"> the function to handle the process </param>
-        /// <returns> true if the operation succeeded</returns>
+        /// <returns> true if the operation succeeded </returns>
         public bool AddOutputHandler(DataReceivedEventHandler outputHandler)
         {
             if (this.processObj == null || this.processObj.HasExited)
                 return false;
             this.processObj.OutputDataReceived += outputHandler;
+            return true;
+        }
+
+        /// <summary>
+        /// removes output handler from the process
+        /// </summary>
+        /// <param name="outputHandler"> the handler to remove </param>
+        /// <returns> true if the operation succeeded </returns>
+        public bool RemoveOutputHandler(DataReceivedEventHandler outputHandler)
+        {
+            if (this.processObj == null || this.processObj.HasExited)
+                return false;
+            try
+            {
+                this.processObj.OutputDataReceived -= outputHandler;
+            }
+            catch (Exception e) // if the event handler not exist in the list
+            {
+#if DEBUG
+                Console.WriteLine("Exception occured in process: " + process.ProcessName + "\nat ProcessHandler.RemoveOutputHandler: " + e);
+#endif
+                return false;
+            }
             return true;
         }
 

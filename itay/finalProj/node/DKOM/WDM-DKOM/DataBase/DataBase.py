@@ -1,15 +1,16 @@
 import sqlite3 as sql
-from threading import Thread
-
+import sys
+from databaseHandler import DatabaseHandler
 
 def main():
-	inputThread = Thread(target = InputProcessing, args = ())
-	inputThread.start()
-
-def InputProcessing():
-	inp = raw_input()
-	
-
+	if len(sys.argv) != 2:
+		print "incorrect args"
+		sys.exit(-1) # error
+	dbHandler = DatabaseHandler(sys.argv[1])
+	while True:
+		inp = eval(raw_input()) # get query
+		ret = dbHandler.executeQuery(inp) # execute
+		print repr(ret) # return result via stdout
 
 if __name__ == "__main__":
 	main()

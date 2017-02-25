@@ -1,25 +1,46 @@
 import sys
+from time import sleep
+from thread import start_new_thread
+from threading import Lock
+from dataController import *
 
-#region constants
-SEND_CMD = 's';
-START_PROCESS_CMD = 'p';
-PROCESS_ENDED_CODE = 'e';
-PROCESS_DATA_CODE = 'd';
-QUERY_CODE = 'q'
-TASK_CODE = 't'
-#endregion
+cmds = [] # commands recieved via stdin
+shutdown = False
+lock = Lock()
 
 def main():
-	
-	
+	start_new_thread(ActionLoop, ())
+	ReceivingLoop()
 	return -1 # temp
 
-def receivingLoop():
-	data = eval(raw_input())
-	decider
+def ReceivingLoop():
+	while not shutdown:
+		inp = raw_input()
+		lock.aquire()
+		cmd.append(inp)
+		lock.release()
 
-def sendData(data):
-	print repr(data)
+
+def ActionLoop():
+	while not shutdown:
+		if len(cmds) == 0: # no command
+			sleep(0.01)
+			continue
+		lock.aquire()
+		data = cmds.pop(0)
+		lock.release()
+		if data[0] == DataController.SEND_CMD: # data recieved from another node
+			OnCommunicationDataRecieved(data[1:])
+		elif data[0] == DataController.PROCESS_DATA_CODE: # data recieved from process
+			DataController.OnProcessDataReceived(data[1:])
+		elif data[0] == DataController.PROCESS_ENDED_CODE: # process ended
+			DataController.OnProcessEnded(data[1:])
+		elif data[0] == DataController.QUERY_CODE: # query response
+			DataController.OnQueryReceived(data[1:])
+		else:
+			raise Exception("unknown command: '" + data[0] + "' full msg: " + data)
+
+
 
 
 if __name__ == "__main__":

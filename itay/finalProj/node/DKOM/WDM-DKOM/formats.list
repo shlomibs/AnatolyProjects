@@ -1,0 +1,33 @@
+
+
+communication formats:
+	between manager and decider layers:
+		decider -> manager:
+			<SEND_CMD/START_PROCESS_CMD/QUERY_CMD> + data:
+				SEND_CMD + toId + "," + nodeTaskId + "," + repr(data)
+				START_PROCESS_CMD + taskInternalId + "," + path + "," + args // args are seperated by spaces e.g: "python,-u add.py 1 2"
+				QUERY_CMD + taskInternalId + "," + repr(data) // data = query
+	
+		manager -> decider:
+			<PROCESS_ENDED_CODE/QUERY_CMD/PROCESS_DATA_CODE> + data:
+				QUERY_CMD/PROCESS_DATA_CODE + taskId + "," + data
+				PROCESS_ENDED_CODE + taskId
+	
+	
+	between different nodes:
+		between decider and communicator:
+			decider -> communicator:
+				(SEND_CMD +) toId + "," + nodeTaskId + "," + repr(data)
+			communicator -> decider:
+				(SEND_CMD +) fromId + "," + nodeTaskId + "," + repr(data)
+
+		between one node's communicator to another:
+			LOW_LEVEL_HEADER + <START_PROCESS_CMD/QUERY_CMD/PROCESS_ENDED_CODE/PROCESS_DATA_CODE> + data:
+				LOW_LEVEL_HEADER + START_PROCESS_CMD + nodeTaskId + "," + path + "," + args
+				LOW_LEVEL_HEADER + QUERY_CMD + nodeTaskId + "," + query
+			
+
+LOW_LEVEL_HEADER -> won't be described
+
+TODO: in communication add "ping" test between nodes
+	
