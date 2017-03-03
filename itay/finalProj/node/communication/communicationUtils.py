@@ -3,6 +3,9 @@ import random
 import psutil
 import netifaces
 
+def defaultCommunicationKey():
+	return 10427582 # random val
+
 def defaultPort():
 	return random.randint(2048,65535) # 2**16-1
 	#return 3846
@@ -21,7 +24,7 @@ def getDirServerAddr(): # FIN
 		raise Exception("could not get directory server addr")
 
 # returns the IPv4 address
-def GetMachineInternalIps(): # its a generator !!
+def GetMachineInternalIps(): # its a generator
 	for interface in netifaces.interfaces():
 		try:
 			for link in netifaces.ifaddresses(interface)[netifaces.AF_INET]:

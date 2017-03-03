@@ -6,12 +6,8 @@ from socket import *
 from time import sleep, time
 import communicationUtils
 
-class LowLevelCommunicator:
-	"""
-	optional: using scapy for communicating hiddenly
-	for now: communicate via socket
-	"""
-	def __init__(self, port, holePunchingAddr, ID):
+class LowLevelCommunicator: # FIN
+	def __init__(self, port, holePunchingAddr, ID): # FIN
 		self.__port = port
 		self.__recvFromAddr = {} # store addresses that sended to this node by format {ID:ADDR}
 		self.__sendedAndNotResponded = []
@@ -26,10 +22,10 @@ class LowLevelCommunicator:
 		self.__ID = ID
 		self.__seq = 0
 		self.EOM = "<EOF>" # end of message
-		self.MAX_SEQ = 2^16
+		self.MAX_SEQ = 2**16
 		# self.pcapWriter = PcapWriter("sniffLog" + str(ID) + ".pcap", append=True, sync=True) for debugging
 
-	def start(self):
+	def start(self): # FIN
 		self.startPortProtectionService()
 		self.startRecievingThread()
 		self.startSendedMsgsValidationThread()
@@ -39,17 +35,12 @@ class LowLevelCommunicator:
 		start_new_thread(self.__portProtectionService, (3,)) # 3 = default
 		self.__isPortProtectionServiceStarted = True
 
-	def __portProtectionService(self, gapBetweenPunches): # FIN (for now)
-		"""
-		hole punching only for now
-		make it a service!
-		"""
+	def __portProtectionService(self, gapBetweenPunches): # FIN
 		while not self.__shutdown:
 		#next: maybe block any connection that attemps to bind or use that port
 			holePunchPac = IP(dst=self.__holePunchingAddr[0])/UDP(sport=self.__port, dport=self.__holePunchingAddr[1])/str(self.__ID)
 			send(holePunchPac, verbose=False)
 			sleep(gapBetweenPunches)
-		#raise Exception("Not implemented exception")
 
 	def startSendedMsgsValidationThread(self): #FIN 
 		if self.__isSendedValidationThreadStarted: return # already started
@@ -64,17 +55,26 @@ class LowLevelCommunicator:
 	def __recievingThread(self): # FIN
 		start_new_thread(self.__sniffingThread,())
 		while not self.__shutdown:
-			# TODO: check the packets are valid
-			# then extract data to recData
 			for pac in self.__sniffed:
-				#try:
+				# check if the packet is valid
+				origChecksum = pac[UDP].chksum
+				del pac[UDP].chksum
+				pac = pac.__class__(str(pac))#IP(str(pac))
+				#pac.show()
+				if origChecksum != pac[UDP].chksum: # packet is damaged
+					continue # ignore this packet
+				# then extract data to recData
+				try:
 					splt = pac[Raw].load.split(",")
 					self.__recvFromAddr[splt[0]] = (pac[IP].src, pac[UDP].sport) # add to addresses by ID's dictionary
 					if splt[2] == "r": # recieved response => remove from self.__sendedAndNotResponded
+						# print "r received" # for debug
 						for i in self.__sendedAndNotResponded:
-							if i[0] == str(self.__seq): # remove
+							if i[0] == int(splt[3]): # remove
+								# print "removed: " + str(i) # for debug
 								self.__sendedAndNotResponded.remove(i)
 								break
+						# print "sended and not resp: " + str(self.__sendedAndNotResponded) # for debug
 					#elif pac[IP].src == communicationUtils.getDirServerAddr()[0]: # dir server ip
 						# its the node connections data... use it, save it to list or ID
 					elif splt[2] == "m": # msg
@@ -83,22 +83,23 @@ class LowLevelCommunicator:
 						self.__sendRecievedResponse(splt)
 					else: # unimplemented packet type
 						raise Exception("not implemented packet type (LLC reached to else statment)")
-				#except Exception as e:
+				except Exception as e:
+					raise Exception("illegal packet, exception: " + str(e))
 					#print "recieving Thread err: illegal packet"
 					#print "err data: " + str(e)
 					#print "packet: \n"
 					#pac.show()
 			self.__sniffed = []
 			sleep(0.1)
-		#raise Exception("Not implemented exception") # sniff and filter packets
 	
 	def __sniffingThread(self): # FIN
 		myIntIps = communicationUtils.GetMachineInternalIps()
+		myIntIps = [ip.encode('ascii', 'ignore') for ip in myIntIps] # from unicode to str
 		# print "My internal Ips: " + str([i for i in myIntIps])
-		pacFilter = lambda p: p.haslayer(UDP) and p[UDP].dport == self.__port and p.haslayer(IP) #and p[IP].dst in myIntIps
+		pacFilter = lambda p: p.haslayer(UDP) and p[UDP].dport == self.__port and p.haslayer(IP) and p[IP].dst in myIntIps
 		stopFilter = lambda x: self.__shutdown
 		sniff(lfilter=pacFilter, prn=self.__appendSniffedPac, stop_filter=stopFilter)
-		print "sniffed unexpectly exited"
+		print "sniff unexpectly exited"
 
 	# for debugging:
 	#def __demoFilter(self, p):
@@ -106,7 +107,7 @@ class LowLevelCommunicator:
 	#		self.pcapWriter.write(p) # for debugging
 	#	return p.haslayer(UDP) and p[UDP].dport == self.__port and p.haslayer(IP) #and p[IP].dst in myIntIps
 	
-	def __appendSniffedPac(self, p):
+	def __appendSniffedPac(self, p): # FIN
 		#print "appended: ",
 		#p.summary()
 		self.__sniffed.append(p)
@@ -146,8 +147,6 @@ class LowLevelCommunicator:
 			elif lastSeqId[0] != i[0]: # start of a msg from another node, ID changed
 				isMsgValid = True # reinitialize for the msg
 				lastKeys = [i] # reinitialize for the next msg
-				# msgParts = [] # reinitialize for next the msg
-				# msgParts.append(self.__rawMessages[i])
 				msgParts = [self.__rawMessages[i]] # reinitialize for the next msg
 			else: # lastSeqId[0] == i[0] and lastSeqId[1] + 1 != i[1]
 				isMsgValid = False
@@ -163,16 +162,17 @@ class LowLevelCommunicator:
 				if time() - i[1] >= self.__pacTimeout:
 					send(i[2], verbose = False)
 					i[1] = time()
+					# print "re-sent: " + str(i) # for debug
 			sleep(0.2)
 
 	def __sendTo(self, msg, to): # FIN
 		# to = (ip, port)
 		#to = self.getAddrById(toID)
 		msgIndicatorLen = len("m,") # indicates thats a message
-		maxIdAndSeqLen = len(str(2^32)) + len(str(self.MAX_SEQ))
-		maxPortLength = len(str(2^16))
+		maxIdAndSeqLen = len(str(2**48)) + len(str(self.MAX_SEQ))
+		maxPortLength = len(str(2**16))
 		dataPerPac = (508 - maxIdAndSeqLen - maxPortLength - msgIndicatorLen) # 508 = for sure safe length
-		numToSend = int(len(msg) / dataPerPac) + 1 # roud down + 1 =~ round up
+		numToSend = int(len(msg) / dataPerPac) + 1 # round down + 1 =~ round up
 		toSend = []
 		for i in xrange(numToSend - 1): # split data to packets with max len of "dataPerPac"
 			# ID,Seq,messageIndicator,data
@@ -190,7 +190,6 @@ class LowLevelCommunicator:
 		self.__incSeq()
 		#print "tosend: " + str(toSend) # fir debugging
 		send(toSend, verbose = False)
-		#self.__sendedAndNotResponded.append(self.__seq, time(), toSend[-1])
 
 	def __sendRecievedResponse(self, pacDataSplt): # FIN
 		splt = pacDataSplt # pacData.split(",")
@@ -200,7 +199,7 @@ class LowLevelCommunicator:
 			print "send recv response err: " + str(e)
 		# ID,Seq,recvResponseIndicator,recPacSeq
 		raw = str(self.__ID) + "," + str(self.__seq) + ",r," + splt[1] #r=recieved , splt[1] = other node's seq
-		#print "sending resp: " + raw # for debugging
+		# print "sending resp: " + raw # for debugging
 		send(IP(dst=to[0])/UDP(sport=self.__port, dport=to[1])/raw, verbose = False)
 
 	def __incSeq(self): # FIN
@@ -208,12 +207,6 @@ class LowLevelCommunicator:
 		self.__seq += 1
 		if self.__seq >= self.MAX_SEQ: self.__seq = 0 # reset seq # like % but faster
 	
-	def shutdown(self):
+	def shutdown(self): # FIN
 		self.__shutdown = True
 		sleep(1)
-
-
-
-
-
-

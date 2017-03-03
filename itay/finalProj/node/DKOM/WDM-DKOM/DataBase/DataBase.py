@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import sqlite3 as sql
 import sys
 from databaseHandler import DatabaseHandler

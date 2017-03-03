@@ -1,8 +1,5 @@
 #!/usr/bin/python
 import sys
-from py_compile import compile
-compile("communicationUtils.py")
-compile("lowLevelCommunicator.py")
 from lowLevelCommunicator import LowLevelCommunicator # = *
 import communicationUtils
 
@@ -26,6 +23,7 @@ while True:
 	if toSend == "exit": break
 	com.sendTo(":".join(toSend.split(":")[2:]), (toSend.split(":")[0],int(toSend.split(":")[1])))
 	rec = com.getRecievedMessages()
-	rec = [str(i) for i in rec]
-	print "recieved: " + str(rec) #"\n".join(rec)
+	rec = [str(i[1]) for i in rec]
+	#print "recieved: " + str(rec) #"\n".join(rec)
+	print "received: " + "\n\n".join(rec)
 com.shutdown()

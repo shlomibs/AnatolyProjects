@@ -54,7 +54,7 @@ class Server:
 				self.s.sendTo("0,0,m," + self.getContacts(splt[0], addr)) # directory servers ID's are all 0
 				self.s.sendTo("0,1,m," + self.getContacts(splt[0], addr)) # 1 = next seq
 			# regular notification (usually hole punching)
-			if (splt[0],addr) not in self.clients:
+			if (splt[0], addr) not in self.clients:
 				self.clients.append((splt[0], addr)) # ID, ADDR
 			self.clientsLastCommunication[(splt[0], addr)] = time()
 
@@ -69,7 +69,7 @@ class Server:
 					i += 1
 			sleep(0.2)
 
-	def getMyIp(self): # FIN
+	def getMyIp(self): # external ip # FIN
 		checkIpSock = socket(AF_INET, SOCK_DGRAM)
 		checkIpSock.connect(('8.8.8.8', 0)) # connecting to a UDP address doesn't send packets
 		return checkIpSock.getsockname()[0]
@@ -110,7 +110,7 @@ def main(): # FIN
 			server.shutdown()
 			break
 		else:
-			print "illigal command, avalivablr commands: " + ", ".join(cmds)
+			print "illigal command, available commands: " + ", ".join(cmds)
 		
 
 if __name__ == "__main__":

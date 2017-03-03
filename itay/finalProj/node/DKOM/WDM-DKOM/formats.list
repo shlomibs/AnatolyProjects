@@ -25,9 +25,15 @@ communication formats:
 			LOW_LEVEL_HEADER + <START_PROCESS_CMD/QUERY_CMD/PROCESS_ENDED_CODE/PROCESS_DATA_CODE> + data:
 				LOW_LEVEL_HEADER + START_PROCESS_CMD + nodeTaskId + "," + path + "," + args
 				LOW_LEVEL_HEADER + QUERY_CMD + nodeTaskId + "," + query
+				LOW_LEVEL_HEADER + WRITE_FILE_CMD + nodeTaskId + "," + query
 			
+	decider -> controller:
+		python -u controller.py port
+
 
 LOW_LEVEL_HEADER -> won't be described
 
 TODO: in communication add "ping" test between nodes
+
+find num of lines: [^\s*$], .*
 	

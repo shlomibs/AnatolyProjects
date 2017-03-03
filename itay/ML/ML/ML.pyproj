@@ -3,15 +3,16 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>4ae536d1-770c-4518-8700-68f32c5855fd</ProjectGuid>
+    <ProjectGuid>7cc19621-aa89-4f5a-a8b6-9077af619791</ProjectGuid>
+    <ProjectTypeGuids>{6c0efafa-1a04-41b6-a6d7-511b90951b5b};{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>controller.py</StartupFile>
+    <StartupFile>regression.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
-    <Name>Controller</Name>
-    <RootNamespace>Controller</RootNamespace>
+    <Name>ML</Name>
+    <RootNamespace>ML</RootNamespace>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -22,10 +23,7 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="controller.py" />
-    <Compile Include="tasksManager.py">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="regression.py" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

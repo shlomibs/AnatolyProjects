@@ -1,18 +1,18 @@
 #!/usr/bin/python
 import communicationUtils
 from encoder import Encoder
+from lowLevelCommunicator import LowLevelCommunicator
 
 class Communication:
 	def __init__(self, ID, communicationKey, holePunchingAddr = communicationUtils.getDirServerAddr()):
-		port = defaultPort()
-		while isPortTaken(self.port): # take over a port
-			port += 1
-			if port >= 2^16:
-				port = 2000 # after saved ports
+		self.port = defaultPort()
+		while communicationUtils.isPortTaken(self.port): # take over a port
+			self.port += 1
+			if self.port >= 2^16:
+				self.port = 2000 # after saved ports
 		self.encoder = Encoder(communicationKey)
 		self.communicator = LowlevelCommunicator(port, holePunchingAddr, ID)
-		self.communicator.startPortProtectionService()
-		self.communicator.startRecievingThread(self.port)
+		self.communicator.start()
 		self.connectedNodes = []
 
 	def sendQuery(self, qry): # FIN

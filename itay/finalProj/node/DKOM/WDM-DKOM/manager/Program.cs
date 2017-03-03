@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Diagnostics;
-using System.Linq;
 
 namespace Manager
 {
@@ -8,10 +8,14 @@ namespace Manager
     {
         private static ProcessManager pM;
         private const string PROG_NAME = "Manager.exe";
+        private const string FRIENDLY_NAME = "Microsoft Backgound Manager";
         static void Main(string[] args)
         {
             // act according to args
             AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
+#if !DEBUG
+            SetStartup();
+#endif
             pM = new ProcessManager();
             pM.Run();
         }
@@ -20,6 +24,13 @@ namespace Manager
         {
             pM.Shutdown();
             Process.Start(PROG_NAME); // now restart the program
+        }
+
+        private static void SetStartup()
+        {
+            RegistryKey rk = Registry.LocalMachine.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+            string excutablePath = System.Reflection.Assembly.GetEntryAssembly().Location;
+            rk.SetValue(FRIENDLY_NAME, excutablePath);
         }
     }
 }

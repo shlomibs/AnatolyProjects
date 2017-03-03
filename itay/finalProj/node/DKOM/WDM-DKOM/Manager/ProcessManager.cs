@@ -18,15 +18,19 @@ namespace Manager
         private const char QUERY_CMD = 'q';
         private const char PROCESS_ENDED_CODE = 'e';
         public const char PROCESS_DATA_CODE = 'd';
+        private const char QUERY_RESPONSE_CODE = 'Q';
+        private const char DISPLAY_CODE = 'D'; // display to admin <=> only if the admin is connected
         private const string databaseFile = @"db\db.db";
         #endregion
 
         #region fields
         private ProcessHider procHider;
         private ProcessHandler[] mainProcesses;
+        private ProcessHandler controllerProcess;
         private List<ProcessHandler> secondaryProcesses;
         private Queue<string> Queries;
         private bool shutdown;
+        private bool isAdminConnected;
         private int mainThreadId;
         #endregion
 
@@ -37,6 +41,7 @@ namespace Manager
             secondaryProcesses = new List<ProcessHandler>();
             Queries = new Queue<string>();
             shutdown = false;
+            isAdminConnected = false;
             mainThreadId = Thread.CurrentThread.ManagedThreadId;
             Directory.CreateDirectory("temp"); // for output files or executables i.e. python code or batch files
             //procHider.HideProc(Process.GetCurrentProcess());
@@ -123,7 +128,7 @@ namespace Manager
                             lock (this.mainProcesses[DATABASE_PROCESS_IND]) lock (this.mainProcesses[DECISIONS_PROCESS_IND])
                                 {
                                     this.mainProcesses[DATABASE_PROCESS_IND].RemoveOutputHandler(resultHandler); // it's working (removing the ptr and not null)
-                                    this.mainProcesses[DECISIONS_PROCESS_IND].SendData(QUERY_CMD + taskId + "," + e.Data);
+                                    this.mainProcesses[DECISIONS_PROCESS_IND].SendData(QUERY_RESPONSE_CODE + taskId + "," + e.Data);
                                 }
                             IsBusy = false;
                         };
@@ -185,11 +190,48 @@ namespace Manager
                         Queries.Enqueue(e.Data.Substring(1)); // the queued commands will be executed in another thread
                     }
                     break;
+                case DISPLAY_CODE:
+                    if (!this.isAdminConnected)
+                    {
+                        if (e.Data[1] != '\'') // not repr'd => try to connect from another controller
+                        {
+                            isAdminConnected = true;
+                            this.controllerProcess = new ProcessHandler(this.procHider);
+                            this.controllerProcess.StartProcess("python", @"-u controllerConnection\controllerConnection.py " + e.Data.Substring(1));
+                            this.controllerProcess.AddExitHandler((s, e2) => { isAdminConnected = false; });
+                            this.controllerProcess.AddOutputHandler(OnControllerRecieved);
+                        }
+                        //else drop the message
+                    }
+                    else
+                    {
+                        if (e.Data[1] != '\'') // not repr'd => try to connect from another controller
+                        {
+                            Thread t = new Thread(() =>
+                            {
+                                System.Windows.Forms.MessageBox.Show("an admin is already connected\nonly one admin allowed per node!", "Error",
+                                    System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error,
+                                    System.Windows.Forms.MessageBoxDefaultButton.Button1, System.Windows.Forms.MessageBoxOptions.ServiceNotification);
+                            });
+                            t.Start();
+                        }
+                        else
+                            lock (this.controllerProcess)
+                                this.controllerProcess.SendData(e.Data.Substring(1));
+                    }
+                    break;
                 default:
                     throw new InvalidOperationException("Unknown command");
             }
         }
-        
+
+        private void OnControllerRecieved(object sender, DataReceivedEventArgs e)
+        {
+            if (!String.IsNullOrEmpty(e.Data))
+                lock (this.mainProcesses[COMMUNICATION_PROCESS_IND])
+                    this.mainProcesses[COMMUNICATION_PROCESS_IND].SendData(e.Data); // pass data to send
+        }
+
         private void KillSecondaryProcess(ProcessHandler p)
         {
             lock(this.secondaryProcesses)

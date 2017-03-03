@@ -12,7 +12,10 @@ namespace Manager
         #region fields
         private ProcessHider procHider;
         private Process processObj;
-        #endregion
+#if DEBUG
+        private static System.IO.StreamWriter Log;
+#endif
+#endregion
 
         public Process process { get { return processObj; } } // returns a reference to the process
         public bool IsRunning { get { return this.processObj != null && !this.processObj.HasExited; } }
@@ -20,6 +23,10 @@ namespace Manager
         public ProcessHandler(ProcessHider procHider)
         {
             this.procHider = procHider;
+#if DEBUG
+            Log = new System.IO.StreamWriter("log.log");
+            Log.AutoFlush = true;
+#endif
         }
 
         /// <summary>
@@ -35,6 +42,13 @@ namespace Manager
                 processObj = this.procHider.StartHiddenProcess(path, args);
             else
                 processObj = this.procHider.StartVisibleProcess(path, args);
+#if DEBUG
+            processObj.OutputDataReceived += (s, e) =>
+            {
+                lock (Log)
+                    Log.WriteLine(process.ProcessName + " >> manager: " + e.Data);
+            };
+#endif
             if (processObj == null)
                 return false;
             return true;
@@ -57,6 +71,14 @@ namespace Manager
 #if (CHECK_OS)
             else
                 processObj = this.procHider.StartVisibleProcess(path, args, outputHandler);
+#endif
+
+#if DEBUG
+            processObj.OutputDataReceived += (s, e) =>
+            {
+                lock (Log)
+                    Log.WriteLine(process.ProcessName + " >> manager: " + e.Data);
+            };
 #endif
             if (processObj == null)
                 return false;
@@ -105,6 +127,7 @@ namespace Manager
             if (this.processObj == null || this.processObj.HasExited)
                 return false;
             this.processObj.OutputDataReceived += outputHandler;
+            this.processObj.ErrorDataReceived += outputHandler;
             return true;
         }
 
@@ -152,6 +175,10 @@ namespace Manager
         {
             lock (this.process.StandardInput)
                 this.processObj.StandardInput.WriteLine(data);
+#if DEBUG
+            lock (Log)
+                Log.WriteLine("manager >> " + process.ProcessName + ": " + data);
+#endif
             //this.processObj.StandardInput.Flush();
         }
 
