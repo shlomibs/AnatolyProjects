@@ -31,6 +31,7 @@
   <ItemGroup>
     <Compile Include="communication.py" />
     <Compile Include="communicationUtils.py" />
+    <Compile Include="communicator.py" />
     <Compile Include="encoder.py" />
     <Compile Include="lowLevelCommunicator.py" />
     <Compile Include="testlowLevel.py" />

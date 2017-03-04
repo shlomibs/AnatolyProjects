@@ -5,7 +5,7 @@ import urllib
 from thread import start_new_thread
 from time import time, sleep
 
-class Server:
+class Server: # FIN
 	def __init__(self):
 		self.port = 13013
 		self.s = socket(AF_INET, SOCK_DGRAM)
@@ -16,6 +16,7 @@ class Server:
 		self.MAX_NODES_NUM_TO_SEND = 20 # to fit to one packet
 		self.CLIENT_TIMEOUT = 3 * 4
 		self.SERVER = "dirser.atwebpages.com"
+		self.EOM = "<EOF>" # end of message
 
 	def uploadAddr(self): # FIN
 		# get current status
@@ -47,16 +48,20 @@ class Server:
 	def recvThread(self): # FIN
 		while not self.isShutdown:
 			data, addr = self.s.recvfrom(1024) # data = ID
-			splt = data.split(",")
+			#splt = data.split(",")
 			#if ">" in data: # want nodes list data = [ID]>[node type] # => data.split(">") = [ID, node type]
-			if splt[3] == ">": # request for nodes list
+			if data[0] == ">": # request for nodes list
 				# can be also regular notification (usually hole punching) -> that's what the if is for
-				self.s.sendTo("0,0,m," + self.getContacts(splt[0], addr)) # directory servers ID's are all 0
-				self.s.sendTo("0,1,m," + self.getContacts(splt[0], addr)) # 1 = next seq
+				contacts = self.getContacts(data[1:])
+				contacts = [contacts[i:i + 10] for i in xrange(0, len(contacts), 10)] # split to force it to send each list in the same packet
+				for i in xrange(len(contacts)):
+					self.s.sendTo("0," + str(i) + ",m," + repr(contacts[i]), addr) # directory servers ID's are all 0
+				#self.s.sendTo("0," + len(contacts) + ",m," + self.EOM, addr) # 1 = next seq
 			# regular notification (usually hole punching)
-			if (splt[0], addr) not in self.clients:
-				self.clients.append((splt[0], addr)) # ID, ADDR
-			self.clientsLastCommunication[(splt[0], addr)] = time()
+			data = data.replace(">", "")
+			if (data, addr) not in self.clients:
+				self.clients.append((data, addr)) # ID, ADDR
+			self.clientsLastCommunication[(data, addr)] = time()
 
 	def checkConnectionThread(self): # FIN
 		while not self.isShutdown:
@@ -74,9 +79,9 @@ class Server:
 		checkIpSock.connect(('8.8.8.8', 0)) # connecting to a UDP address doesn't send packets
 		return checkIpSock.getsockname()[0]
 
-	def getContacts(self, ID):
+	def getContacts(self, ID): # FIN
 		# send list of ID's and addresses of nodes that this node[ID] can send to
-		raise("Not Implemented exception")
+		return [c for c in self.clients if c is not ID]
 
 	def shutdown(self): # FIN
 		self.isShutdown = True

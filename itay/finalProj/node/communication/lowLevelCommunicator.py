@@ -13,14 +13,16 @@ class LowLevelCommunicator: # FIN
 		self.__sendedAndNotResponded = []
 		self.__sniffed = []
 		self.__rawMessages = {}
-		self.__pacTimeout = 1 # 1 = default
+		self.__pacTimeout = 1 # 1 = default # in seconds
 		self.__isPortProtectionServiceStarted = False
 		self.__isRecievingThreadStarted = False
 		self.__isSendedValidationThreadStarted = False
 		self.__shutdown = False
 		self.__holePunchingAddr = holePunchingAddr
+		self.__dirSerAddr = communicationUtils.getDirServerAddr();
 		self.__ID = ID
 		self.__seq = 0
+		self.otherNodes = [] # [(ID,ADDR)...]
 		self.EOM = "<EOF>" # end of message
 		self.MAX_SEQ = 2**16
 		# self.pcapWriter = PcapWriter("sniffLog" + str(ID) + ".pcap", append=True, sync=True) for debugging
@@ -37,7 +39,7 @@ class LowLevelCommunicator: # FIN
 
 	def __portProtectionService(self, gapBetweenPunches): # FIN
 		while not self.__shutdown:
-		#next: maybe block any connection that attemps to bind or use that port
+		# optional: maybe block any connection that attemps to bind or use that port
 			holePunchPac = IP(dst=self.__holePunchingAddr[0])/UDP(sport=self.__port, dport=self.__holePunchingAddr[1])/str(self.__ID)
 			send(holePunchPac, verbose=False)
 			sleep(gapBetweenPunches)
@@ -59,8 +61,7 @@ class LowLevelCommunicator: # FIN
 				# check if the packet is valid
 				origChecksum = pac[UDP].chksum
 				del pac[UDP].chksum
-				pac = pac.__class__(str(pac))#IP(str(pac))
-				#pac.show()
+				pac = pac.__class__(str(pac)) # dump to string and rebuild the packet
 				if origChecksum != pac[UDP].chksum: # packet is damaged
 					continue # ignore this packet
 				# then extract data to recData
@@ -75,8 +76,12 @@ class LowLevelCommunicator: # FIN
 								self.__sendedAndNotResponded.remove(i)
 								break
 						# print "sended and not resp: " + str(self.__sendedAndNotResponded) # for debug
-					#elif pac[IP].src == communicationUtils.getDirServerAddr()[0]: # dir server ip
+						# pac[IP].src == self.__dirSerAddr[0]: # dir server ip
+					elif splt[0] == "0": # ID == 0 => its a directory server
 						# its the node connections data... use it, save it to list or ID
+						for i in eval(",".join(splt[3:])): # list
+							if i not in self.otherNodes:
+								self.otherNodes.append(i) # (ID, ADDR), ADDR = (IP, PORT)
 					elif splt[2] == "m": # msg
 						if (splt[0], splt[1]) not in self.__rawMessages.keys(): # not recieved yet
 							self.__rawMessages[(int(splt[0]), int(splt[1]))] = ",".join(splt[3:]) # dict[ID, Seq] = data
@@ -99,7 +104,6 @@ class LowLevelCommunicator: # FIN
 		pacFilter = lambda p: p.haslayer(UDP) and p[UDP].dport == self.__port and p.haslayer(IP) and p[IP].dst in myIntIps
 		stopFilter = lambda x: self.__shutdown
 		sniff(lfilter=pacFilter, prn=self.__appendSniffedPac, stop_filter=stopFilter)
-		print "sniff unexpectly exited"
 
 	# for debugging:
 	#def __demoFilter(self, p):
@@ -210,3 +214,11 @@ class LowLevelCommunicator: # FIN
 	def shutdown(self): # FIN
 		self.__shutdown = True
 		sleep(1)
+
+	def refreshContacts(self):
+		requestPac = IP(dst=self.__dirSerAddr[0])/UDP(sport=self.__port, dport=self.__dirSerAddr[1])/(">" + str(self.__ID))
+		self.otherNodes = []
+		send(requestPac, verbose=False)
+
+	def getContacts(self):
+		return self.otherNodes[0:]

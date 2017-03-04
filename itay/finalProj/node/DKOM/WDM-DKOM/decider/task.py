@@ -5,9 +5,7 @@ class TaskType:
 	TASK = 1
 
 class Task:
-
 	nextId = 0 # static var
-
 	def __init__(self, taskType, sourceNodeId, sourceNodeTaskId):
 		self.type = taskType
 		self.id = nextId

@@ -1,4 +1,5 @@
 #!/usr/bin/python
+from time import sleep
 import communicationUtils
 from encoder import Encoder
 from lowLevelCommunicator import LowLevelCommunicator
@@ -10,26 +11,28 @@ class Communication:
 			self.port += 1
 			if self.port >= 2^16:
 				self.port = 2000 # after saved ports
-		self.encoder = Encoder(communicationKey)
-		self.communicator = LowlevelCommunicator(port, holePunchingAddr, ID)
-		self.communicator.start()
-		self.connectedNodes = []
+		self.__encoder = Encoder(communicationKey)
+		self.__communicator = LowLevelCommunicator(port, holePunchingAddr, ID)
+		self.__communicator.start()
 
-	def sendQuery(self, qry): # FIN
-		toID = self.getBestContactId(qry)
-		self.communicator.sendTo(self.encoder.encodeQuerry(qry), toID) # to = (host,port)
+	def send(self, qryOrTsk, toId): # FIN
+		#toId = self.getBestContactId(qryOrTsk)
+		self.__communicator.sendTo(self.__encoder.encrypt(qryOrTsk), self.getAddrById(toId)) # to = (host,port)
 
-	def sendQuery(self, task): # FIN
-		toID = self.getBestContactId(task)
-		self.communicator.sendTo(self.encoder.encodeTask(task), toID) # to = (host,port)
+	def getRecievedMessages(self): # getRecievedQuerriesAndTasks(): # FIN
+		QandT = self.__communicator.getRecievedMessages() #getRecievedQuerriesAndTasks()
+		return self.__encoder.decrypt(QandT)
 
-	def recieve(self):#getRecievedQuerriesAndTasks(): # FIN
-		QandT = self.communicator.getRecievedQuerriesAndTasks()
-		return self.encoder.decode(QandT)
+	def getAddrById(self, ID):
+		contacts = dict(self.__communicator.getContacts())
+		try:
+			return contacts[str(ID)]
+		except Exception as e:
+			raise e
 
-	def getBestContactId(self, qry):
-		raise("Not implemented execption")
+	def refreshContacts(self, ID, timeout = 0.1):
+		self.__communicator.refreshContacts()
+		sleep(timeout)
 
-	def getAddrById(ID):
-		dirSerAddr = communicationUtils.getDirServerAddr()
-		raise Exception("Not implemented exception")
+	def getContacts(self):
+		return self.__communicator.getContacts()
