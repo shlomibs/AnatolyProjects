@@ -50,7 +50,7 @@ class Server: # FIN
 			data, addr = self.s.recvfrom(20) # data = [>]ID
 			#splt = data.split(",")
 			#if ">" in data: # want nodes list data = [ID]>[node type] # => data.split(">") = [ID, node type]
-			print "input data: " + data + " \nfrom: " + str(addr)
+			print str(addr) + ": " + data
 			if data[0] == ">": # request for nodes list
 				# can be also regular notification (usually hole punching) -> that's what the if is for
 				contacts = self.getContacts(data[1:])
@@ -83,7 +83,6 @@ class Server: # FIN
 
 	def getContacts(self, ID): # FIN
 		# send list of ID's and addresses of nodes that this node[ID] can send to
-		print "ID: " + ID
 		return [c for c in self.clients if c[0] != ID]
 
 	def shutdown(self): # FIN
