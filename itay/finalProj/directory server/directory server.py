@@ -47,7 +47,7 @@ class Server: # FIN
 
 	def recvThread(self): # FIN
 		while not self.isShutdown:
-			data, addr = self.s.recvfrom(1024) # data = ID
+			data, addr = self.s.recvfrom(20) # data = [>]ID
 			#splt = data.split(",")
 			#if ">" in data: # want nodes list data = [ID]>[node type] # => data.split(">") = [ID, node type]
 			print "input data: " + data + " \nfrom: " + str(addr)
@@ -83,7 +83,8 @@ class Server: # FIN
 
 	def getContacts(self, ID): # FIN
 		# send list of ID's and addresses of nodes that this node[ID] can send to
-		return [c for c in self.clients if c[0] is not ID]
+		print "ID: " + ID
+		return [c for c in self.clients if c[0] != ID]
 
 	def shutdown(self): # FIN
 		self.isShutdown = True
