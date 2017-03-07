@@ -50,7 +50,9 @@ class Server: # FIN
 			data, addr = self.s.recvfrom(1024) # data = ID
 			#splt = data.split(",")
 			#if ">" in data: # want nodes list data = [ID]>[node type] # => data.split(">") = [ID, node type]
+			print "input data: " + data + " \nfrom: " + str(addr)
 			if data[0] == ">": # request for nodes list
+				print "sending contacts: " +str(contacts) + " to: " + data[1:]
 				# can be also regular notification (usually hole punching) -> that's what the if is for
 				contacts = self.getContacts(data[1:])
 				contacts = [contacts[i:i + 10] for i in xrange(0, len(contacts), 10)] # split to force it to send each list in the same packet
@@ -68,7 +70,7 @@ class Server: # FIN
 			i=0
 			while i < len(self.clients):
 				if time() - self.clientsLastCommunication[self.clients[i]] > self.CLIENT_TIMEOUT: # remove if connection timed out
-					self.clientsLastCommunication.remove(self.clientsLastCommunication[self.clients[i]])
+					del self.clientsLastCommunication[self.clients[i]]
 					self.clients.remove(self.clients[i])
 				else:
 					i += 1
@@ -106,7 +108,7 @@ def main(): # FIN
 	if not server.start():
 		print "failure!\n exiting . . ."
 		return
-	print ">> started . . ."
+	print ">> started port: " + str(server.port) + " . . ."
 	cmds = ["shutdown", "exit", "close", "quit"]
 	while True:
 		inp = raw_input(">> ")
@@ -115,7 +117,8 @@ def main(): # FIN
 			server.shutdown()
 			break
 		else:
-			print "illigal command, available commands: " + ", ".join(cmds)
+			print "illegal command, available commands: " + ", ".join(cmds)
+			print "clients: " + str(server.clients)
 		
 
 if __name__ == "__main__":

@@ -12,6 +12,7 @@ class DataController:
 	TASK_CODE = 't'
 	DISPLAY_CODE = 'D' # display to admin <=> only if the admin is connected
 	WRITE_FILE_CMD = 'w'
+	CLIENTS_LIST_CODE = 'c'
 	#endregion
 	
 	#region static vars
@@ -22,9 +23,11 @@ class DataController:
 	@staticmethod
 	def OnCommunicationDataRecieved(data): # check what command recieved
 		data = eval(data)
-		if data[0] == DISPLAY_CODE: # start an admin session request
+		if data[0] == CLIENTS_LIST_CODE: # start process
+			print DISPLAY_CODE + data
+		elif data[0] == DISPLAY_CODE: # start an admin session request
 			print DISPLAY_CODE + data[1:] # data[1:] = portNum
-		if data[0] == START_PROCESS_CMD: # start process
+		elif data[0] == START_PROCESS_CMD: # start process
 			StartProcess(data[1:])
 		elif data[0] == QUERY_CMD: # a sended query response
 			Query(data[1:])
@@ -84,7 +87,7 @@ class DataController:
 		fromId, nodeTaskId = data.split(",")[0:2] # take the first 2 vals (fromId, nodeTaskId, data)
 		tsk = Task(TaskType.QUERY, fromId, nodeTaskId)
 		tasks.append(tsk)
-		print QUERY_CODE + tsk.id + "," + repr(data)
+		print QUERY_CODE + tsk.id + "," + repr(",".join(data.split(",")[2:]))
 
 	@staticmethod
 	def _FindTaskByData(data): # if the complexity will be too high then turn it to dictionary

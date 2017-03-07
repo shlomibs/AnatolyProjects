@@ -10,12 +10,12 @@ class Encoder: # encryption with xor (list of values) and base64
 			key /= 256
 
 	def decrypt(self, msgs): # in format [(ID, msg)...]
-		if(type(QuerriesAndTasks) == type(list())):
+		if(type(msgs) == type(list())):
 			retLst = []
-			for item in QuerriesAndTasks:
+			for item in msgs:
 				retLst.append(item[0], self.__decrypt(item[1]))
 			return retLst
-		return self.__decrypt(QandT) # if single item
+		return self.__decrypt(msgs) # if single item
 
 	def __decrypt(msg): # type(msg) = string
 		notBase64 = b64decode(msg)

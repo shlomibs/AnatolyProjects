@@ -19,7 +19,7 @@ def main():
 	except Exception as e:
 		print "cannot connect: " + str(e)
 	start_new_thread(nodeReceivingLoop, (sock,))
-	if sys.argv == "bash.py": # executing bash.py or python bash.py or python -u bash.py
+	if "bash.py" in sys.argv[0]: # executing bash.py or python bash.py or python -u bash.py
 		bash()
 	else:
 		gui()
