@@ -83,7 +83,7 @@ class Server: # FIN
 
 	def getContacts(self, ID): # FIN
 		# send list of ID's and addresses of nodes that this node[ID] can send to
-		return [c for c in self.clients if c is not ID]
+		return [c for c in self.clients if c[0] is not ID]
 
 	def shutdown(self): # FIN
 		self.isShutdown = True
