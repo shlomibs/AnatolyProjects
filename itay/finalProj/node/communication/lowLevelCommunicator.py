@@ -42,8 +42,6 @@ class LowLevelCommunicator: # FIN
 		# optional: maybe block any connection that attemps to bind or use that port
 			holePunchPac = IP(dst=self.__holePunchingAddr[0])/UDP(sport=self.__port, dport=self.__holePunchingAddr[1])/str(self.__ID)
 			send(holePunchPac, verbose=False)
-			print "sended: " + holePunchPac.summary()
-			holePunchPac.show()
 			sleep(gapBetweenPunches)
 
 	def startSendedMsgsValidationThread(self): #FIN 

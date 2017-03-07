@@ -52,9 +52,9 @@ class Server: # FIN
 			#if ">" in data: # want nodes list data = [ID]>[node type] # => data.split(">") = [ID, node type]
 			print "input data: " + data + " \nfrom: " + str(addr)
 			if data[0] == ">": # request for nodes list
-				print "sending contacts: " +str(contacts) + " to: " + data[1:]
 				# can be also regular notification (usually hole punching) -> that's what the if is for
 				contacts = self.getContacts(data[1:])
+				print "sending contacts: " +str(contacts) + " to: " + data[1:]
 				contacts = [contacts[i:i + 10] for i in xrange(0, len(contacts), 10)] # split to force it to send each list in the same packet
 				for i in xrange(len(contacts)):
 					self.s.sendTo("0," + str(i) + ",m," + repr(contacts[i]), addr) # directory servers ID's are all 0
