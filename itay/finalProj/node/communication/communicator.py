@@ -6,6 +6,8 @@ from uuid import getnode as getMacAsInt
 import communicationUtils
 from communication import Communication
 
+import traceback
+
 CLIENTS_LIST_CODE = 'c'
 toSendQueue = []
 lock = Lock() # lock for input queue
@@ -25,7 +27,8 @@ def inputLoop():
 		splt = raw_input().split(",")
 		msg = eval(",".join(splt[2:]))
 		lock.acquire()
-		toSendQueue.append((splt[0], msg[0] + splt[1] + "," + msg[1:])) # TODO: according to format
+		toSendQueue.append((splt[0], msg[0] + splt[1] + "," + msg[1:])) # according to format
+		print "to send: " + str(msg[0] + splt[1] + "," + msg[1:])
 		lock.release()
 
 def receivingLoop():
@@ -36,14 +39,16 @@ def receivingLoop():
 			for id, msg in msgs:
 				splt = msg[1:].split(",")
 				data = ",".join(splt[1:])
-				print repr(msg[0] + id + "," + splt[0] + "," + data) # msg = CODE + nodeTaskId + "," + data
+				print repr(msg[0] + str(id) + "," + splt[0] + "," + data) # msg = CODE + nodeTaskId + "," + data
 			sleep(0.01)
 	except Exception as e:
-		print e
+		#print "exception: " + str(e)
+		#print "trcbk: " + traceback.format_exc() # for debug
 		raise e
 
 def sendingLoop():
 	global lock, toSendQueue, com
+	com.refreshContacts()
 	i = 0
 	while True:
 		i += 1
@@ -58,7 +63,7 @@ def sendingLoop():
 			continue
 		while(len(toSendQueue) > 0):
 			lock.acquire()
-			toId, data = toSendtoSendQueue.pop()
+			toId, data = toSendQueue.pop()
 			lock.release()
 			com.send(data, toId)
 

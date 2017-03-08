@@ -24,10 +24,10 @@ class DataController:
 	def OnCommunicationDataRecieved(data): # check what command recieved
 		data = eval(data)
 		if data[0] == CLIENTS_LIST_CODE: # start process
-			print DISPLAY_CODE + data
+			print DISPLAY_CODE + repr(data)
 		elif data[0] == DISPLAY_CODE: # start an admin session request
 			print DISPLAY_CODE + data[1:] # data[1:] = portNum
-		elif data[0] == START_PROCESS_CMD: # start process
+		elif data[0] == START_PROCESS_CMD: # start process, to c#, not repered
 			StartProcess(data[1:])
 		elif data[0] == QUERY_CMD: # a sended query response
 			Query(data[1:])

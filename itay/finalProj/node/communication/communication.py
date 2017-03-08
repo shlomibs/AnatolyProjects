@@ -18,6 +18,7 @@ class Communication:
 	def send(self, qryOrTsk, toId): # FIN
 		#toId = self.getBestContactId(qryOrTsk)
 		self.__communicator.sendTo(self.__encoder.encrypt(qryOrTsk), self.getAddrById(toId)) # to = (host,port)
+		#self.__communicator.sendTo(qryOrTsk, self.getAddrById(toId)) # to = (host,port)
 
 	def getReceivedMessages(self): # getRecievedQuerriesAndTasks(): # FIN
 		QandT = self.__communicator.getReceivedMessages() #getRecievedQuerriesAndTasks()

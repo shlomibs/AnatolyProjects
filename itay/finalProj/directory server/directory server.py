@@ -104,6 +104,7 @@ class Server: # FIN
 
 def main(): # FIN
 	# upload external address and port ..
+	print "must be runned on a seperate computer!"
 	server = Server()
 	if not server.start():
 		print "failure!\n exiting . . ."
