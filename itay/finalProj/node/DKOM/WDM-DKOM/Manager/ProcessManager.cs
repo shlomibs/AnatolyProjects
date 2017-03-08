@@ -193,7 +193,7 @@ namespace Manager
                 case DISPLAY_CODE:
                     if (!this.isAdminConnected)
                     {
-                        if (e.Data[1] != '\'' && e.Data[1] != '"') // not repr'd => try to connect from another controller
+                        if (e.Data[1] != '\'') // not repr'd => try to connect from another controller
                         {
                             isAdminConnected = true;
                             this.controllerProcess = new ProcessHandler(this.procHider);
@@ -205,7 +205,7 @@ namespace Manager
                     }
                     else
                     {
-                        if (e.Data[1] != '\'' && e.Data[1] != '"') // not repr'd => try to connect from another controller
+                        if (e.Data[1] != '\'') // not repr'd => try to connect from another controller
                         {
                             Thread t = new Thread(() =>
                             {

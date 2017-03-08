@@ -12,12 +12,13 @@ lock = Lock()
 def main():
 	start_new_thread(ActionLoop, ())
 	ReceivingLoop()
+	return -1 # temp
 
 def ReceivingLoop():
 	global lock, shutdown
 	while not shutdown:
 		inp = raw_input()
-		lock.acquire()
+		lock.aquire()
 		cmd.append(inp)
 		lock.release()
 
@@ -27,11 +28,11 @@ def ActionLoop():
 		if len(cmds) == 0: # no command
 			sleep(0.01)
 			continue
-		lock.acquire()
+		lock.aquire()
 		data = cmds.pop(0)
 		lock.release()
 		if data[0] == DataController.SEND_CMD: # data recieved from another node
-			DataController.OnCommunicationDataRecieved(data[1:])
+			OnCommunicationDataRecieved(data[1:])
 		elif data[0] == DataController.PROCESS_DATA_CODE: # data recieved from process
 			DataController.OnProcessDataReceived(data[1:])
 		elif data[0] == DataController.PROCESS_ENDED_CODE: # process ended

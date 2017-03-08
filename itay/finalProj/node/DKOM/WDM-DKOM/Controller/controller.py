@@ -11,7 +11,7 @@ from communicationUtils import isPortTaken
 
 
 printLock = Lock()
-taskManager = 0 # temp just for making it a global var 
+taskManager = 0 # temp just for making it a global var
 def main():
 	try:
 		sock = socket() # AF_INET, SOCK_STREAM
@@ -19,7 +19,7 @@ def main():
 	except Exception as e:
 		print "cannot connect: " + str(e)
 	start_new_thread(nodeReceivingLoop, (sock,))
-	if "bash.py" in sys.argv[0]: # executing bash.py or python bash.py or python -u bash.py
+	if sys.argv == "bash.py": # executing bash.py or python bash.py or python -u bash.py
 		bash()
 	else:
 		gui()
