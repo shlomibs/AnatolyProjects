@@ -11,7 +11,7 @@ from communicationUtils import isPortTaken
 
 
 printLock = Lock()
-taskManager = 0 # temp just for making it a global var
+taskManager = 0 # temp just for making it a global var 
 def main():
 	try:
 		sock = socket() # AF_INET, SOCK_STREAM
