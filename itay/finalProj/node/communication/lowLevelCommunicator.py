@@ -124,7 +124,7 @@ class LowLevelCommunicator: # FIN
 			self.__sendTo(msg, to)
 
 	# returning recieved messages in format: [(ID1, msg1), (ID2, msg2), (ID3, msg3)...]
-	def getRecievedMessages(self): # FIN
+	def getReceivedMessages(self): # FIN
 		if len(self.__rawMessages) == 0: # if raw messages empty exit
 			return []
 		messages = []

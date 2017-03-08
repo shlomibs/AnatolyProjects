@@ -17,7 +17,7 @@ communication formats:
 	between different nodes:
 		between decider and communicator:
 			decider -> communicator:
-				(SEND_CMD +) toId + "," + nodeTaskId + "," + repr(data)
+				(SEND_CMD +) toId + "," + nodeTaskId + "," + data)
 			communicator -> decider:
 				(SEND_CMD +) fromId + "," + nodeTaskId + "," + repr(data)
 

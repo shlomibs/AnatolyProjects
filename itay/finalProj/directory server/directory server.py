@@ -47,15 +47,17 @@ class Server: # FIN
 
 	def recvThread(self): # FIN
 		while not self.isShutdown:
-			data, addr = self.s.recvfrom(1024) # data = ID
+			data, addr = self.s.recvfrom(20) # data = [>]ID
 			#splt = data.split(",")
 			#if ">" in data: # want nodes list data = [ID]>[node type] # => data.split(">") = [ID, node type]
+			print str(addr) + ": " + data
 			if data[0] == ">": # request for nodes list
 				# can be also regular notification (usually hole punching) -> that's what the if is for
 				contacts = self.getContacts(data[1:])
+				print "sending contacts: " +str(contacts) + " to: " + data[1:]
 				contacts = [contacts[i:i + 10] for i in xrange(0, len(contacts), 10)] # split to force it to send each list in the same packet
 				for i in xrange(len(contacts)):
-					self.s.sendTo("0," + str(i) + ",m," + repr(contacts[i]), addr) # directory servers ID's are all 0
+					self.s.sendto("0," + str(i) + ",m," + repr(contacts[i]), addr) # directory servers ID's are all 0
 				#self.s.sendTo("0," + len(contacts) + ",m," + self.EOM, addr) # 1 = next seq
 			# regular notification (usually hole punching)
 			data = data.replace(">", "")
@@ -68,7 +70,7 @@ class Server: # FIN
 			i=0
 			while i < len(self.clients):
 				if time() - self.clientsLastCommunication[self.clients[i]] > self.CLIENT_TIMEOUT: # remove if connection timed out
-					self.clientsLastCommunication.remove(self.clientsLastCommunication[self.clients[i]])
+					del self.clientsLastCommunication[self.clients[i]]
 					self.clients.remove(self.clients[i])
 				else:
 					i += 1
@@ -81,7 +83,7 @@ class Server: # FIN
 
 	def getContacts(self, ID): # FIN
 		# send list of ID's and addresses of nodes that this node[ID] can send to
-		return [c for c in self.clients if c is not ID]
+		return [c for c in self.clients if c[0] != ID]
 
 	def shutdown(self): # FIN
 		self.isShutdown = True
@@ -102,11 +104,12 @@ class Server: # FIN
 
 def main(): # FIN
 	# upload external address and port ..
+	print "must be runned on a seperate computer!"
 	server = Server()
 	if not server.start():
 		print "failure!\n exiting . . ."
 		return
-	print ">> started . . ."
+	print ">> started port: " + str(server.port) + " . . ."
 	cmds = ["shutdown", "exit", "close", "quit"]
 	while True:
 		inp = raw_input(">> ")
@@ -115,7 +118,8 @@ def main(): # FIN
 			server.shutdown()
 			break
 		else:
-			print "illigal command, available commands: " + ", ".join(cmds)
+			print "illegal command, available commands: " + ", ".join(cmds)
+			print "clients: " + str(server.clients)
 		
 
 if __name__ == "__main__":

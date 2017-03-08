@@ -40,6 +40,7 @@ def uploadDir(path, ftp, sp): # sp = is subprocess?
 
 # sp = false for debugging or uploading manually
 def upload(sp): # sp = is subprocess?
+	cwd = os.getcwd()
 	try:
 		#ftp = FTP('dirser.honor.es','u140460863','1346798255')
 		#ftp = FTP('dirser.honor.es','nurealnetwork','1346798255')
@@ -53,6 +54,7 @@ def upload(sp): # sp = is subprocess?
 			return True
 		print 'success'
 	except Exception as e:
+		os.chdir(cwd) # avoid drifting
 		print "connection failed!!!\nerr: " + str(e)
 		if sp:
 			return False
