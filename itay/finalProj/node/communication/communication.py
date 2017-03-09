@@ -36,4 +36,4 @@ class Communication:
 		sleep(timeout)
 
 	def getContacts(self):
-		return self.__communicator.getContacts()
+		return [c[0] for c in self.__communicator.getContacts()] # only id's

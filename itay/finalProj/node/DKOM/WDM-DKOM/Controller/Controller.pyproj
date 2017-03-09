@@ -22,7 +22,9 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="bash.py" />
     <Compile Include="controller.py" />
+    <Compile Include="controllerGui.py" />
     <Compile Include="tasksManager.py">
       <SubType>Code</SubType>
     </Compile>

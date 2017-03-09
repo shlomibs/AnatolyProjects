@@ -61,9 +61,10 @@ def bash():
 	global taskManager
 	taskManager = TasksManager(BashOutput)
 	nodesIds = GetOtherNodesIds()
-	print "other nodes: " + nodesIds
+	print "other nodes: " + ",".join(nodesIds)
 	inp = raw_input(">> ")
 	# declare format ...
+	raise NotImplementedError()
 
 def gui():
 	global taskManager
