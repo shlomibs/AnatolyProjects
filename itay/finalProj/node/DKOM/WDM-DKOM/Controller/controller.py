@@ -68,8 +68,8 @@ def bash():
 
 def gui():
 	global taskManager
-	gui = ControllerGui()
-	gui.show()
+	gui = ControllerGui(taskManager)
+	gui.show() # must be on the main thread
 	# start a gui with wx
 	raise NotImplementedError()
 

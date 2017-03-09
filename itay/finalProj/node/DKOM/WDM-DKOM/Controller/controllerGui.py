@@ -12,12 +12,11 @@ class ControllerGui():
 		self.window.Show(True) 
 		self.app.MainLoop()
 
-###########################################################################
-## Python code generated with wxFormBuilder (version Jun 17 2015)
-## http://www.wxformbuilder.org/
-###########################################################################
-
 class controllerWindow (wx.Frame):
+	###################################################################################
+	## the next __init__ Python code generated with wxFormBuilder (version Jun 17 2015)
+	## http://www.wxformbuilder.org/
+	###################################################################################
 	def __init__(self, parent, taskManager):
 		self.taskManager = taskManager
 

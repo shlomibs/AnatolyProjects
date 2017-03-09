@@ -2,6 +2,8 @@
 class TasksManager:
 	def __init__(self, OutputFunc):
 		self.OutpuFunc = OutputFunc
+		self.tasks = [] # (
+		self.nextTaskId = 1
 		
 	def ExecCmd(self, cmd): # command line like in cmd
 		raise NotImplementedError()
