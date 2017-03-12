@@ -25,6 +25,7 @@
     <Compile Include="bash.py" />
     <Compile Include="controller.py" />
     <Compile Include="controllerGui.py" />
+    <Compile Include="task.py" />
     <Compile Include="tasksManager.py">
       <SubType>Code</SubType>
     </Compile>

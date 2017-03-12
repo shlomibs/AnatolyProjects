@@ -1,5 +1,6 @@
 import wx
 import wx.xrc
+import shlex
 from thread import start_new_thread
 
 class ControllerGui():
@@ -96,6 +97,8 @@ class controllerWindow (wx.Frame):
 		
 		self.Centre(wx.BOTH)
 		
+		self.taskManager.SetOutput(self.outputTextControl.AppendText)
+
 		# Connect Events
 		self.Bind(wx.EVT_CLOSE, self.OnExit)
 		self.executeCmdButton.Bind(wx.EVT_BUTTON, self.ExecuteCmd)
@@ -107,7 +110,9 @@ class controllerWindow (wx.Frame):
 		self.taskManager.OnExit()
 	
 	def ExecuteCmd(self, event):
-		self.taskManager.ExecCmd(str(self.cmdTextControl.GetValue()))
+		argv = shlex.split(str(self.cmdTextControl.GetValue()))
+		args = "" if str(self.cmdTextControl.GetValue())[len(argv[0]):] == "" else str(self.cmdTextControl.GetValue())[len(argv[0]) + 1:]
+		self.taskManager.ExecCmd(argv[0], args)
 	
 	def ExecuteQuery(self, event):
 		self.taskManager.ExecQry(str(self.qryTextControl.GetValue()))

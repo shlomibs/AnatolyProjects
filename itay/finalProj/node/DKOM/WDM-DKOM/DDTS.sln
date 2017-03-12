@@ -39,6 +39,11 @@ Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "Controller", "Controller\Co
 EndProject
 Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "ControllerConnection", "ControllerConnection\ControllerConnection.pyproj", "{42733C69-809F-4795-99E2-C433C752782B}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3B213942-B1BE-4EB2-8B49-B4169116232B}"
+	ProjectSection(SolutionItems) = preProject
+		readme.md = readme.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

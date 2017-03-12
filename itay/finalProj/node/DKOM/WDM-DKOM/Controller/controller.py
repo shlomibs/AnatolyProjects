@@ -20,9 +20,9 @@ def main():
 		print "cannot connect: " + str(e)
 	start_new_thread(nodeReceivingLoop, (sock,))
 	if "bash.py" in sys.argv[0]: # executing bash.py or python bash.py or python -u bash.py
-		bash()
+		bash(sock)
 	else:
-		gui()
+		gui(sock)
 
 
 shutdown = False
@@ -53,25 +53,24 @@ def nodeDataProcessing():
 
 def BashOutput(msg):
 	global printLock
-	printLock.aquire()
-	print msg
+	printLock.acquire()
+	print msg,
 	printLock.release()
 
-def bash():
+def bash(sock):
 	global taskManager
-	taskManager = TasksManager(BashOutput)
+	taskManager = TasksManager(BashOutput, sock)
 	nodesIds = GetOtherNodesIds()
 	print "other nodes: " + ",".join(nodesIds)
 	inp = raw_input(">> ")
 	# declare format ...
 	raise NotImplementedError()
 
-def gui():
+def gui(sock):
 	global taskManager
+	taskManager = TasksManager("", sock) # "" is temp, will be changed in ControllerGui
 	gui = ControllerGui(taskManager)
 	gui.show() # must be on the main thread
-	# start a gui with wx
-	raise NotImplementedError()
 
 def GetOtherNodesIds():
 	raise NotImplementedError()

@@ -29,7 +29,6 @@ def inputLoop():
 		msg = eval(",".join(splt[2:]))
 		lock.acquire()
 		toSendQueue.append((splt[0], msg[0] + splt[1] + "," + msg[1:])) # according to format
-		print "to send: " + str(msg[0] + splt[1] + "," + msg[1:])
 		lock.release()
 
 def receivingLoop():

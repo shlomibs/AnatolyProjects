@@ -1,33 +1,45 @@
+from task import *
 
 class TasksManager:
-	#region constants
-	SEND_CMD = 's'
-	START_PROCESS_CMD = 'p'
-	QUERY_CMD = 'q'
-	PROCESS_ENDED_CODE = 'e'
-	PROCESS_DATA_CODE = 'd'
-	QUERY_RESPONSE_CODE = 'Q'
-	TASK_CODE = 't'
-	DISPLAY_CODE = 'D' # display to admin <=> only if the admin is connected
-	WRITE_FILE_CMD = 'w'
-	CLIENTS_LIST_CODE = 'c'
-	#endregion
-
-	def __init__(self, OutputFunc):
-		self.OutpuFunc = OutputFunc
-		self.tasks = [] # [(taskId, ... # continue
-		self.nextTaskId = 1
-		
-	def ExecCmd(self, cmd): # command line like in cmd
-		raise NotImplementedError()
+	def __init__(self, outputFunc, sock):
+		self.__outpuFunc = outputFunc
+		self.__sock = sock
+		self.otherNodes = [] # nodes' ids
+		self.currentTasks = {} # {nodeId:[tasks] ...}
+		self.pendingTasks = []
 	
+	def SetOutput(self, func):
+		self.__outpuFunc = func
+
 	def ExecQry(self, qry):
-		raise NotImplementedError()
+		task = Task(TaskType.QUERY, qry)
+		for node in otherNodes:
+			tsk = Task(task)
+			currentTasks[node].append(tsk)
+			self.__sock.send(tsk.GetNextCommand())
+
+	def ExecCmd(self, cmd, args): # command line like in cmd
+		task = Task(TaskType.CMD, cmd, args)
+		for node in otherNodes:
+			tsk = Task(task)
+			currentTasks[node].append(tsk)
+			self.__sock.send(tsk.GetNextCommand())
 	
 	def ExecScript(self, executablePath, argsFilePath):
+		args = [arg.strip() for arg in open(argsFilePath).read().split("\n")] # strip to remove "\r" if exists
+		tasks = [Task(TaskType.SCRIPT, executablePath, arg) for arg in args]
+		for node in self.otherNodes:
+			tsk = tasks.pop(0, None)
+			if tsk == None:
+				break;
+			currentTasks[node].append(tsk)
+			self.__sock.send(tsk.GetNextCommand())
+		if len(tasks) > 0:
+			self.pendingTasks.append(tasks)
+
 		raise NotImplementedError()
 
-	def StartTask(self, cmd): # cmd is string recieved from command line
+	def StartTask(self, cmd, args): # cmd is string recieved from command line (bash)
 		raise NotImplementedError()
 
 	def MessageReceived(self, msg):
