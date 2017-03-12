@@ -11,10 +11,10 @@ def defaultPort():
 	return random.randint(2048,65535) # 2**16-1
 	#return 3846
 
-def isPortTaken(port): # FIN
+def IsPortTaken(port): # FIN
 	return port in [i.laddr[1] for i in psutil.net_connections()]
 
-def getDirServerAddr(): # FIN
+def GetDirServerAddr(): # FIN
 	try:
 		# dirServers = urllib.urlopen("http://dirser.honor.es/dirSer/status.php").read().split("\n")[1:]
 		dirServers = urllib.urlopen("http://dirser.atwebpages.com/dirSer/status.php").read().split("\n")[1:]

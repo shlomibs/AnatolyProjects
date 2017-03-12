@@ -4,8 +4,8 @@ from thread import start_new_thread
 from socket import socket, AF_INET, SOCK_STREAM
 
 nodeData = []
-CLOSE_CODE = 'c'
-MESSAGECODE
+CLOSE_CODE = 'C'
+CLIENTS_LIST_CODE = 'c'
 
 def main():
 	if(len(sys.argv) != 2):

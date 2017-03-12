@@ -19,7 +19,7 @@ class LowLevelCommunicator: # FIN
 		self.__isSendedValidationThreadStarted = False
 		self.__shutdown = False
 		self.__holePunchingAddr = holePunchingAddr
-		self.__dirSerAddr = communicationUtils.getDirServerAddr();
+		self.__dirSerAddr = communicationUtils.GetDirServerAddr();
 		self.__ID = ID
 		self.__seq = 0
 		self.otherNodes = [] # [(ID,ADDR)...]

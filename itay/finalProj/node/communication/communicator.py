@@ -28,7 +28,7 @@ def inputLoop():
 		splt = raw_input().split(",")
 		msg = eval(",".join(splt[2:]))
 		lock.acquire()
-		toSendQueue.append((splt[0], msg[0] + splt[1] + "," + msg[1:])) # according to format
+		toSendQueue.append((splt[0], msg[0] + splt[1] + "," + msg[1:])) # according to format -> CODE + nodeTaskId + "," + data
 		lock.release()
 
 def receivingLoop():

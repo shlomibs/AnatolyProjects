@@ -42,7 +42,7 @@ class controllerWindow (wx.Frame):
 		
 		querySizer = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, u"query"), wx.HORIZONTAL)
 		
-		self.qryTextControl = wx.TextCtrl(querySizer.GetStaticBox(), wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0)
+		self.qryTextControl = wx.TextCtrl( querySizer.GetStaticBox(), wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.TE_MULTILINE )
 		self.qryTextControl.SetMinSize(wx.Size(800,-1))
 		
 		querySizer.Add(self.qryTextControl, 0, wx.ALL, 5)

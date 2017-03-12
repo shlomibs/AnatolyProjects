@@ -5,9 +5,9 @@ from encoder import Encoder
 from lowLevelCommunicator import LowLevelCommunicator
 
 class Communication:
-	def __init__(self, ID, communicationKey, holePunchingAddr = communicationUtils.getDirServerAddr()):
+	def __init__(self, ID, communicationKey, holePunchingAddr = communicationUtils.GetDirServerAddr()):
 		self.port = communicationUtils.defaultPort()
-		while communicationUtils.isPortTaken(self.port): # take over a port
+		while communicationUtils.IsPortTaken(self.port): # take over a port
 			self.port += 1
 			if self.port >= 2^16:
 				self.port = 2000 # after saved ports

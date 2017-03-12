@@ -29,7 +29,9 @@ communication formats:
 			
 	decider -> controller:
 		python -u controller.py port
-
+	controller -> decider:
+		start session:
+			DISPLAY_CODE + portNum
 
 LOW_LEVEL_HEADER -> won't be described
 

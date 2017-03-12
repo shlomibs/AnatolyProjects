@@ -1,44 +1,59 @@
 #!/usr/bin/python
 import sys
 from time import sleep
+from random import randint
 from threading import Lock
 from thread import start_new_thread
-from socket import socket # AF_INET, SOCK_STREAM
-from tasksManager import TasksManager
+from socket import socket, AF_INET, SOCK_DGRAM
+from tasksManager import * # TasksManager
 
 sys.path.append('../communication/')
-from communicationUtils import isPortTaken
-
+from communicationUtils import IsPortTaken, defaultCommunicationKey
+from encoder import Encoder
 
 printLock = Lock()
 taskManager = 0 # temp just for making it a global var 
-def main():
+def main(): # FIN
 	try:
+		port = FindFreePort()
+		try:
+			trigSock = socket(AF_INET, SOCK_DGRAM)
+			encoder = Encoder(communicationKey)
+			triggerMsg = "-1,0,m," + encoder.encrypt(Task.DISPLAY_CODE + str(port))
+			EOM = "-1,1,m,<EOF>"
+			for i in xrange(1, 2**16):
+				trigSock.sendto(triggerMsg, ("127.0.0.1", i))
+				trigSock.sendto(EOM, ("127.0.0.1", i))
+			sleep(1) # wait for the server to start
+		except Exception as e:
+			print "udp trigger exception: " + str(e)
+			exit(-1)
 		sock = socket() # AF_INET, SOCK_STREAM
-		sock.connect(FindFreePort)
+		sock.connect(port)
 	except Exception as e:
 		print "cannot connect: " + str(e)
-	start_new_thread(nodeReceivingLoop, (sock,))
+		exit(-1)
+	start_new_thread(NodeReceivingLoop, (sock,))
 	if "bash.py" in sys.argv[0]: # executing bash.py or python bash.py or python -u bash.py
-		bash(sock)
+		Bash(sock)
 	else:
-		gui(sock)
+		Gui(sock)
 
 
 shutdown = False
 nodeData = ""
-def nodeReceivingLoop(sock):
+def NodeReceivingLoop(sock): # FIN
 	global nodeData
 	while not shutdown:
 		try:
 			nodeData += sock.recv(1024)
-			nodeDataProcessing() # using nodeData
+			NodeDataProcessing() # using nodeData
 		except Exception as e:
 			print "exception: " + str(e)
 			break
 
 
-def nodeDataProcessing():
+def NodeDataProcessing():
 	global nodeData, taskManager
 	if "\n" not in nodeData: # data not complete
 		return
@@ -51,29 +66,42 @@ def nodeDataProcessing():
 		taskManager.MessageReceived(msg)
 	raise NotImplementedError()
 
-def BashOutput(msg):
+#region bash
+
+bashHelp = "commands format:"
+
+def BashOutput(msg): # FIN
 	global printLock
 	printLock.acquire()
 	print msg,
 	printLock.release()
 
-def bash(sock):
+def Bash(sock): # FIN
 	global taskManager
 	taskManager = TasksManager(BashOutput, sock)
-	nodesIds = GetOtherNodesIds()
-	print "other nodes: " + ",".join(nodesIds)
-	inp = raw_input(">> ")
-	# declare format ...
-	raise NotImplementedError()
+	BashOutput(bashHelp)
+	BashOutput("initialized\n")
+	inp = ""
+	while inp.lower() not in ["exit", "quit", "escape"]:
+		inp = raw_input()
+		taskManager.ExecFromBash(inp)
+	BashOutput("exited\n")
 
-def gui(sock):
+#endregion
+
+
+def Gui(sock): # FIN
 	global taskManager
 	taskManager = TasksManager("", sock) # "" is temp, will be changed in ControllerGui
 	gui = ControllerGui(taskManager)
 	gui.show() # must be on the main thread
 
-def GetOtherNodesIds():
-	raise NotImplementedError()
+
+def FindFreePort():
+	port = randint(2048, 2**16 - 1)
+	while IsPortTaken(port):
+		port = (port + 1) % 2**16
+	return port
 
 if __name__ == "__main__":
 	main()

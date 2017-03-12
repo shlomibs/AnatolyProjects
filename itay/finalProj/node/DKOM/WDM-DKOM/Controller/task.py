@@ -16,6 +16,7 @@ class Task:
 	TASK_CODE = 't'
 	WRITE_FILE_CMD = 'w'
 	CLIENTS_LIST_CODE = 'c'
+	DISPLAY_CODE = 'D'
 	#endregion
 
 	#region static vars

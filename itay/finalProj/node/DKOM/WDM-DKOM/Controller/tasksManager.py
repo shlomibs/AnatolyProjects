@@ -39,7 +39,7 @@ class TasksManager:
 
 		raise NotImplementedError()
 
-	def StartTask(self, cmd, args): # cmd is string recieved from command line (bash)
+	def ExecFromBash(self, cmd): # cmd is string recieved from command line (bash)
 		raise NotImplementedError()
 
 	def MessageReceived(self, msg):
