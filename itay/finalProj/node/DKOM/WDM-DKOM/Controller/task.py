@@ -4,7 +4,6 @@ class TaskType:
 	CMD = 1
 	SCRIPT = 2
 
-
 class Task:
 	#region constants
 	SEND_CMD = 's'
@@ -23,7 +22,8 @@ class Task:
 	nextId = 0
 	#endregion
 
-	def __init__(self, type, cmd, args = ""):
+	def __init__(self, type, cmd, args = "", missionId = -1):
+		self.missionId = missionId # the task group id (tasks that belong to the same script and args)
 		self.name = cmd + " " + args + ": "
 		self.type = type
 		self.__lastCommandId = -1 # illegal id
@@ -43,6 +43,7 @@ class Task:
 		nextId += 1
 
 	def __init__(self, otherTask): # copy constructor
+		self.missionId = otherTask.missionId
 		self.name = otherTask.name
 		self.type = otherTask.type
 		self.__lastCommandId = -1

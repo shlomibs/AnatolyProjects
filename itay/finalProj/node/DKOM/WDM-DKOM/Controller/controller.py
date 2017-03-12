@@ -17,8 +17,8 @@ def main(): # FIN
 	try:
 		port = FindFreePort()
 		try:
-			trigSock = socket(AF_INET, SOCK_DGRAM)
-			encoder = Encoder(communicationKey)
+			trigSock = socket(AF_INET, SOCK_DGRAM) # UDP
+			encoder = Encoder(defaultCommunicationKey())
 			triggerMsg = "-1,0,m," + encoder.encrypt(Task.DISPLAY_CODE + str(port))
 			EOM = "-1,1,m,<EOF>"
 			for i in xrange(1, 2**16):
@@ -28,7 +28,7 @@ def main(): # FIN
 		except Exception as e:
 			print "udp trigger exception: " + str(e)
 			exit(-1)
-		sock = socket() # AF_INET, SOCK_STREAM
+		sock = socket() # AF_INET, SOCK_STREAM # TCP
 		sock.connect(port)
 	except Exception as e:
 		print "cannot connect: " + str(e)
@@ -62,7 +62,6 @@ def NodeDataProcessing():
 	for msg in data:
 		decMsg = eval(data)
 		taskManager.MessageReceived(msg)
-	raise NotImplementedError()
 
 #region bash
 
@@ -98,7 +97,6 @@ def Gui(sock): # FIN
 	taskManager = TasksManager("", sock) # "" is temp, will be changed in ControllerGui
 	gui = ControllerGui(taskManager)
 	gui.show() # must be on the main thread
-
 
 def FindFreePort(): # FIN
 	port = randint(2048, 2**16 - 1)

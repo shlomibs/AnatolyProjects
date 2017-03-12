@@ -17,14 +17,14 @@ class TasksManager:
 		for node in otherNodes:
 			tsk = Task(task)
 			currentTasks[node].append(tsk)
-			self.__sock.send(tsk.GetNextCommand())
+			self.__sock.send(tsk.GetNextCommand() + "\n")
 
 	def ExecCmd(self, cmd, args): # command line like in cmd
 		task = Task(TaskType.CMD, cmd, args)
 		for node in otherNodes:
 			tsk = Task(task)
 			currentTasks[node].append(tsk)
-			self.__sock.send(tsk.GetNextCommand())
+			self.__sock.send(tsk.GetNextCommand() + "\n")
 	
 	def ExecScript(self, executablePath, argsFilePath):
 		args = [arg.strip() for arg in open(argsFilePath).read().split("\n")] # strip to remove "\r" if exists
@@ -34,24 +34,22 @@ class TasksManager:
 			if tsk == None:
 				break;
 			currentTasks[node].append(tsk)
-			self.__sock.send(tsk.GetNextCommand())
+			self.__sock.send(tsk.GetNextCommand() + "\n")
 		if len(tasks) > 0:
 			self.pendingTasks.append(tasks)
 
-		raise NotImplementedError()
-
-	def ExecFromBash(self, cmd): # cmd is string recieved from command line (bash)
+	def ExecFromBash(self, cmd): # cmd is string recieved from command line (bash) # FIN
 		try:
 			argv = shlex.split(cmd)
 			args = "" if str(cmd)[len(argv[0]):] == "" else str(cmd)[len(argv[0]) + 1:]
 			
-			if argv[0].lower() in ["cmd", "command"]:
+			if argv[0].lower() in ["c", "cmd", "command"]:
 				cmdArgv = shlex.split(args)
 				cmdArgs = "" if str(args)[len(argv[0]):] == "" else str(args)[len(argv[0]) + 1:]
 				self.ExecCmd(cmdArgv[0], cmdArgs)
-			elif argv[0].lower() in ["qry", "query"]:
+			elif argv[0].lower() in ["q", "qry", "query"]:
 				self.ExecQry(args)
-			elif argv[0].lower() in ["scrpt", "script"]:
+			elif argv[0].lower() in ["s", "scrpt", "script"]:
 				self.ExecScript(argv[1], argv[2])
 			else:
 				self.__outputFunc("illegal command\n")
@@ -62,4 +60,6 @@ class TasksManager:
 		raise NotImplementedError()
 
 	def OnExit(self):
-		raise NotImplementedError()
+		self.__sock.send(Task.CLOSE_CODE + "\n")
+		sleep(0.1)
+		self.__sock.close()

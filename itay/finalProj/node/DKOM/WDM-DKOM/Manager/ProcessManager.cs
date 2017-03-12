@@ -221,7 +221,7 @@ namespace Manager
                     }
                     break;
                 default:
-                    throw new InvalidOperationException("Unknown command");
+                    throw new InvalidOperationException("Unknown command: " + e.Data);
             }
         }
 

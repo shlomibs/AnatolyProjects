@@ -6,14 +6,14 @@ from thread import start_new_thread
 class ControllerGui():
 	def __init__(self, taskManager):
 		self.app = wx.App() 
-		self.window = controllerWindow(None, taskManager, title = "wxPython Frame") 
+		self.window = ControllerWindow(None, taskManager) 
 		#self.panel = wx.Panel(self.window) 
 
 	def Show(self): # must be in the main thread (blocking)
 		self.window.Show(True) 
 		self.app.MainLoop()
 
-class controllerWindow (wx.Frame):
+class ControllerWindow (wx.Frame):
 	###################################################################################
 	## the next __init__ Python code generated with wxFormBuilder (version Jun 17 2015)
 	## http://www.wxformbuilder.org/
@@ -21,7 +21,7 @@ class controllerWindow (wx.Frame):
 	def __init__(self, parent, taskManager):
 		self.taskManager = taskManager
 
-		wx.Frame.__init__ (self, parent, id = wx.ID_ANY, title = u"controller", pos = wx.DefaultPosition, size = wx.Size(1000,700), style = wx.DEFAULT_FRAME_STYLE, name = u"controller")
+		wx.Frame.__init__ (self, parent, id = wx.ID_ANY, title = u"controller", pos = wx.DefaultPosition, size = wx.Size(950,710), style = wx.DEFAULT_FRAME_STYLE, name = u"controller")
 		
 		self.SetSizeHintsSz(wx.DefaultSize, wx.DefaultSize)
 		
