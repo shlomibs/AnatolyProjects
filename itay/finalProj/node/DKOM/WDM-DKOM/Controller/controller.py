@@ -39,7 +39,6 @@ def main(): # FIN
 	else:
 		Gui(sock)
 
-
 shutdown = False
 nodeData = ""
 def NodeReceivingLoop(sock): # FIN
@@ -51,7 +50,6 @@ def NodeReceivingLoop(sock): # FIN
 		except Exception as e:
 			print "exception: " + str(e)
 			break
-
 
 def NodeDataProcessing():
 	global nodeData, taskManager
@@ -68,7 +66,12 @@ def NodeDataProcessing():
 
 #region bash
 
-bashHelp = "commands format:"
+bashHelp ="""
+commands:
+cmd <command> [arg1 [arg2 [arg3...]]]
+query <query-syntax (repr'd = with \r,\n,\t... and surrounded by '' or "" by the format)>
+script <executable-path> <args-file-path>
+"""[1:] # remove first \n
 
 def BashOutput(msg): # FIN
 	global printLock
@@ -78,8 +81,9 @@ def BashOutput(msg): # FIN
 
 def Bash(sock): # FIN
 	global taskManager
-	taskManager = TasksManager(BashOutput, sock)
 	BashOutput(bashHelp)
+	BashOutput("initializing . . .\n")
+	taskManager = TasksManager(BashOutput, sock)
 	BashOutput("initialized\n")
 	inp = ""
 	while inp.lower() not in ["exit", "quit", "escape"]:
@@ -89,7 +93,6 @@ def Bash(sock): # FIN
 
 #endregion
 
-
 def Gui(sock): # FIN
 	global taskManager
 	taskManager = TasksManager("", sock) # "" is temp, will be changed in ControllerGui
@@ -97,7 +100,7 @@ def Gui(sock): # FIN
 	gui.show() # must be on the main thread
 
 
-def FindFreePort():
+def FindFreePort(): # FIN
 	port = randint(2048, 2**16 - 1)
 	while IsPortTaken(port):
 		port = (port + 1) % 2**16

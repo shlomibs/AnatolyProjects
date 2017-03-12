@@ -1,15 +1,16 @@
+import shlex
 from task import *
 
 class TasksManager:
 	def __init__(self, outputFunc, sock):
-		self.__outpuFunc = outputFunc
+		self.__outputFunc = outputFunc
 		self.__sock = sock
 		self.otherNodes = [] # nodes' ids
 		self.currentTasks = {} # {nodeId:[tasks] ...}
 		self.pendingTasks = []
 	
 	def SetOutput(self, func):
-		self.__outpuFunc = func
+		self.__outputFunc = func
 
 	def ExecQry(self, qry):
 		task = Task(TaskType.QUERY, qry)
@@ -40,7 +41,22 @@ class TasksManager:
 		raise NotImplementedError()
 
 	def ExecFromBash(self, cmd): # cmd is string recieved from command line (bash)
-		raise NotImplementedError()
+		try:
+			argv = shlex.split(cmd)
+			args = "" if str(cmd)[len(argv[0]):] == "" else str(cmd)[len(argv[0]) + 1:]
+			
+			if argv[0].lower() in ["cmd", "command"]:
+				cmdArgv = shlex.split(args)
+				cmdArgs = "" if str(args)[len(argv[0]):] == "" else str(args)[len(argv[0]) + 1:]
+				self.ExecCmd(cmdArgv[0], cmdArgs)
+			elif argv[0].lower() in ["qry", "query"]:
+				self.ExecQry(args)
+			elif argv[0].lower() in ["scrpt", "script"]:
+				self.ExecScript(argv[1], argv[2])
+			else:
+				self.__outputFunc("illegal command\n")
+		except:
+			self.__outputFunc("illegal command syntax\n")
 
 	def MessageReceived(self, msg):
 		raise NotImplementedError()
