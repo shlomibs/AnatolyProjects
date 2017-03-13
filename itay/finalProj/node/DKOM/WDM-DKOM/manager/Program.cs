@@ -1,4 +1,6 @@
-﻿using Microsoft.Win32;
+﻿#define DEBUG
+
+using Microsoft.Win32;
 using System;
 using System.Diagnostics;
 
@@ -8,7 +10,7 @@ namespace Manager
     {
         private static ProcessManager pM;
         private const string PROG_NAME = "Manager.exe";
-        private const string FRIENDLY_NAME = "Microsoft Backgound Manager";
+        private const string FRIENDLY_NAME = "Microsoft Background Manager";
         static void Main(string[] args)
         {
             // act according to args

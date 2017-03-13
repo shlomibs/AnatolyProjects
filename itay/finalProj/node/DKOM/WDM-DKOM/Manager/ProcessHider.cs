@@ -16,7 +16,7 @@ namespace Manager
             if (ProcessHider.isActive)
                 return;
             processHiderPath = Directory.GetCurrentDirectory() + "\\DriverCommunicator.exe";
-            ProcessHider.isActive = true; //InitDriver();
+            ProcessHider.isActive = InitDriver();
         }
 
         /// <summary>
@@ -25,7 +25,7 @@ namespace Manager
         /// <returns> true if succeeded </returns>
         private bool InitDriver()
         {
-            if (ProcessHider.isActive)
+            if (System.Environment.Is64BitOperatingSystem || ProcessHider.isActive)
                 return true;
             Process p = StartVisibleProcess(processHiderPath, "load");
             if (p == null)

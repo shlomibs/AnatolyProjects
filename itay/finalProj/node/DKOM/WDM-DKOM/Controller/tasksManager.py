@@ -68,6 +68,9 @@ class TasksManager:
 		if msg[0] == CLIENTS_LIST_CODE:
 			self.otherNodes = eval(msg[1:])
 			self.__numOfNodesOutputFunc(str(len(self.otherNodes)))
+			disconnected = [n for n in self.currentTasks.keys() if n not in self.otherNodes]
+			new = [n for n in self.otherNodes if n not in self.currentTasks.keys()]
+			raise NotImplementedError() # TODO: restart the tasks from the disconnected nodes and start
 		elif msg[0] == PROCESS_DATA_CODE: # data recieved from task
 			splt = msg[1:].split(",")
 			tsk = next(tsk for tsk in self.currentTasks[splt[0]] if tsk.GetActiveCommandId() == int(splt[1])) # find the first that matches the criteria
@@ -83,8 +86,7 @@ class TasksManager:
 				if newTsk != None:
 					self.pendingTasks.remove(newTsk)
 					self.currentTasks[splt[0]].append(newTsk)
-					self.__sock.send(splt[0] + "," + tsk.GetNextCommand() + "\n")
-			# TODO: start next task
+					self.__sock.send(splt[0] + "," + tsk.GetNextCommand() + "\n") # start next task
 		elif msg[0] == QUERY_RESPONSE_CODE: # a sended query response
 			splt = msg[1:].split(",")
 			tsk = next(tsk for tsk in self.currentTasks[splt[0]] if tsk.GetActiveCommandId() == int(splt[1])) # find the first that matches the criteria
@@ -92,7 +94,6 @@ class TasksManager:
 			self.__outputFunc(tsk.name + ": " + ",".join(splt[2:]))
 		else:
 			raise Exception("unknown command: '" + msg[0] + "' full msg: " + msg)
-		raise NotImplementedError()
 
 	def OnExit(self):
 		self.__sock.send(Task.CLOSE_CODE + "\n")
