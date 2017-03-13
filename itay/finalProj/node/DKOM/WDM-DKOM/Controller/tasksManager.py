@@ -2,15 +2,19 @@ import shlex
 from task import *
 
 class TasksManager:
-	def __init__(self, outputFunc, sock):
-		self.__outputFunc = outputFunc
+	def __init__(self, sock, outputFunc = lambda x: None, numOfNodesOutputFunc = lambda num: None):
 		self.__sock = sock
+		self.__outputFunc = outputFunc
+		self.__numOfNodesOutputFunc = numOfNodesOutputFunc
 		self.otherNodes = [] # nodes' ids
 		self.currentTasks = {} # {nodeId:[tasks] ...}
 		self.pendingTasks = []
 	
 	def SetOutput(self, func):
 		self.__outputFunc = func
+		
+	def SetNumNodesOutput(self, func):
+		self.__numOfNodesOutputFunc = func
 
 	def ExecQry(self, qry):
 		task = Task(TaskType.QUERY, qry)
@@ -51,12 +55,26 @@ class TasksManager:
 				self.ExecQry(args)
 			elif argv[0].lower() in ["s", "scrpt", "script"]:
 				self.ExecScript(argv[1], argv[2])
+			elif argv[0].lower() in ["n", "nodes"]:
+				self.__outputFunc(str(len(self.otherNodes)) + "\n")
 			else:
 				self.__outputFunc("illegal command\n")
 		except:
 			self.__outputFunc("illegal command syntax\n")
 
 	def MessageReceived(self, msg):
+		if msg[0] == CLIENTS_LIST_CODE:
+			self.otherNodes = eval(msg[1:])
+			self.__numOfNodesOutputFunc(str(len(self.otherNodes)))
+		elif msg[0] == PROCESS_DATA_CODE: # data recieved from task
+			print DISPLAY_CODE + repr(data) # TODO: output
+		elif msg[0] == PROCESS_ENDED_CODE: # a sended task ended
+
+			print DISPLAY_CODE + repr(data) # TODO: start next task
+		elif msg[0] == QUERY_RESPONSE_CODE: # a sended query response
+			print DISPLAY_CODE + repr(data) # TODO: output
+		else:
+			raise Exception("unknown command: '" + msg[0] + "' full msg: " + msg)
 		raise NotImplementedError()
 
 	def OnExit(self):

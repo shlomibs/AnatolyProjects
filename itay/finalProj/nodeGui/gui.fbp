@@ -44,7 +44,7 @@
             <property name="minimum_size"></property>
             <property name="name">controllerGui</property>
             <property name="pos"></property>
-            <property name="size">950,710</property>
+            <property name="size">950,770</property>
             <property name="style">wxDEFAULT_FRAME_STYLE</property>
             <property name="subclass"></property>
             <property name="title"></property>
@@ -336,7 +336,7 @@
                                 <property name="maxlength"></property>
                                 <property name="min_size"></property>
                                 <property name="minimize_button">0</property>
-                                <property name="minimum_size">800,-1</property>
+                                <property name="minimum_size">800,100</property>
                                 <property name="moveable">1</property>
                                 <property name="name">qryTextControl</property>
                                 <property name="pane_border">1</property>

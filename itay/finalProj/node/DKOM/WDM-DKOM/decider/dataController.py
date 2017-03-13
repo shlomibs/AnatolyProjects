@@ -23,13 +23,13 @@ class DataController:
 	@staticmethod
 	def OnCommunicationDataRecieved(data): # check what command recieved
 		data = eval(data)
-		if data[0] == CLIENTS_LIST_CODE: # start process
+		if data[0] == CLIENTS_LIST_CODE:
 			print DISPLAY_CODE + repr(data)
 		elif data[0] == DISPLAY_CODE: # start an admin session request
 			print DISPLAY_CODE + data[1:] # data[1:] = portNum
 		elif data[0] == START_PROCESS_CMD: # start process, to c#, not repered
 			StartProcess(data[1:])
-		elif data[0] == QUERY_CMD: # a sended query response
+		elif data[0] == QUERY_CMD: # start query
 			Query(data[1:])
 		elif data[0] == PROCESS_DATA_CODE: # data recieved from task
 			print DISPLAY_CODE + repr(data) # keep the CMD code and send to the controller

@@ -60,8 +60,8 @@ def NodeDataProcessing():
 	data = data[0:-1]
 
 	for msg in data:
-		decMsg = eval(data)
-		taskManager.MessageReceived(msg)
+		decMsg = eval(msg)
+		taskManager.MessageReceived(decMsg)
 
 #region bash
 
@@ -70,7 +70,8 @@ commands:
 cmd <command> [arg1 [arg2 [arg3...]]]
 query <query-syntax (repr'd = with \r,\n,\t... and surrounded by '' or "" by the format)>
 script <executable-path> <args-file-path>
-"""[1:] # remove first \n
+nodes
+"""[1:] # remove the first \n
 
 def BashOutput(msg): # FIN
 	global printLock
@@ -94,7 +95,7 @@ def Bash(sock): # FIN
 
 def Gui(sock): # FIN
 	global taskManager
-	taskManager = TasksManager("", sock) # "" is temp, will be changed in ControllerGui
+	taskManager = TasksManager(sock) # no output functions, will be changed in ControllerGui
 	gui = ControllerGui(taskManager)
 	gui.show() # must be on the main thread
 

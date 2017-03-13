@@ -14,14 +14,14 @@ class ControllerGui():
 		self.app.MainLoop()
 
 class ControllerWindow (wx.Frame):
-	###################################################################################
-	## the next __init__ Python code generated with wxFormBuilder (version Jun 17 2015)
+	############################################################################################
+	## most of the next __init__ Python code generated with wxFormBuilder (version Jun 17 2015)
 	## http://www.wxformbuilder.org/
-	###################################################################################
+	############################################################################################
 	def __init__(self, parent, taskManager):
 		self.taskManager = taskManager
 
-		wx.Frame.__init__ (self, parent, id = wx.ID_ANY, title = u"controller", pos = wx.DefaultPosition, size = wx.Size(950,710), style = wx.DEFAULT_FRAME_STYLE, name = u"controller")
+		wx.Frame.__init__ (self, parent, id = wx.ID_ANY, title = u"controller", pos = wx.DefaultPosition, size = wx.Size(950,770), style = wx.DEFAULT_FRAME_STYLE, name = u"controller")
 		
 		self.SetSizeHintsSz(wx.DefaultSize, wx.DefaultSize)
 		
@@ -43,7 +43,7 @@ class ControllerWindow (wx.Frame):
 		querySizer = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, u"query"), wx.HORIZONTAL)
 		
 		self.qryTextControl = wx.TextCtrl( querySizer.GetStaticBox(), wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.TE_MULTILINE )
-		self.qryTextControl.SetMinSize(wx.Size(800,-1))
+		self.qryTextControl.SetMinSize(wx.Size(800, 100))
 		
 		querySizer.Add(self.qryTextControl, 0, wx.ALL, 5)
 		
@@ -97,6 +97,8 @@ class ControllerWindow (wx.Frame):
 		
 		self.Centre(wx.BOTH)
 		
+		# for output
+		self.taskManager.SetNumNodesOutput(self.numOfNodesLabel.SetLabel)
 		self.taskManager.SetOutput(self.outputTextControl.AppendText)
 
 		# Connect Events
@@ -110,12 +112,20 @@ class ControllerWindow (wx.Frame):
 		self.taskManager.OnExit()
 	
 	def ExecuteCmd(self, event):
+		if str(self.cmdTextControl.GetValue()).strip() == "":
+			wx.MessageBox("no command entered",  "Alert", wx.OK | wx.ICON_WARNING).ShowModal()
 		argv = shlex.split(str(self.cmdTextControl.GetValue()))
 		args = "" if str(self.cmdTextControl.GetValue())[len(argv[0]):] == "" else str(self.cmdTextControl.GetValue())[len(argv[0]) + 1:]
 		self.taskManager.ExecCmd(argv[0], args)
 	
 	def ExecuteQuery(self, event):
+		if str(self.qryTextControl.GetValue()).strip() == "":
+			wx.MessageBox("no query entered", "Alert", wx.OK | wx.ICON_WARNING).ShowModal()
 		self.taskManager.ExecQry(str(self.qryTextControl.GetValue()))
 	
 	def ExecuteScript(self, event):
+		if str(self.executablePicker.GetPath()).strip() == "":
+			wx.MessageBox("no executable selected", "Alert", wx.OK | wx.ICON_WARNING).ShowModal()
+		if str(self.argsFilePicker.GetPath()).strip() == "":
+			wx.MessageBox("no args file selected", "Alert", wx.OK | wx.ICON_WARNING).ShowModal()
 		self.taskManager.ExecScript(str(self.executablePicker.GetPath()), str(self.argsFilePicker.GetPath()))
