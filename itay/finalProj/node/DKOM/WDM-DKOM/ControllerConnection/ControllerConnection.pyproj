@@ -12,6 +12,7 @@
     <OutputPath>.</OutputPath>
     <Name>ControllerConnection</Name>
     <RootNamespace>ControllerConnection</RootNamespace>
+    <PublishUrl>G:\programming\AnatolyProjects\itay\finalProj\node\DKOM\WDM-DKOM\publish\ControllerConnection</PublishUrl>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -22,9 +23,6 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="bash.py">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="controllerConnection.py" />
   </ItemGroup>
   <PropertyGroup>

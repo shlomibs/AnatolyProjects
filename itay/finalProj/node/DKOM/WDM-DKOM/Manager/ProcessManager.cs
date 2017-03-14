@@ -73,7 +73,7 @@ namespace Manager
                 this.mainProcesses[i] = new ProcessHandler(this.procHider);
             // python -u = python unbuffered -> disable the need for sys.stdout.flush() after every print (like doing it automatically)
             if (!this.mainProcesses[COMMUNICATION_PROCESS_IND].StartProcess("python", @"-u Communication\communicator.py", this.OnCommunicationReceived) ||
-                !this.mainProcesses[DECISIONS_PROCESS_IND].StartProcess("python" , @"-u Decision\decider.py", this.OnDecisionRecieved) ||
+                !this.mainProcesses[DECISIONS_PROCESS_IND].StartProcess("python" , @"-u Decider\decider.py", this.OnDecisionRecieved) ||
                 !this.mainProcesses[DATABASE_PROCESS_IND].StartProcess("python", @"-u Database\database.py " + ProcessManager.databaseFile))
                 Environment.Exit(-1); // could not start main processes
 

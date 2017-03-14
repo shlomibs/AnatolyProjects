@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{228fd0d3-eb10-4f7b-a10d-b698117e5426}</ProjectGuid>
     <ProjectHome />
-    <StartupFile>testlowLevel.py</StartupFile>
+    <StartupFile>communicator.py</StartupFile>
     <SearchPath />
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
@@ -21,6 +21,7 @@
     </InterpreterArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
     <CommandLineArguments>8080 1000</CommandLineArguments>
+    <PublishUrl>G:\programming\AnatolyProjects\itay\finalProj\node\DKOM\WDM-DKOM\publish\Communication</PublishUrl>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
   <PropertyGroup Condition="'$(Configuration)' == 'Release'" />

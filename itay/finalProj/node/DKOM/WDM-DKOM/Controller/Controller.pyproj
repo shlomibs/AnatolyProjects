@@ -12,6 +12,8 @@
     <OutputPath>.</OutputPath>
     <Name>Controller</Name>
     <RootNamespace>Controller</RootNamespace>
+    <IsWindowsApplication>False</IsWindowsApplication>
+    <PublishUrl>G:\programming\AnatolyProjects\itay\finalProj\node\DKOM\WDM-DKOM\publish\Controller</PublishUrl>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
