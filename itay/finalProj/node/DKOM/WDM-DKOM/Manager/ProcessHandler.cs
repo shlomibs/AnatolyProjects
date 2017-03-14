@@ -1,4 +1,4 @@
-﻿
+﻿#define DEBUG
 #define CHECK_OS // for testing
 // if DKOM will work on 64bit OS then undefine it
 
