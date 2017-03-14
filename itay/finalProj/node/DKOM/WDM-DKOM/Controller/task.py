@@ -41,6 +41,7 @@ class Task:
 					(nextId + 1, Task.TASK_CODE + str(nextId + 1) + "," + command + "," + args)] # [(id, command), (id, command)]
 			nextId += 1
 		nextId += 1
+		self.__commandsBackup = commands
 
 	def __init__(self, otherTask): # copy constructor
 		self.missionId = otherTask.missionId
@@ -61,3 +62,7 @@ class Task:
 
 	def GetActiveCommandId(self):
 		return self.__lastCommandId
+
+	def Restart(self):
+		self.__lastCommandId = -1
+		self.commands = self.__commandsBackup

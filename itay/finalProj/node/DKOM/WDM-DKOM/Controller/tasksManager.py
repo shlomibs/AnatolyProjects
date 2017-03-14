@@ -70,6 +70,18 @@ class TasksManager:
 			self.__numOfNodesOutputFunc(str(len(self.otherNodes)))
 			disconnected = [n for n in self.currentTasks.keys() if n not in self.otherNodes]
 			new = [n for n in self.otherNodes if n not in self.currentTasks.keys()]
+			for node in disconnected:
+				for tsk in self.currentTasks[node]:
+					if tsk.type == TaskType.SCRIPT:
+						tsk.Restart()
+						self.pendingTasks.append(tsk)
+			tasksById = {}
+			for tsk in self.pendingTasks:
+				tasksById[tsk.missionId] = tsk
+			for node in new:
+				for mission in tasksById.keys():
+					tsk = tasksById.pop(mission, None)
+
 			raise NotImplementedError() # TODO: restart the tasks from the disconnected nodes and start
 		elif msg[0] == PROCESS_DATA_CODE: # data recieved from task
 			splt = msg[1:].split(",")
