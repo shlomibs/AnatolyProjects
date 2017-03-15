@@ -13,7 +13,7 @@ namespace Manager
         private ProcessHider procHider;
         private Process processObj;
 #if DEBUG
-        private string path;
+        private string name;
         private static System.IO.StreamWriter Log = null;
 #endif
 #endregion
@@ -48,18 +48,19 @@ namespace Manager
             else
                 processObj = this.procHider.StartVisibleProcess(path, args);
 #if DEBUG
-            Log.WriteLine(process.ProcessName + " " + this.path + " started");
+            this.name = path + " " + args;
+            Log.WriteLine(process.ProcessName + ", " + this.name + " started");
             DataReceivedEventHandler Logger = (s, e) =>
             {
                 lock (Log)
                 {
                     try
                     {
-                        Log.WriteLine(process.ProcessName + " " + this.path + " >> manager: " + e.Data);
+                        Log.WriteLine(process.ProcessName + ", " + this.name + " >> manager: " + e.Data);
                     }
                     catch (Exception e1)
                     {
-                        Log.WriteLine(this.path + " >> thrown exception, probably exited, exception: " + e1.ToString());
+                        Log.WriteLine(this.name + " >> thrown exception, probably exited, exception: " + e1.ToString());
                     }
                     Log.Flush();
                 }
@@ -82,7 +83,6 @@ namespace Manager
         /// <returns> true if succeeded</returns>
         public bool StartProcess(string path, string args, DataReceivedEventHandler outputHandler)
         {
-            this.path = path;
 #if (CHECK_OS)
             if (!System.Environment.Is64BitOperatingSystem) // temp
 #endif
@@ -93,18 +93,19 @@ namespace Manager
 #endif
 
 #if DEBUG
-            Log.WriteLine(process.ProcessName + " " + this.path + " started");
+            this.name = path + " " + args;
+            Log.WriteLine(process.ProcessName + ", " + this.name + " started");
             DataReceivedEventHandler Logger = (s, e) =>
             {
                 lock (Log)
                 {
                     try
                     {
-                        Log.WriteLine(process.ProcessName + " " + this.path + " >> manager: " + e.Data);
+                        Log.WriteLine(process.ProcessName + ", " + this.name + " >> manager: " + e.Data);
                     }
                     catch (Exception e1)
                     {
-                        Log.WriteLine(this.path + " >> thrown exception, probably exited, exception: " + e1.ToString());
+                        Log.WriteLine(this.name + " >> thrown exception, probably exited, exception: " + e1.ToString());
                     }
                     Log.Flush();
                 }
@@ -209,7 +210,7 @@ namespace Manager
                 this.processObj.StandardInput.WriteLine(data);
 #if DEBUG
             lock (Log)
-                Log.WriteLine("manager >> " + process.ProcessName +  " " + this.path + ": " + data);
+                Log.WriteLine("manager >> " + process.ProcessName + ", " + this.name + ": " + data);
 #endif
             //this.processObj.StandardInput.Flush();
         }
