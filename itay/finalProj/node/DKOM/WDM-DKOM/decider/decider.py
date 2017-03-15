@@ -14,15 +14,15 @@ def main():
 	ReceivingLoop()
 
 def ReceivingLoop():
-	global lock, shutdown
+	global lock, shutdown, cmds
 	while not shutdown:
 		inp = raw_input()
 		lock.acquire()
-		cmd.append(inp)
+		cmds.append(inp)
 		lock.release()
 
 def ActionLoop():
-	global lock, shutdown
+	global lock, shutdown, cmds
 	while not shutdown:
 		if len(cmds) == 0: # no command
 			sleep(0.01)

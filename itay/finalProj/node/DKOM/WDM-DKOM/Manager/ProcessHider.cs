@@ -109,7 +109,7 @@ namespace Manager
             p.StartInfo.CreateNoWindow = true;
             p.EnableRaisingEvents = true;
             p.OutputDataReceived += outputHandler;
-            p.ErrorDataReceived += outputHandler;
+            //p.ErrorDataReceived += outputHandler;
             p.Exited += new EventHandler(OnEventedProcessExit);
             if (!p.Start())
                 return null;
