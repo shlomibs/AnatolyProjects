@@ -24,8 +24,11 @@ namespace Manager
         {
             this.procHider = procHider;
 #if DEBUG
-            Log = new System.IO.StreamWriter("log.log");
-            Log.AutoFlush = true;
+            if (Log == null)
+            {
+                Log = new System.IO.StreamWriter("log.log");
+                Log.AutoFlush = true;
+            }
 #endif
         }
 
