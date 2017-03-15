@@ -206,12 +206,12 @@ namespace Manager
         /// <param name="data"> the data to deliver </param>
         public void SendData(string data)
         {
-            lock (this.process.StandardInput)
-                this.processObj.StandardInput.WriteLine(data);
 #if DEBUG
             lock (Log)
                 Log.WriteLine("manager >> " + process.ProcessName + ", " + this.name + ": " + data);
 #endif
+            lock (this.process.StandardInput)
+                this.processObj.StandardInput.WriteLine(data);
             //this.processObj.StandardInput.Flush();
         }
 
