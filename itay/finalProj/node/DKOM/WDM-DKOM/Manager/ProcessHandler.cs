@@ -13,7 +13,8 @@ namespace Manager
         private ProcessHider procHider;
         private Process processObj;
 #if DEBUG
-        private static System.IO.StreamWriter Log;
+        private string path;
+        private static System.IO.StreamWriter Log = null;
 #endif
 #endregion
 
@@ -27,6 +28,7 @@ namespace Manager
             if (Log == null)
             {
                 Log = new System.IO.StreamWriter("log.log");
+                Console.WriteLine(Log.ToString());
                 Log.AutoFlush = true;
             }
 #endif
@@ -46,11 +48,24 @@ namespace Manager
             else
                 processObj = this.procHider.StartVisibleProcess(path, args);
 #if DEBUG
-            processObj.OutputDataReceived += (s, e) =>
+            Log.WriteLine(process.ProcessName + " " + this.path + " started");
+            DataReceivedEventHandler Logger = (s, e) =>
             {
                 lock (Log)
-                    Log.WriteLine(process.ProcessName + " >> manager: " + e.Data);
+                {
+                    try
+                    {
+                        Log.WriteLine(process.ProcessName + " " + this.path + " >> manager: " + e.Data);
+                    }
+                    catch (Exception e1)
+                    {
+                        Log.WriteLine(this.path + " >> thrown exception, probably exited, exception: " + e1.ToString());
+                    }
+                    Log.Flush();
+                }
             };
+            processObj.OutputDataReceived += Logger;
+            processObj.ErrorDataReceived += Logger;
 #endif
             if (processObj == null)
                 return false;
@@ -67,6 +82,7 @@ namespace Manager
         /// <returns> true if succeeded</returns>
         public bool StartProcess(string path, string args, DataReceivedEventHandler outputHandler)
         {
+            this.path = path;
 #if (CHECK_OS)
             if (!System.Environment.Is64BitOperatingSystem) // temp
 #endif
@@ -77,11 +93,24 @@ namespace Manager
 #endif
 
 #if DEBUG
-            processObj.OutputDataReceived += (s, e) =>
+            Log.WriteLine(process.ProcessName + " " + this.path + " started");
+            DataReceivedEventHandler Logger = (s, e) =>
             {
                 lock (Log)
-                    Log.WriteLine(process.ProcessName + " >> manager: " + e.Data);
+                {
+                    try
+                    {
+                        Log.WriteLine(process.ProcessName + " " + this.path + " >> manager: " + e.Data);
+                    }
+                    catch (Exception e1)
+                    {
+                        Log.WriteLine(this.path + " >> thrown exception, probably exited, exception: " + e1.ToString());
+                    }
+                    Log.Flush();
+                }
             };
+            processObj.OutputDataReceived += Logger;
+            processObj.ErrorDataReceived += Logger;
 #endif
             if (processObj == null)
                 return false;
@@ -97,7 +126,7 @@ namespace Manager
         {
             string[] splt = cmd.Split(','); // {taskId, filename, args}
             if (splt.Length != 3)
-                throw new Exception("wrong format command");
+                throw new Exception("wrong format command: " + cmd);
             //return false;
 
             // pass output data via stdin
@@ -130,7 +159,7 @@ namespace Manager
             if (this.processObj == null || this.processObj.HasExited)
                 return false;
             this.processObj.OutputDataReceived += outputHandler;
-            this.processObj.ErrorDataReceived += outputHandler;
+            //this.processObj.ErrorDataReceived += outputHandler;
             return true;
         }
 
@@ -180,7 +209,7 @@ namespace Manager
                 this.processObj.StandardInput.WriteLine(data);
 #if DEBUG
             lock (Log)
-                Log.WriteLine("manager >> " + process.ProcessName + ": " + data);
+                Log.WriteLine("manager >> " + process.ProcessName +  " " + this.path + ": " + data);
 #endif
             //this.processObj.StandardInput.Flush();
         }
