@@ -221,6 +221,7 @@ namespace Manager
                     }
                     break;
                 default:
+                    Console.WriteLine("unknown cmd data: " + e.Data);
                     throw new InvalidOperationException("Unknown command: " + e.Data);
             }
         }
