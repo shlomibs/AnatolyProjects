@@ -54,12 +54,12 @@ def sendingLoop():
 	i = 0
 	while True:
 		i += 1
-		if i == 5: # give 0.5 second to receive the info
+		if i == 50: # give 0.5 second to receive the info
 			printLock.acquire()
 			print repr(CLIENTS_LIST_CODE + repr(com.getContacts()))
 			printLock.release()
 		if len(toSendQueue) == 0:
-			if(i > 60*100): # approximatly a minute
+			if(i > 10*100): # approximatly 10 secomds
 				i = 0
 				com.refreshContacts()
 			else:

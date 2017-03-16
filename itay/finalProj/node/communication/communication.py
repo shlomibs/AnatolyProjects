@@ -9,9 +9,11 @@ class Communication:
 		self.port = communicationUtils.defaultPort()
 		while communicationUtils.IsPortTaken(self.port): # take over a port
 			self.port += 1
-			if self.port >= 2^16:
+			if self.port >= 2**16:
 				self.port = 2000 # after saved ports
 		self.__encoder = Encoder(communicationKey)
+		with open("config.cfg", "w") as f:
+			f.write(self.__encoder.encrypt(str(self.port))) # save the port for controller
 		self.__communicator = LowLevelCommunicator(self.port, holePunchingAddr, ID)
 		self.__communicator.start()
 

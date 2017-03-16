@@ -28,7 +28,6 @@ namespace Manager
             if (Log == null)
             {
                 Log = new System.IO.StreamWriter("log.log");
-                Console.WriteLine(Log.ToString());
                 Log.AutoFlush = true;
             }
 #endif
@@ -56,10 +55,12 @@ namespace Manager
                 {
                     try
                     {
+                        Console.WriteLine(process.ProcessName + ", " + this.name + " >> manager: " + e.Data);
                         Log.WriteLine(process.ProcessName + ", " + this.name + " >> manager: " + e.Data);
                     }
                     catch (Exception e1)
                     {
+                        Console.WriteLine(this.name + " >> thrown exception, probably exited, exception: " + e1.ToString());
                         Log.WriteLine(this.name + " >> thrown exception, probably exited, exception: " + e1.ToString());
                     }
                     Log.Flush();
@@ -101,10 +102,12 @@ namespace Manager
                 {
                     try
                     {
+                        Console.WriteLine(process.ProcessName + ", " + this.name + " >> manager: " + e.Data);
                         Log.WriteLine(process.ProcessName + ", " + this.name + " >> manager: " + e.Data);
                     }
                     catch (Exception e1)
                     {
+                        Console.WriteLine(this.name + " >> thrown exception, probably exited, exception: " + e1.ToString());
                         Log.WriteLine(this.name + " >> thrown exception, probably exited, exception: " + e1.ToString());
                     }
                     Log.Flush();
@@ -208,7 +211,11 @@ namespace Manager
         {
 #if DEBUG
             lock (Log)
+            {
+                Console.WriteLine("manager >> " + process.ProcessName + ", " + this.name + ": " + data);
                 Log.WriteLine("manager >> " + process.ProcessName + ", " + this.name + ": " + data);
+                Log.Flush();
+            }
 #endif
             lock (this.process.StandardInput)
                 this.processObj.StandardInput.WriteLine(data);
