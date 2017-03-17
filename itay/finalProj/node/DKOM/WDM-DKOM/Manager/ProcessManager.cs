@@ -195,10 +195,11 @@ namespace Manager
                     {
                         if (e.Data[1] != '\'' && e.Data[1] != '"') // not repr'd => try to connect from another controller
                         {
+                            Console.WriteLine("starting admin session");
                             isAdminConnected = true;
                             this.controllerProcess = new ProcessHandler(this.procHider);
                             this.controllerProcess.StartProcess("python", @"-u controllerConnection\controllerConnection.py " + e.Data.Substring(1));
-                            this.controllerProcess.AddExitHandler((s, e2) => { isAdminConnected = false; });
+                            this.controllerProcess.AddExitHandler((s, e2) => { isAdminConnected = false; Console.WriteLine("admin session ended"); });
                             this.controllerProcess.AddOutputHandler(OnControllerRecieved);
                         }
                         //else drop the message

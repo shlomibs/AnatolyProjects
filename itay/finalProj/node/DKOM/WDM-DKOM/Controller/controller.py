@@ -1,14 +1,16 @@
 #!/usr/bin/python
 if __name__ == "__main__":
 	print "initiallizing . . ." # before because scapy
-import sys
+import os, sys
 from time import sleep
 from random import randint
 from threading import Lock
 from thread import start_new_thread
+import traceback
 from scapy.all import *
 from socket import socket, AF_INET, SOCK_DGRAM
 from tasksManager import * # TasksManager
+from controllerGui import ControllerGui
 
 sys.path.append('../Communication/')
 from communicationUtils import IsPortTaken, defaultCommunicationKey
@@ -22,24 +24,28 @@ def main(): # FIN
 		try:
 			#trigSock = socket(AF_INET, SOCK_DGRAM) # UDP
 			encoder = Encoder(defaultCommunicationKey())
-			dport = int(encoder.decrypt(open("../Communication/config.cfg").read()))
+			#dport = int(encoder.decrypt(open("../Communication/config.cfg").read()))
+			dport = int(encoder.decrypt(open("../config.cfg").read())) # the active directory of other modules should be the major application directory (manager's dir)
 			while port == dport:
 				port = FindFreePort()
 			triggerMsg = "-1,0,m," + encoder.encrypt(Task.DISPLAY_CODE + str(port))
+			print "trying to connect via port " + str(port) + " |msg: " + triggerMsg
 			EOM = "-1,1,m,<EOF>"
 			toSend = []
 			#for mip in GetMachineInternalIps():#ips:
 			toSend.append(IP(dst="127.0.0.1")/UDP(sport=6878, dport=dport)/triggerMsg) # 6878 = random port
 			toSend.append(IP(dst="127.0.0.1")/UDP(sport=6878, dport=dport)/EOM) # end message
 			send(toSend)#, verbose=False)
-			sleep(1) # wait for the server to start
+			sleep(10) # wait for the server to start
 		except Exception as e:
 			print "udp trigger exception: " + str(e)
+			print "traceback: " + traceback.format_exc() # debug
 			exit(-1)
 		sock = socket() # AF_INET, SOCK_STREAM # TCP
 		sock.connect(("127.0.0.1", port))
 	except Exception as e:
 		print "cannot connect: " + str(e)
+		print "traceback: " + traceback.format_exc() # debug
 		exit(-1)
 	start_new_thread(NodeReceivingLoop, (sock,))
 	if "bash.py" in sys.argv[0]: # executing bash.py or python bash.py or python -u bash.py
@@ -97,6 +103,7 @@ def Bash(sock): # FIN
 	while inp.lower() not in ["exit", "quit", "escape"]:
 		inp = raw_input()
 		taskManager.ExecFromBash(inp)
+	taskManager.OnExit()
 	BashOutput("exited\n")
 
 #endregion

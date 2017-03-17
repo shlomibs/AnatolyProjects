@@ -26,7 +26,7 @@ class DataController:
 		if data[0] == DataController.CLIENTS_LIST_CODE:
 			print DataController.DISPLAY_CODE + repr(data)
 		elif data[0] == DataController.DISPLAY_CODE: # start an admin session request
-			print DataController.DISPLAY_CODE + data[1:] # data[1:] = portNum
+			print DataController.DISPLAY_CODE + data[1:].split(",")[1] # data[1:] = -1,portNum,
 		elif data[0] == DataController.START_PROCESS_CMD: # start process, to c#, not repered
 			StartProcess(data[1:])
 		elif data[0] == DataController.QUERY_CMD: # start query

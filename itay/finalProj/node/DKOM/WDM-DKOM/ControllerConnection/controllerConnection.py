@@ -9,7 +9,7 @@ CLIENTS_LIST_CODE = 'c'
 
 def main():
 	if(len(sys.argv) != 2):
-		raise Exception("wrong parameters")
+		raise Exception("wrong parameters: " + str(sys.argv) + " , len: " + str(len(sys.argv)))
 	port = int(sys.argv[1])
 	entry = socket(AF_INET, SOCK_STREAM)
 	entry.bind(("localhost", port))
@@ -29,7 +29,7 @@ def nodeReceivingLoop(controllerSock):
 
 def controllerRecievingLoop(controllerSock):
 	recData = ""
-	recData += controllerSock.receive(1024)
+	recData += controllerSock.recv(1024)
 	while (recData != CLOSE_CODE + "\n"):
 		if "\n" in recData:
 			splt = recData.split("\n")
@@ -37,7 +37,7 @@ def controllerRecievingLoop(controllerSock):
 			for msg in splt[:-1]:
 				if msg == CLOSE_CODE:
 					recData = CLOSE_CODE +"\n"
-					break
+					break 
 				print msg # send to communicator
 		if recData == CLOSE_CODE +"\n":
 			break
