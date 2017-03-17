@@ -1,4 +1,5 @@
 import shlex
+from time import sleep
 from task import *
 
 class TasksManager:
@@ -19,17 +20,17 @@ class TasksManager:
 
 	def ExecQry(self, qry):
 		task = Task(TaskType.QUERY, qry)
-		for node in otherNodes:
-			tsk = Task(task)
-			currentTasks[node].append(tsk)
+		for node in self.otherNodes:
+			tsk = task.Copy()
+			self.currentTasks[node].append(tsk)
 			self.__sock.send(node + "," + tsk.GetNextCommand() + "\n")
 
 	def ExecCmd(self, cmd, args): # command line like in cmd
 		task = Task(TaskType.CMD, cmd, args)
-		for node in otherNodes:
-			tsk = Task(task)
-			currentTasks[node].append(tsk)
-			self.__sock.send(tsk.GetNextCommand() + "\n")
+		for node in self.otherNodes:
+			tsk = task.Copy()
+			self.currentTasks[node].append(tsk)
+			self.__sock.send(node + "," + tsk.GetNextCommand() + "\n")
 	
 	def ExecScript(self, executablePath, argsFilePath):
 		args = [arg.strip() for arg in open(argsFilePath).read().split("\n")] # strip to remove "\r" if exists
@@ -39,10 +40,10 @@ class TasksManager:
 			tsk = tasks.pop(0, None)
 			if tsk == None:
 				break;
-			currentTasks[node].append(tsk)
-			self.__sock.send(tsk.GetNextCommand() + "\n")
+			self.currentTasks[node].append(tsk)
+			self.__sock.send(node + "," + tsk.GetNextCommand() + "\n")
 		if len(tasks) > 0:
-			self.pendingTasks.append(tasks)
+			self.pendingTasks += tasks
 
 	def ExecFromBash(self, cmd): # cmd is string recieved from command line (bash) # FIN
 		try:
@@ -65,7 +66,7 @@ class TasksManager:
 			self.__outputFunc("illegal command syntax\n")
 
 	def MessageReceived(self, msg):
-		if msg[0] == CLIENTS_LIST_CODE:
+		if msg[0] == Task.CLIENTS_LIST_CODE:
 			self.otherNodes = eval(msg[1:])
 			self.__numOfNodesOutputFunc(str(len(self.otherNodes)))
 			disconnected = [n for n in self.currentTasks.keys() if n not in self.otherNodes]
@@ -76,13 +77,16 @@ class TasksManager:
 						tsk.Restart()
 						self.pendingTasks.append(tsk)
 			tasksById = {}
-			for tsk in self.pendingTasks:
-				tasksById[tsk.missionId] = tsk
+			for tsk in self.pendingTasks: # prepare
+				if tsk.missionId not in tasksById.keys():
+					tasksById[tsk.missionId] = []
+				tasksById[tsk.missionId].append(tsk)
 			for node in new:
 				for mission in tasksById.keys():
 					tsk = tasksById.pop(mission, None)
-
-			raise NotImplementedError() # TODO: restart the tasks from the disconnected nodes and start
+					if tsk != None:
+						self.currentTasks[node].append(tsk)
+						self.__sock.send(node + "," + tsk.GetNextCommand() + "\n") # start it
 		elif msg[0] == PROCESS_DATA_CODE: # data recieved from task
 			splt = msg[1:].split(",")
 			tsk = next(tsk for tsk in self.currentTasks[splt[0]] if tsk.GetActiveCommandId() == int(splt[1])) # find the first that matches the criteria

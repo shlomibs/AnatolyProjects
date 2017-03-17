@@ -1,3 +1,4 @@
+from copy import deepcopy as copy
 
 class TaskType:
 	QUERY = 0
@@ -16,6 +17,7 @@ class Task:
 	WRITE_FILE_CMD = 'w'
 	CLIENTS_LIST_CODE = 'c'
 	DISPLAY_CODE = 'D'
+	CLOSE_CODE = 'C'
 	#endregion
 
 	#region static vars
@@ -29,26 +31,29 @@ class Task:
 		self.__lastCommandId = -1 # illegal id
 		#self.commands = []
 		if self.type == TaskType.CMD:
-			self.commands = [(nextId, Task.TASK_CODE + str(nextId) + "," + cmd + "," + args)] # [(id, command)]
+			self.commands = [(Task.nextId, Task.TASK_CODE + str(Task.nextId) + "," + cmd + "," + args)] # [(id, command)]
 		elif self.type == TaskType.QUERY:
-			self.commands = [(nextId, Task.QUERY_CMD + str(nextId) + "," + cmd)] # [(id, command)]
+			self.commands = [(Task.nextId, Task.QUERY_CMD + str(Task.nextId) + "," + cmd)] # [(id, command)]
 		else: # self.type == TaskType.SCRIPT
 			content = open(cmd, 'rb').read() # cmd is the script 
 			command = cmd.split("\\")[-1].split("/")[-1]
 			# next make python unbuffered if it is a python script
-			command, args = "python", "-u " + command + " " + args if len(command.split(".")) > 1 and command.split(".")[-1].lower() in ["py", "pyw", "pyc"] else command, args
-			self.commands = [(nextId, Task.WRITE_FILE_CMD + str(nextId) + "," + cmd.split("\\")[-1].split("/")[-1] + "," + content),
-					(nextId + 1, Task.TASK_CODE + str(nextId + 1) + "," + command + "," + args)] # [(id, command), (id, command)]
-			nextId += 1
-		nextId += 1
-		self.__commandsBackup = commands
+			command, args = ("python", "-u " + command + " " + args) if len(command.split(".")) > 1 and command.split(".")[-1].lower() in ["py", "pyw", "pyc"] else (command, args)
+			self.commands = [(Task.nextId, Task.WRITE_FILE_CMD + str(Task.nextId) + "," + cmd.split("\\")[-1].split("/")[-1] + "," + content),
+					(Task.nextId + 1, Task.TASK_CODE + str(Task.nextId + 1) + "," + command + "," + args)] # [(id, command), (id, command)]
+			Task.nextId += 1
+		Task.nextId += 1
+		self.__commandsBackup = list(self.commands) # copy
 
-	def __init__(self, otherTask): # copy constructor
-		self.missionId = otherTask.missionId
-		self.name = otherTask.name
-		self.type = otherTask.type
-		self.__lastCommandId = -1
-		self.commands = list(otherTask.commands) # same taskId!
+	#def __init__(self, otherTask): # copy constructor
+	#	self.missionId = otherTask.missionId
+	#	self.name = otherTask.name
+	#	self.type = otherTask.type
+	#	self.__lastCommandId = -1
+	#	self.commands = list(otherTask.commands) # same taskId!
+
+	def Copy(self):
+		return copy(self) # deep copy
 
 	def __str__(self):
 		return self.name

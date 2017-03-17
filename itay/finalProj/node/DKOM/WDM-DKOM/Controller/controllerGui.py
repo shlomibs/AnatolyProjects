@@ -12,6 +12,7 @@ class ControllerGui():
 	def Show(self): # must be in the main thread (blocking)
 		self.window.Show(True) 
 		self.app.MainLoop()
+		exit(0) # no errors
 
 class ControllerWindow (wx.Frame):
 	############################################################################################
@@ -110,22 +111,33 @@ class ControllerWindow (wx.Frame):
 	#events:
 	def OnExit(self, event):
 		self.taskManager.OnExit()
+		event.Skip() # closes the window (return the control to the default event handler
 	
 	def ExecuteCmd(self, event):
 		if str(self.cmdTextControl.GetValue()).strip() == "":
-			wx.MessageBox("no command entered",  "Alert", wx.OK | wx.ICON_WARNING).ShowModal()
+			wx.MessageBox("no command entered",  "Alert", wx.OK | wx.ICON_WARNING)
+			return
 		argv = shlex.split(str(self.cmdTextControl.GetValue()))
 		args = "" if str(self.cmdTextControl.GetValue())[len(argv[0]):] == "" else str(self.cmdTextControl.GetValue())[len(argv[0]) + 1:]
+		self.outputTextControl.AppendText("starting command:\n" + self.cmdTextControl.GetValue().strip() + "\n")
 		self.taskManager.ExecCmd(argv[0], args)
+		self.outputTextControl.AppendText("command: \"" + self.cmdTextControl.GetValue().strip() + "\" started\n")
 	
 	def ExecuteQuery(self, event):
 		if str(self.qryTextControl.GetValue()).strip() == "":
-			wx.MessageBox("no query entered", "Alert", wx.OK | wx.ICON_WARNING).ShowModal()
-		self.taskManager.ExecQry(str(self.qryTextControl.GetValue()))
+			wx.MessageBox("no query entered", "Alert", wx.OK | wx.ICON_WARNING)
+			return
+		self.outputTextControl.AppendText("starting query:\n\"" + self.qryTextControl.GetValue().strip() + "\"\n")
+		self.taskManager.ExecQry(str(self.qryTextControl.GetValue().strip()))
+		self.outputTextControl.AppendText("query:\n\"" + self.qryTextControl.GetValue().strip() + "\"\nstarted\n")
 	
 	def ExecuteScript(self, event):
 		if str(self.executablePicker.GetPath()).strip() == "":
-			wx.MessageBox("no executable selected", "Alert", wx.OK | wx.ICON_WARNING).ShowModal()
+			wx.MessageBox("no executable selected", "Alert", wx.OK | wx.ICON_WARNING)
+			return
 		if str(self.argsFilePicker.GetPath()).strip() == "":
-			wx.MessageBox("no args file selected", "Alert", wx.OK | wx.ICON_WARNING).ShowModal()
+			wx.MessageBox("no args file selected", "Alert", wx.OK | wx.ICON_WARNING)
+			return
+		self.outputTextControl.AppendText("starting script:\n\"" + self.executablePicker.GetPath() + "\"\n\"" + self.argsFilePicker.GetPath() + "\"\n")
 		self.taskManager.ExecScript(str(self.executablePicker.GetPath()), str(self.argsFilePicker.GetPath()))
+		self.outputTextControl.AppendText("script:\n\"" + self.executablePicker.GetPath() + "\"\n\"" + self.argsFilePicker.GetPath() + "\"\nstarted\n")

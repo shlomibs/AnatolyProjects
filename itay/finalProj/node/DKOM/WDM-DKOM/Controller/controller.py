@@ -62,7 +62,10 @@ def NodeReceivingLoop(sock): # FIN
 			nodeData += sock.recv(1024)
 			NodeDataProcessing() # using nodeData
 		except Exception as e:
+			if str(e) == "[Errno 9] Bad file descriptor":
+				exit(0) # ended session
 			print "exception: " + str(e)
+			print "traceback: " + traceback.format_exc() # debug
 			break
 
 def NodeDataProcessing():
@@ -112,7 +115,7 @@ def Gui(sock): # FIN
 	global taskManager
 	taskManager = TasksManager(sock) # no output functions, will be changed in ControllerGui
 	gui = ControllerGui(taskManager)
-	gui.show() # must be on the main thread
+	gui.Show() # must be on the main thread
 
 def FindFreePort(): # FIN
 	port = randint(2048, 2**16 - 1)
