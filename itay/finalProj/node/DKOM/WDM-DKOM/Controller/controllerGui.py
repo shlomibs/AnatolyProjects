@@ -1,3 +1,4 @@
+import os
 import wx
 import wx.xrc
 import shlex
@@ -22,7 +23,7 @@ class ControllerWindow (wx.Frame):
 	def __init__(self, parent, taskManager):
 		self.taskManager = taskManager
 
-		wx.Frame.__init__ (self, parent, id = wx.ID_ANY, title = u"controller", pos = wx.DefaultPosition, size = wx.Size(950,770), style = wx.DEFAULT_FRAME_STYLE, name = u"controller")
+		wx.Frame.__init__ (self, parent, id = wx.ID_ANY, title = u"controller", pos = wx.DefaultPosition, size = wx.Size(950,780), style = wx.DEFAULT_FRAME_STYLE, name = u"controller")
 		
 		self.SetSizeHintsSz(wx.DefaultSize, wx.DefaultSize)
 		
@@ -58,7 +59,7 @@ class ControllerWindow (wx.Frame):
 		
 		executableSizer = wx.StaticBoxSizer(wx.StaticBox(scriptSizer.GetStaticBox(), wx.ID_ANY, u"executable"), wx.HORIZONTAL)
 		
-		self.executablePicker = wx.FilePickerCtrl(executableSizer.GetStaticBox(), wx.ID_ANY, wx.EmptyString, u"Select a file", u"*.*", wx.DefaultPosition, wx.Size(796,-1), wx.FLP_DEFAULT_STYLE)
+		self.executablePicker = wx.FilePickerCtrl(executableSizer.GetStaticBox(), wx.ID_ANY, wx.EmptyString, u"Select a file", u"*.*", wx.DefaultPosition, wx.Size(796,-1), wx.FLP_DEFAULT_STYLE | wx.FLP_FILE_MUST_EXIST)
 		executableSizer.Add(self.executablePicker, 0, wx.ALL, 5)
 		
 		self.executeScriptButton = wx.Button(executableSizer.GetStaticBox(), wx.ID_ANY, u"execute", wx.DefaultPosition, wx.DefaultSize, 0)
@@ -69,9 +70,10 @@ class ControllerWindow (wx.Frame):
 		
 		argsFileSizer = wx.StaticBoxSizer(wx.StaticBox(scriptSizer.GetStaticBox(), wx.ID_ANY, u"args file"), wx.HORIZONTAL)
 		
-		self.argsFilePicker = wx.FilePickerCtrl(argsFileSizer.GetStaticBox(), wx.ID_ANY, wx.EmptyString, u"Select a file", u"*.*", wx.DefaultPosition, wx.Size(796,-1), wx.FLP_DEFAULT_STYLE)
+		self.argsFilePicker = wx.FilePickerCtrl(argsFileSizer.GetStaticBox(), wx.ID_ANY, wx.EmptyString, u"Select a file", u"*.*", wx.DefaultPosition, wx.Size(796,-1), wx.FLP_DEFAULT_STYLE | wx.FLP_FILE_MUST_EXIST)
 		argsFileSizer.Add(self.argsFilePicker, 0, wx.ALL, 5)
 		
+
 		numOfNodesSizer = wx.StaticBoxSizer(wx.StaticBox(argsFileSizer.GetStaticBox(), wx.ID_ANY, u"connected nodes"), wx.VERTICAL)
 		
 		self.numOfNodesLabel = wx.StaticText(numOfNodesSizer.GetStaticBox(), wx.ID_ANY, u"0", wx.DefaultPosition, wx.DefaultSize, 0)
@@ -87,10 +89,10 @@ class ControllerWindow (wx.Frame):
 		
 		mainSizer.Add(scriptSizer, 1, wx.EXPAND, 5)
 		
-		self.outputTextControl = wx.TextCtrl(self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.TE_READONLY, wx.DefaultValidator, u"controller")
+		self.outputTextControl = wx.TextCtrl(self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.TE_READONLY | wx.TE_MULTILINE, wx.DefaultValidator, u"controller")
 		self.outputTextControl.SetMinSize(wx.Size(1000,375))
 		
-		mainSizer.Add(self.outputTextControl, 0, wx.ALL|wx.EXPAND, 5)
+		mainSizer.Add(self.outputTextControl, 0, wx.ALL | wx.EXPAND, 5)
 		
 		
 		self.SetSizer(mainSizer)
@@ -119,7 +121,7 @@ class ControllerWindow (wx.Frame):
 			return
 		argv = shlex.split(str(self.cmdTextControl.GetValue()))
 		args = "" if str(self.cmdTextControl.GetValue())[len(argv[0]):] == "" else str(self.cmdTextControl.GetValue())[len(argv[0]) + 1:]
-		self.outputTextControl.AppendText("starting command:\n" + self.cmdTextControl.GetValue().strip() + "\n")
+		self.outputTextControl.AppendText("starting command: \"" + self.cmdTextControl.GetValue().strip() + "\"\n")
 		self.taskManager.ExecCmd(argv[0], args)
 		self.outputTextControl.AppendText("command: \"" + self.cmdTextControl.GetValue().strip() + "\" started\n")
 	
@@ -137,6 +139,12 @@ class ControllerWindow (wx.Frame):
 			return
 		if str(self.argsFilePicker.GetPath()).strip() == "":
 			wx.MessageBox("no args file selected", "Alert", wx.OK | wx.ICON_WARNING)
+			return
+		if not os.path.isfile(str(self.executablePicker.GetPath()).strip()): # file not exist
+			wx.MessageBox("executable doesn't exist", "Alert", wx.OK | wx.ICON_WARNING)
+			return
+		if not os.path.isfile(str(self.argsFilePicker.GetPath()).strip()): # file not exist
+			wx.MessageBox("args file doesn't exist", "Alert", wx.OK | wx.ICON_WARNING)
 			return
 		self.outputTextControl.AppendText("starting script:\n\"" + self.executablePicker.GetPath() + "\"\n\"" + self.argsFilePicker.GetPath() + "\"\n")
 		self.taskManager.ExecScript(str(self.executablePicker.GetPath()), str(self.argsFilePicker.GetPath()))

@@ -76,12 +76,14 @@ class TasksManager:
 					if tsk.type == TaskType.SCRIPT:
 						tsk.Restart()
 						self.pendingTasks.append(tsk)
+				del self.currentTasks[node]
 			tasksById = {}
 			for tsk in self.pendingTasks: # prepare
 				if tsk.missionId not in tasksById.keys():
 					tasksById[tsk.missionId] = []
 				tasksById[tsk.missionId].append(tsk)
 			for node in new:
+				self.currentTasks[node] = []
 				for mission in tasksById.keys():
 					tsk = tasksById.pop(mission, None)
 					if tsk != None:

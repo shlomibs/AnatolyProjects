@@ -1,5 +1,6 @@
 #!/usr/bin/python
 import sys
+import traceback
 from thread import start_new_thread
 from socket import socket, AF_INET, SOCK_STREAM
 
@@ -16,33 +17,41 @@ def main():
 	entry.listen(1)
 	controllerSock, addr = entry.accept()
 	start_new_thread(nodeReceivingLoop, (controllerSock,))
-	controllerRecievingLoop(controllerSock)
+	controllerReceivingLoop(controllerSock)
 	entry.close()
 	exit(0)
 
 
 def nodeReceivingLoop(controllerSock):
-	while True:
-		inp = raw_input() # input is repr'd
-		controllerSock.send(inp + "\n")
+	try:
+		while True:
+			inp = raw_input() # input is repr'd
+			controllerSock.send(inp + "\n")
+	except Exception as e:
+		print "node receiving exception: " + str(e)
+		print "traceback: " + traceback.format_exc() # debug
 
 
-def controllerRecievingLoop(controllerSock):
+def controllerReceivingLoop(controllerSock):
 	recData = ""
-	recData += controllerSock.recv(1024)
-	while (recData != CLOSE_CODE + "\n"):
-		if "\n" in recData:
-			splt = recData.split("\n")
-			recData = splt[-1] # unfinished msg, might be even "" (empty)
-			for msg in splt[:-1]:
-				if msg == CLOSE_CODE:
-					recData = CLOSE_CODE +"\n"
-					break 
-				print msg # send to communicator
-		if recData == CLOSE_CODE +"\n":
-			break
-		recData += controllerSock.receive(1024)
-	controllerSock.close()
+	try:
+		recData += controllerSock.recv(1024)
+		while (recData != CLOSE_CODE + "\n"):
+			if "\n" in recData:
+				splt = recData.split("\n")
+				recData = splt[-1] # unfinished msg, might be even "" (empty)
+				for msg in splt[:-1]:
+					if msg == CLOSE_CODE:
+						recData = CLOSE_CODE +"\n"
+						break 
+					print msg # send to communicator
+			if recData == CLOSE_CODE +"\n":
+				break
+			recData += controllerSock.recv(1024)
+		controllerSock.close()
+	except Exception as e:
+		print "controller receiving exception: " + str(e)
+		print "traceback: " + traceback.format_exc() # debug
 
 
 if __name__ == "__main__":
