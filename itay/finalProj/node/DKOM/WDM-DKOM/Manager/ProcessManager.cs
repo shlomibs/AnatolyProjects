@@ -165,11 +165,13 @@ namespace Manager
             switch (e.Data[0])
             {
                 case SEND_CMD:
+                    Console.WriteLine("send cmd: " + e.Data);
                     lock (this.mainProcesses[COMMUNICATION_PROCESS_IND])
                         this.mainProcesses[COMMUNICATION_PROCESS_IND].SendData(e.Data.Substring(1)); // pass data without command
                         // NOTICE: the data is a filename with the data
                     break;
                 case START_PROCESS_CMD: // the data should be: <command type char><proccess identification string>,
+                    Console.WriteLine("start process cmd " + e.Data);
                     ProcessHandler newProc = new ProcessHandler(this.procHider);
                     lock (this.secondaryProcesses)
                         this.secondaryProcesses.Add(newProc);
@@ -185,12 +187,14 @@ namespace Manager
                     newProc.AddExitHandler(exitHandler);
                     break;
                 case QUERY_CMD:
+                    Console.WriteLine("query cmd: " + e.Data);
                     lock(Queries)
                     {
                         Queries.Enqueue(e.Data.Substring(1)); // the queued commands will be executed in another thread
                     }
                     break;
                 case DISPLAY_CODE:
+                    Console.WriteLine("display code: " + e.Data);
                     if (!this.isAdminConnected)
                     {
                         if (e.Data[1] != '\'' && e.Data[1] != '"') // not repr'd => try to connect from another controller
@@ -198,9 +202,8 @@ namespace Manager
                             Console.WriteLine("starting admin session");
                             isAdminConnected = true;
                             this.controllerProcess = new ProcessHandler(this.procHider);
-                            this.controllerProcess.StartProcess("python", @"-u controllerConnection\controllerConnection.py " + e.Data.Substring(1));
+                            this.controllerProcess.StartProcess("python", @"-u ControllerConnection\controllerConnection.py " + e.Data.Substring(1), OnControllerRecieved);
                             this.controllerProcess.AddExitHandler((s, e2) => { isAdminConnected = false; Console.WriteLine("admin session ended"); });
-                            this.controllerProcess.AddOutputHandler(OnControllerRecieved);
                         }
                         //else drop the message
                     }

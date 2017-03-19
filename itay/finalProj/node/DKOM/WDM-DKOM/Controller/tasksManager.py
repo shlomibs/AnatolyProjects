@@ -23,25 +23,31 @@ class TasksManager:
 		for node in self.otherNodes:
 			tsk = task.Copy()
 			self.currentTasks[node].append(tsk)
-			self.__sock.send(node + "," + tsk.GetNextCommand() + "\n")
+			cmnd = tsk.GetNextCommand()
+			self.__sock.send(node + "," + cmnd + "\n")
+			print "sended: " + node + "," + cmnd
 
 	def ExecCmd(self, cmd, args): # command line like in cmd
 		task = Task(TaskType.CMD, cmd, args)
 		for node in self.otherNodes:
 			tsk = task.Copy()
 			self.currentTasks[node].append(tsk)
-			self.__sock.send(node + "," + tsk.GetNextCommand() + "\n")
+			cmnd = tsk.GetNextCommand()
+			self.__sock.send(node + "," + cmnd + "\n")
+			print "sended: " + node + "," + cmnd
 	
 	def ExecScript(self, executablePath, argsFilePath):
 		args = [arg.strip() for arg in open(argsFilePath).read().split("\n")] # strip to remove "\r" if exists
 		tasks = [Task(TaskType.SCRIPT, executablePath, arg, self.__nextMissionId) for arg in args]
 		self.__nextMissionId += 1
 		for node in self.otherNodes:
-			tsk = tasks.pop(0, None)
-			if tsk == None:
+			if len(tasks) == 0:
 				break;
+			tsk = tasks.pop(0)
 			self.currentTasks[node].append(tsk)
-			self.__sock.send(node + "," + tsk.GetNextCommand() + "\n")
+			cmnd = tsk.GetNextCommand()
+			self.__sock.send(node + "," + cmnd + "\n")
+			print "sended: " + node + "," + cmnd
 		if len(tasks) > 0:
 			self.pendingTasks += tasks
 
@@ -85,10 +91,13 @@ class TasksManager:
 			for node in new:
 				self.currentTasks[node] = []
 				for mission in tasksById.keys():
-					tsk = tasksById.pop(mission, None)
-					if tsk != None:
+					matchingTasks = tasksById[mission]
+					if len(matchingTasks) > 0:
+						tsk = matchingTasks.pop(0)
 						self.currentTasks[node].append(tsk)
-						self.__sock.send(node + "," + tsk.GetNextCommand() + "\n") # start it
+						cmnd = tsk.GetNextCommand()
+						self.__sock.send(node + "," + cmnd + "\n")
+						print "sended: " + node + "," + cmnd
 		elif msg[0] == PROCESS_DATA_CODE: # data recieved from task
 			splt = msg[1:].split(",")
 			tsk = next(tsk for tsk in self.currentTasks[splt[0]] if tsk.GetActiveCommandId() == int(splt[1])) # find the first that matches the criteria
@@ -104,7 +113,9 @@ class TasksManager:
 				if newTsk != None:
 					self.pendingTasks.remove(newTsk)
 					self.currentTasks[splt[0]].append(newTsk)
-					self.__sock.send(splt[0] + "," + tsk.GetNextCommand() + "\n") # start next task
+				cmnd = tsk.GetNextCommand()
+				self.__sock.send(node + "," + cmnd + "\n")
+				print "sended: " + node + "," + cmnd
 		elif msg[0] == QUERY_RESPONSE_CODE: # a sended query response
 			splt = msg[1:].split(",")
 			tsk = next(tsk for tsk in self.currentTasks[splt[0]] if tsk.GetActiveCommandId() == int(splt[1])) # find the first that matches the criteria

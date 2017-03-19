@@ -49,6 +49,7 @@ namespace Manager
 #if DEBUG
             this.name = path + " " + args;
             Log.WriteLine(process.ProcessName + ", " + this.name + " started");
+            Console.WriteLine(process.ProcessName + ", " + this.name + " started");
             DataReceivedEventHandler Logger = (s, e) =>
             {
                 lock (Log)
@@ -96,6 +97,7 @@ namespace Manager
 #if DEBUG
             this.name = path + " " + args;
             Log.WriteLine(process.ProcessName + ", " + this.name + " started");
+            Console.WriteLine(process.ProcessName + ", " + this.name + " started");
             DataReceivedEventHandler Logger = (s, e) =>
             {
                 lock (Log)

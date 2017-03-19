@@ -24,12 +24,17 @@ def main():
 
 def inputLoop():
 	global lock, toSendQueue
-	while True:
-		splt = raw_input().split(",")
-		msg = eval(",".join(splt[2:]))
-		lock.acquire()
-		toSendQueue.append((splt[0], msg[0] + splt[1] + "," + msg[1:])) # according to format -> CODE + nodeTaskId + "," + data
-		lock.release()
+	try:
+		while True:
+			splt = raw_input().split(",")
+			msg = eval(",".join(splt[2:]))
+			lock.acquire()
+			toSendQueue.append((splt[0], msg[0] + splt[1] + "," + msg[1:])) # according to format -> CODE + nodeTaskId + "," + data
+			lock.release()
+	except Exception as e:
+		print "exception: " + str(e)
+		print "trcbk: " + traceback.format_exc() # for debug
+		raise e
 
 def receivingLoop():
 	global com
@@ -44,32 +49,37 @@ def receivingLoop():
 				printLock.release()
 			sleep(0.01)
 	except Exception as e:
-		#print "exception: " + str(e)
-		#print "trcbk: " + traceback.format_exc() # for debug
+		print "exception: " + str(e)
+		print "trcbk: " + traceback.format_exc() # for debug
 		raise e
 
 def sendingLoop():
 	global lock, toSendQueue, com
 	com.refreshContacts()
 	i = 0
-	while True:
-		i += 1
-		if i == 50: # give 0.5 second to receive the info
-			printLock.acquire()
-			print repr(CLIENTS_LIST_CODE + repr(com.getContacts()))
-			printLock.release()
-		if len(toSendQueue) == 0:
-			if(i > 10*100): # approximatly 10 secomds
-				i = 0
-				com.refreshContacts()
-			else:
-				sleep(0.01)
-			continue
-		while(len(toSendQueue) > 0):
-			lock.acquire()
-			toId, data = toSendQueue.pop()
-			lock.release()
-			com.send(data, toId)
+	try:
+		while True:
+			i += 1
+			if i == 50: # give 0.5 second to receive the info
+				printLock.acquire()
+				print repr(CLIENTS_LIST_CODE + repr(com.getContacts()))
+				printLock.release()
+			if len(toSendQueue) == 0:
+				if(i > 10*100): # approximatly 10 secomds
+					i = 0
+					com.refreshContacts()
+				else:
+					sleep(0.01)
+				continue
+			while(len(toSendQueue) > 0):
+				lock.acquire()
+				toId, data = toSendQueue.pop()
+				lock.release()
+				com.send(data, toId)
+	except Exception as e:
+		print "exception: " + str(e)
+		print "trcbk: " + traceback.format_exc() # for debug
+		raise e
 
 if __name__ == "__main__":
 	main()

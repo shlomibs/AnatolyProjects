@@ -28,9 +28,9 @@ class DataController:
 		elif data[0] == DataController.DISPLAY_CODE: # start an admin session request
 			print DataController.DISPLAY_CODE + data[1:].split(",")[1] # data[1:] = -1,portNum,
 		elif data[0] == DataController.START_PROCESS_CMD: # start process, to c#, not repered
-			StartProcess(data[1:])
+			DataController.StartProcess(data[1:])
 		elif data[0] == DataController.QUERY_CMD: # start query
-			Query(data[1:])
+			DataController.Query(data[1:])
 		elif data[0] == DataController.PROCESS_DATA_CODE: # data recieved from task
 			print DataController.DISPLAY_CODE + repr(data) # keep the CMD code and send to the controller
 		elif data[0] == DataController.PROCESS_ENDED_CODE: # a sended task ended
@@ -45,27 +45,27 @@ class DataController:
 				pass
 			with open("../temp/" + splt[2], "w") as f:
 				f.write(",".join(data.split(",")[3:])) # write to file
-			SendData(splt[0], splt[1], DataController.PROCESS_ENDED_CODE)
+			DataController.SendData(splt[0], splt[1], DataController.PROCESS_ENDED_CODE)
 			#SendData(sourceNodeId, sourceNodeTaskId, PROCESS_ENDED_CODE)
 		else:
 			raise Exception("unknown command: '" + data[0] + "' full msg: " + data)
 
 	@staticmethod
 	def OnProcessDataRecieved(data):
-		tsk = _FindTaskByData(data)
-		SendData(tsk.sourceNodeId, tsk.sourceNodeTaskId, DataController.PROCESS_DATA_CODE + ",".join(data.split(",")[1:]))
+		tsk = DataController._FindTaskByData(data)
+		DataController.SendData(tsk.sourceNodeId, tsk.sourceNodeTaskId, DataController.PROCESS_DATA_CODE + ",".join(data.split(",")[1:]))
 
 	@staticmethod
 	def OnProcessEnded(data):
-		tsk = _FindTaskByData(data)
-		SendData(tsk.sourceNodeId, tsk.sourceNodeTaskId, DataController.PROCESS_ENDED_CODE)
-		tasks.remove(tsk)
+		tsk = DataController._FindTaskByData(data)
+		DataController.SendData(tsk.sourceNodeId, tsk.sourceNodeTaskId, DataController.PROCESS_ENDED_CODE)
+		DataController.tasks.remove(tsk)
 
 	@staticmethod
 	def OnQueryReceived(data):
-		tsk = _FindTaskByData(data)
-		SendData(tsk.sourceNodeId, tsk.sourceNodeTaskId, DataController.PROCESS_DATA_CODE + ",".join(data.split(",")[1:]))
-		tasks.remove(tsk)
+		tsk = DataController._FindTaskByData(data)
+		DataController.SendData(tsk.sourceNodeId, tsk.sourceNodeTaskId, DataController.PROCESS_DATA_CODE + ",".join(data.split(",")[1:]))
+		DataController.tasks.remove(tsk)
 	#endregion
 
 	@staticmethod
@@ -79,15 +79,15 @@ class DataController:
 	def StartProcess(data):
 		sourceNodeId, sourceNodeTaskId = data.split(",")[0:2]
 		tsk = Task(TaskType.TASK, sourceNodeId, sourceNodeTaskId)
-		tasks.append(tsk)
-		print DataController.START_PROCESS_CMD + tsk.id + "," + ",".join(data.split(",")[2:]) # do not repr (c# is starting the process)
+		DataController.tasks.append(tsk)
+		print DataController.START_PROCESS_CMD + str(tsk.id) + "," + ",".join(data.split(",")[2:]) # do not repr (c# is starting the process)
 
 	@staticmethod
 	def Query(data):
 		fromId, nodeTaskId = data.split(",")[0:2] # take the first 2 vals (fromId, nodeTaskId, data)
 		tsk = Task(TaskType.QUERY, fromId, nodeTaskId)
-		tasks.append(tsk)
-		print DataController.QUERY_CODE + tsk.id + "," + repr(",".join(data.split(",")[2:]))
+		DataController.tasks.append(tsk)
+		print DataController.QUERY_CMD + str(tsk.id) + "," + repr(",".join(data.split(",")[2:]))
 
 	@staticmethod
 	def _FindTaskByData(data): # if the complexity will be too high then turn it to dictionary

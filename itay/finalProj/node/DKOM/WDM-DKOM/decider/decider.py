@@ -4,6 +4,7 @@ from time import sleep
 from thread import start_new_thread
 from threading import Lock
 from dataController import *
+import traceback
 
 cmds = [] # commands recieved via stdin
 shutdown = False
@@ -41,8 +42,12 @@ def ActionLoop():
 		else:
 			raise Exception("unknown command: '" + data[0] + "' full msg: " + data)
 
-
-
-
+		
 if __name__ == "__main__":
-	main()
+	try:
+		main()
+	except Exception as e:
+		with open(sys.argv[0] + ".log", "a") as f:
+			f.write("exception: " + str(e) + "\ntraceback: " + traceback.format_exc())
+		print "exception: " + str(e)
+		print "traceback: " + traceback.format_exc() # debug
