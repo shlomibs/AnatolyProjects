@@ -110,7 +110,7 @@ class ControllerWindow (wx.Frame):
 		self.qryExecuteButton.Bind(wx.EVT_BUTTON, self.ExecuteQuery)
 		self.executeScriptButton.Bind(wx.EVT_BUTTON, self.ExecuteScript)
 	
-	#events:
+	# events:
 	def OnExit(self, event):
 		self.taskManager.OnExit()
 		event.Skip() # closes the window (return the control to the default event handler
