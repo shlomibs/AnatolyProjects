@@ -33,8 +33,10 @@ namespace Manager
             this.errEvntHandler += (s, e) => { };
             this.exitEvntHandler += (s, e) =>
             {
+#if DEBUG
                 Console.WriteLine(this.name + " || exited, data: " + e.ToString());
                 Log.WriteLine(this.name + " || exited, data: " + e.ToString());
+#endif
             };
 #if DEBUG
             if (Log == null)

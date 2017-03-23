@@ -91,6 +91,6 @@ class DataController:
 
 	@staticmethod
 	def _FindTaskByData(data): # if the complexity will be too high then turn it to dictionary
-		for t in tasks:
+		for t in DataController.tasks:
 			if t.id == int(data.split(",")[0]):
 				return t
