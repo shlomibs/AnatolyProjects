@@ -36,10 +36,11 @@ class Task:
 			self.commands = [(Task.nextId, str(Task.nextId) + "," + repr(Task.QUERY_CMD + cmd))] # [(id, command)]
 		else: # self.type == TaskType.SCRIPT
 			content = open(cmd, 'rb').read() # cmd is the script 
-			command = cmd.split("\\")[-1].split("/")[-1]
+			fileName = cmd.split("\\")[-1].split("/")[-1]
+			command = "temp\\" + fileName
 			# next make python unbuffered if it is a python script
 			command, args = ("python", "-u " + command + " " + args) if len(command.split(".")) > 1 and command.split(".")[-1].lower() in ["py", "pyw", "pyc"] else (command, args)
-			self.commands = [(Task.nextId, str(Task.nextId) + "," + repr(Task.WRITE_FILE_CMD + command + "," + content)),
+			self.commands = [(Task.nextId, str(Task.nextId) + "," + repr(Task.WRITE_FILE_CMD + fileName + "," + content)),
 					(Task.nextId + 1, str(Task.nextId + 1) + "," + repr(Task.START_PROCESS_CMD + command + "," + args))] # [(id, command), (id, command)]
 			Task.nextId += 1
 		Task.nextId += 1
