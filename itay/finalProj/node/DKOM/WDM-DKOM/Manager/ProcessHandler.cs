@@ -189,7 +189,8 @@ namespace Manager
             }
             catch(Exception e)
             {
-                string errData = String.Join("\n" + ProcessManager.PROCESS_DATA_CODE + splt[0]/* task id */ + ", ", e.ToString().Split('\n'));
+                //string errData = String.Join("\n" + ProcessManager.PROCESS_DATA_CODE + splt[0]/* task id */ + ", ", e.ToString().Split('\n'));
+                string errData = e.ToString().Split('\n')[0] + ", Message: " + e.Message;
                 lock (outputProcess)
                     outputProcess.SendData(ProcessManager.PROCESS_DATA_CODE + splt[0] /* task id */ + ",error: " + errData);
                 return false;
