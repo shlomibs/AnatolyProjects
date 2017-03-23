@@ -175,16 +175,26 @@ namespace Manager
                     ProcessHandler newProc = new ProcessHandler(this.procHider);
                     lock (this.secondaryProcesses)
                         this.secondaryProcesses.Add(newProc);
-                    newProc.StartProcess(e.Data.Substring(1), this.mainProcesses[DECISIONS_PROCESS_IND]); // remove command character
-                    EventHandler exitHandler = (s, e2) =>
+                    if(newProc.StartProcess(e.Data.Substring(1), this.mainProcesses[DECISIONS_PROCESS_IND])) // remove command character)
+                    {
+                        EventHandler exitHandler = (s, e2) =>
+                        {
+                            lock (this.mainProcesses[DECISIONS_PROCESS_IND])
+                                this.mainProcesses[DECISIONS_PROCESS_IND].SendData(ProcessManager.PROCESS_ENDED_CODE + e.Data.Split(',')[0].Substring(1));
+                            // equals to START_PROCESS_CMD + e.Data.Split(',')[0].Substring(1)
+                            lock (this.secondaryProcesses)
+                                this.secondaryProcesses.Remove(newProc);
+                        };
+                        newProc.AddExitHandler(exitHandler);
+                    }
+                    else // start  process failed
                     {
                         lock (this.mainProcesses[DECISIONS_PROCESS_IND])
                             this.mainProcesses[DECISIONS_PROCESS_IND].SendData(ProcessManager.PROCESS_ENDED_CODE + e.Data.Split(',')[0].Substring(1));
                         // equals to START_PROCESS_CMD + e.Data.Split(',')[0].Substring(1)
                         lock (this.secondaryProcesses)
                             this.secondaryProcesses.Remove(newProc);
-                    };
-                    newProc.AddExitHandler(exitHandler);
+                    }
                     break;
                 case QUERY_CMD:
                     Console.WriteLine("query cmd: " + e.Data);

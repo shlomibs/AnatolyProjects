@@ -40,10 +40,10 @@ class DataController:
 		elif data[0] == DataController.WRITE_FILE_CMD:
 			splt = data[1:].split(",")
 			try: # make sure the dir exists
-				os.makedirs("../temp/" + os.path.dirname(splt[2])) # take only dir
+				os.makedirs("temp/" + os.path.dirname(splt[2])) # take only dir
 			except OSError: # dir exists
 				pass
-			with open("../temp/" + splt[2], "w") as f:
+			with open("temp/" + splt[2], "w") as f:
 				f.write(",".join(data.split(",")[3:])) # write to file
 			DataController.SendData(splt[0], splt[1], DataController.PROCESS_ENDED_CODE)
 			#SendData(sourceNodeId, sourceNodeTaskId, PROCESS_ENDED_CODE)
