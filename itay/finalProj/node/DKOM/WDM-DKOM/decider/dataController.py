@@ -51,7 +51,7 @@ class DataController:
 			raise Exception("unknown command: '" + data[0] + "' full msg: " + data)
 
 	@staticmethod
-	def OnProcessDataRecieved(data):
+	def OnProcessDataReceived(data):
 		tsk = DataController._FindTaskByData(data)
 		DataController.SendData(tsk.sourceNodeId, tsk.sourceNodeTaskId, DataController.PROCESS_DATA_CODE + ",".join(data.split(",")[1:]))
 
