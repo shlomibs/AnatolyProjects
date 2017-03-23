@@ -1,0 +1,73 @@
+from copy import deepcopy as copy
+
+class TaskType:
+	QUERY = 0
+	CMD = 1
+	SCRIPT = 2
+
+class Task:
+	#region constants
+	SEND_CMD = 's'
+	START_PROCESS_CMD = 'p'
+	QUERY_CMD = 'q'
+	PROCESS_ENDED_CODE = 'e'
+	PROCESS_DATA_CODE = 'd'
+	QUERY_RESPONSE_CODE = 'Q'
+	TASK_CODE = 't'
+	WRITE_FILE_CMD = 'w'
+	CLIENTS_LIST_CODE = 'c'
+	DISPLAY_CODE = 'D'
+	CLOSE_CODE = 'C'
+	#endregion
+
+	#region static vars
+	nextId = 0
+	#endregion
+
+	def __init__(self, type, cmd, args = "", missionId = -1):
+		self.missionId = missionId # the task group id (tasks that belong to the same script and args)
+		self.name = cmd + " " + args
+		self.type = type
+		self.__lastCommandId = -1 # illegal id
+		#self.commands = []
+		if self.type == TaskType.CMD:
+			self.commands = [(Task.nextId, str(Task.nextId) + "," + repr(Task.START_PROCESS_CMD + cmd + "," + args))] # [(id, command)]
+		elif self.type == TaskType.QUERY:
+			self.commands = [(Task.nextId, str(Task.nextId) + "," + repr(Task.QUERY_CMD + cmd))] # [(id, command)]
+		else: # self.type == TaskType.SCRIPT
+			content = open(cmd, 'rb').read() # cmd is the script 
+			command = cmd.split("\\")[-1].split("/")[-1]
+			# next make python unbuffered if it is a python script
+			command, args = ("python", "-u " + command + " " + args) if len(command.split(".")) > 1 and command.split(".")[-1].lower() in ["py", "pyw", "pyc"] else (command, args)
+			self.commands = [(Task.nextId, str(Task.nextId) + "," + repr(Task.WRITE_FILE_CMD + command + "," + content)),
+					(Task.nextId + 1, str(Task.nextId + 1) + "," + repr(Task.START_PROCESS_CMD + command + "," + args))] # [(id, command), (id, command)]
+			Task.nextId += 1
+		Task.nextId += 1
+		self.__commandsBackup = list(self.commands) # copy
+
+	#def __init__(self, otherTask): # copy constructor
+	#	self.missionId = otherTask.missionId
+	#	self.name = otherTask.name
+	#	self.type = otherTask.type
+	#	self.__lastCommandId = -1
+	#	self.commands = list(otherTask.commands) # same taskId!
+
+	def Copy(self):
+		return copy(self) # deep copy
+
+	def __str__(self):
+		return self.name
+
+	def GetNextCommand(self):
+		if len(self.commands) == 0:
+			return None
+		id, cmd = self.commands.pop(0)
+		self.__lastCommandId = id
+		return cmd
+
+	def GetActiveCommandId(self):
+		return self.__lastCommandId
+
+	def Restart(self):
+		self.__lastCommandId = -1
+		self.commands = self.__commandsBackup
