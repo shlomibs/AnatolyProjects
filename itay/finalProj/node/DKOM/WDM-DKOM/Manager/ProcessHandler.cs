@@ -183,10 +183,11 @@ namespace Manager
             {
                 return this.StartProcess(splt[1], splt[2], outputHandler);
             }
-            catch( Exception e)
+            catch(Exception e)
             {
+                string errData = String.Join("\n" + ProcessManager.PROCESS_DATA_CODE + splt[0]/* task id */, e.ToString().Split('\n'));
                 lock (outputProcess)
-                    outputProcess.SendData(ProcessManager.PROCESS_DATA_CODE + splt[0] /* task id */ + ",error: " + e.ToString());
+                    outputProcess.SendData(ProcessManager.PROCESS_DATA_CODE + splt[0] /* task id */ + ",error: " + errData);
                 return false;
             }
         }
