@@ -31,6 +31,7 @@ namespace Manager
             this.procHider = procHider;
             this.outEvntHandler += (s, e) => { }; // to prevent null reference exception
             this.errEvntHandler += (s, e) => { };
+            this.exitEvntHandler += (s, e) => { };
 #if DEBUG
             if (Log == null)
             {
