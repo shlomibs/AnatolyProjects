@@ -31,7 +31,11 @@ namespace Manager
             this.procHider = procHider;
             this.outEvntHandler += (s, e) => { }; // to prevent null reference exception
             this.errEvntHandler += (s, e) => { };
-            this.exitEvntHandler += (s, e) => { };
+            this.exitEvntHandler += (s, e) =>
+            {
+                Console.WriteLine(this.name + " || exited, data: " + e.ToString());
+                Log.WriteLine(this.name + " || exited, data: " + e.ToString());
+            };
 #if DEBUG
             if (Log == null)
             {
