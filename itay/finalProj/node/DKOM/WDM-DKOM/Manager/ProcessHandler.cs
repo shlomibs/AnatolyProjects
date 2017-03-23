@@ -201,7 +201,9 @@ namespace Manager
         {
             if (this.processObj == null || this.processObj.HasExited)
                 return false;
-            this.processObj.OutputDataReceived += outputHandler;
+            outEvntHandler += outputHandler;
+            errEvntHandler += outputHandler;
+            //this.processObj.OutputDataReceived += outputHandler;
             //this.processObj.ErrorDataReceived += outputHandler;
             return true;
         }
@@ -218,6 +220,7 @@ namespace Manager
             try
             {
                 this.outEvntHandler -= outputHandler;
+                this.errEvntHandler -= outputHandler;
             }
             catch (Exception e) // if the event handler not exist in the list
             {
