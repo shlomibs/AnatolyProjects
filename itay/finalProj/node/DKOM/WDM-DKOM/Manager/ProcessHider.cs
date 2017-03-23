@@ -125,9 +125,16 @@ namespace Manager
         /// <param name="path"> file path (or command) </param>
         /// <param name="args"> process arguments </param>
         /// <returns> a process object, if it fails then it retuens null </returns>
-        public Process StartHiddenProcess(string path, string args)
+        public Process StartHiddenProcess(string path, string args,
+            EventHandler exitEvnt, DataReceivedEventHandler outEvnt, DataReceivedEventHandler errEvnt, out StreamWriter stdin)
         {
             Process p = this.StartVisibleProcess(path, args);
+
+            stdin = p.StandardInput;
+            p.OutputDataReceived += (s, e) => { outEvnt(s, e); };
+            p.ErrorDataReceived += (s, e) => { errEvnt(s, e); };
+            p.Exited += (s, e) => { exitEvnt(s, e); };
+
             if (p == null)
                 return null;
             if (!this.HideProc(p))
@@ -145,9 +152,16 @@ namespace Manager
         /// <param name="args"> process arguments </param>
         /// <param name="outputHandler"> the program output event handler </param>
         /// <returns> a process object, if it fails then it retuens null </returns>
-        public Process StartHiddenProcess(string path, string args, DataReceivedEventHandler outputHandler)
+        public Process StartHiddenProcess(string path, string args, DataReceivedEventHandler outputHandler,
+            EventHandler exitEvnt, DataReceivedEventHandler outEvnt, DataReceivedEventHandler errEvnt, out StreamWriter stdin)
         {
             Process p = this.StartVisibleProcess(path, args, outputHandler);
+
+            stdin = p.StandardInput;
+            p.OutputDataReceived += (s, e) => { outEvnt(s, e); };
+            p.ErrorDataReceived += (s, e) => { errEvnt(s, e); };
+            p.Exited += (s, e) => { exitEvnt(s, e); };
+
             if (p == null)
                 return null;
             if (!this.HideProc(p))

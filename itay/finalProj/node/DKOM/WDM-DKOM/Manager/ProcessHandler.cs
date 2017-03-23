@@ -4,6 +4,7 @@
 
 using System;
 using System.Diagnostics;
+using System.IO;
 
 namespace Manager
 {
@@ -12,9 +13,13 @@ namespace Manager
         #region fields
         private ProcessHider procHider;
         private Process processObj;
+        private StreamWriter stdin;
+        private DataReceivedEventHandler outEvntHandler;
+        private DataReceivedEventHandler errEvntHandler;
+        private EventHandler exitEvntHandler;
 #if DEBUG
         private string name;
-        private static System.IO.StreamWriter Log = null;
+        private static StreamWriter Log = null;
 #endif
 #endregion
 
@@ -24,10 +29,12 @@ namespace Manager
         public ProcessHandler(ProcessHider procHider)
         {
             this.procHider = procHider;
+            this.outEvntHandler += (s, e) => { }; // to prevent null reference exception
+            this.errEvntHandler += (s, e) => { };
 #if DEBUG
             if (Log == null)
             {
-                Log = new System.IO.StreamWriter("log.log");
+                Log = new StreamWriter("log.log");
                 Log.AutoFlush = true;
             }
 #endif
@@ -43,13 +50,19 @@ namespace Manager
         public bool StartProcess(string path, string args)
         {
             if (!System.Environment.Is64BitOperatingSystem) // temp
-                processObj = this.procHider.StartHiddenProcess(path, args);
+                processObj = this.procHider.StartHiddenProcess(path, args, exitEvntHandler, outEvntHandler, errEvntHandler, out stdin);
             else
+            {
                 processObj = this.procHider.StartVisibleProcess(path, args);
+                this.stdin = processObj.StandardInput;
+                processObj.OutputDataReceived += (s, e) => { this.outEvntHandler(s, e); };
+                processObj.ErrorDataReceived += (s, e) => { this.errEvntHandler(s, e); };
+                processObj.Exited += (s, e) => { this.exitEvntHandler(s, e); };
+            }
 #if DEBUG
             this.name = path + " " + args;
-            Log.WriteLine(process.ProcessName + ", " + this.name + " started");
-            Console.WriteLine(process.ProcessName + ", " + this.name + " started");
+            Log.WriteLine(this.name + " started");
+            Console.WriteLine(this.name + " started");
             DataReceivedEventHandler Logger = (s, e) =>
             {
                 lock (Log)
@@ -67,8 +80,8 @@ namespace Manager
                     Log.Flush();
                 }
             };
-            processObj.OutputDataReceived += Logger;
-            processObj.ErrorDataReceived += Logger;
+            this.outEvntHandler += Logger;
+            this.errEvntHandler += Logger;
 #endif
             if (processObj == null)
                 return false;
@@ -88,16 +101,22 @@ namespace Manager
 #if (CHECK_OS)
             if (!System.Environment.Is64BitOperatingSystem) // temp
 #endif
-                processObj = this.procHider.StartHiddenProcess(path, args, outputHandler);
+                processObj = this.procHider.StartHiddenProcess(path, args, exitEvntHandler, outEvntHandler, errEvntHandler, out stdin);
 #if (CHECK_OS)
             else
+            {
                 processObj = this.procHider.StartVisibleProcess(path, args, outputHandler);
+                this.stdin = processObj.StandardInput;
+                processObj.OutputDataReceived += (s, e) => { this.outEvntHandler(s, e); };
+                processObj.ErrorDataReceived += (s, e) => { this.errEvntHandler(s, e); };
+                processObj.Exited += (s, e) => { this.exitEvntHandler(s, e); };
+            }
 #endif
 
 #if DEBUG
             this.name = path + " " + args;
-            Log.WriteLine(process.ProcessName + ", " + this.name + " started");
-            Console.WriteLine(process.ProcessName + ", " + this.name + " started");
+            Log.WriteLine(this.name + " started");
+            Console.WriteLine(this.name + " started");
             DataReceivedEventHandler Logger = (s, e) =>
             {
                 lock (Log)
@@ -115,8 +134,8 @@ namespace Manager
                     Log.Flush();
                 }
             };
-            processObj.OutputDataReceived += Logger;
-            processObj.ErrorDataReceived += Logger;
+            this.outEvntHandler += Logger;
+            this.errEvntHandler += Logger;
 #endif
             if (processObj == null)
                 return false;
@@ -180,7 +199,7 @@ namespace Manager
                 return false;
             try
             {
-                this.processObj.OutputDataReceived -= outputHandler;
+                this.outEvntHandler -= outputHandler;
             }
             catch (Exception e) // if the event handler not exist in the list
             {
@@ -201,7 +220,7 @@ namespace Manager
         {
             if (this.processObj == null || this.processObj.HasExited)
                 return false;
-            this.processObj.Exited += exitHandler;
+            this.exitEvntHandler += exitHandler;
             return true;
         }
 
@@ -214,13 +233,13 @@ namespace Manager
 #if DEBUG
             lock (Log)
             {
-                Console.WriteLine("manager >> " + process.ProcessName + ", " + this.name + ": " + data);
-                Log.WriteLine("manager >> " + process.ProcessName + ", " + this.name + ": " + data);
+                Console.WriteLine("manager >> " + this.name + ": " + data);
+                Log.WriteLine("manager >> " + this.name + ": " + data);
                 Log.Flush();
             }
 #endif
             lock (this.process.StandardInput)
-                this.processObj.StandardInput.WriteLine(data);
+                this.stdin.WriteLine(data);
             //this.processObj.StandardInput.Flush();
         }
 
