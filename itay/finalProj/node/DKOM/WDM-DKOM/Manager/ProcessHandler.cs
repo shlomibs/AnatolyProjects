@@ -270,6 +270,14 @@ namespace Manager
             lock (this.process.StandardInput)
                 this.stdin.WriteLine(data);
             //this.processObj.StandardInput.Flush();
+#if DEBUG
+            lock (Log)
+            {
+                Console.WriteLine("manager >> " + this.name + ": sended: " + data);
+                Log.WriteLine("manager >> " + this.name + ": sended: " + data);
+                Log.Flush();
+            }
+#endif
         }
 
         /// <summary>

@@ -173,7 +173,7 @@ namespace Manager
                         // NOTICE: the data is a filename with the data
                     break;
                 case START_PROCESS_CMD: // the data should be: <command type char><proccess identification string>,
-                    Console.WriteLine("start process cmd " + trimData);
+                    Console.WriteLine("start process cmd: " + trimData);
                     ProcessHandler newProc = new ProcessHandler(this.procHider);
                     lock (this.secondaryProcesses)
                         this.secondaryProcesses.Add(newProc);
@@ -206,7 +206,7 @@ namespace Manager
                     }
                     break;
                 case DISPLAY_CODE:
-                    Console.WriteLine("display code: " + trimData);
+                    //Console.WriteLine("display code: " + trimData);
                     if (!this.isAdminConnected)
                     {
                         if (trimData[1] != '\'' && trimData[1] != '"') // not repr'd => try to connect from another controller
