@@ -38,11 +38,16 @@ class LowLevelCommunicator: # FIN
 		start_new_thread(self.__portProtectionService, (3,)) # 3 = default
 		self.__isPortProtectionServiceStarted = True
 
-	def __portProtectionService(self, gapBetweenPunches): # FIN
+	def __portProtectionService(self, gapBetweenPunches=3): # FIN
+		i = 0
 		while not self.__shutdown:
 		# optional: maybe block any connection that attemps to bind or use that port
-			holePunchPac = IP(dst=self.__holePunchingAddr[0])/UDP(sport=self.__port, dport=self.__holePunchingAddr[1])/str(self.__ID)
-			send(holePunchPac, verbose=False)
+			i += 1
+			if i == 6 / 3:
+				self.requestContacts()
+			else:
+				holePunchPac = IP(dst=self.__holePunchingAddr[0])/UDP(sport=self.__port, dport=self.__holePunchingAddr[1])/str(self.__ID)
+				send(holePunchPac, verbose=False)
 			sleep(gapBetweenPunches)
 
 	def startSendedMsgsValidationThread(self): #FIN 
@@ -218,8 +223,11 @@ class LowLevelCommunicator: # FIN
 		sleep(1)
 
 	def refreshContacts(self):
-		requestPac = IP(dst=self.__dirSerAddr[0])/UDP(sport=self.__port, dport=self.__dirSerAddr[1])/(">" + str(self.__ID))
 		self.otherNodes = []
+		self.requestContacts()
+
+	def requestContacts(self):
+		requestPac = IP(dst=self.__dirSerAddr[0])/UDP(sport=self.__port, dport=self.__dirSerAddr[1])/(">" + str(self.__ID))
 		send(requestPac, verbose=False)
 
 	def getContacts(self):

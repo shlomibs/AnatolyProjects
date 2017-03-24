@@ -94,6 +94,7 @@ class TasksManager:
 					matchingTasks = tasksById[mission]
 					if len(matchingTasks) > 0:
 						tsk = matchingTasks.pop(0)
+						self.pendingTasks.remove(tsk)
 						self.currentTasks[node].append(tsk)
 						cmnd = tsk.GetNextCommand()
 						self.__sock.send(node + "," + cmnd + "\n")

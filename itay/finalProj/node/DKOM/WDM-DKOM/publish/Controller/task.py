@@ -71,4 +71,4 @@ class Task:
 
 	def Restart(self):
 		self.__lastCommandId = -1
-		self.commands = self.__commandsBackup
+		self.commands = list(self.__commandsBackup) # copy
