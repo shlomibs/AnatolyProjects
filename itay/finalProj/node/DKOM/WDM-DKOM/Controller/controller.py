@@ -78,6 +78,7 @@ def NodeDataProcessing():
 
 	for msg in data:
 		decMsg = eval(msg)
+		print "received: " + decMsg
 		taskManager.MessageReceived(decMsg)
 
 #region bash

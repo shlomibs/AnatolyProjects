@@ -36,8 +36,9 @@ namespace Manager
             this.exitEvntHandler += (s, e) =>
             {
 #if DEBUG
-                Console.WriteLine(this.name + " || exited, data: " + e.ToString());
-                Log.WriteLine(this.name + " || exited, data: " + e.ToString());
+                Console.WriteLine(this.name + " || exited");
+                lock (Log)
+                    Log.WriteLine(this.name + " || exited");
 #endif
             };
 #if DEBUG
@@ -70,7 +71,8 @@ namespace Manager
             }
 #if DEBUG
             this.name = path + " " + args;
-            Log.WriteLine(this.name + " started");
+            lock (Log)
+                Log.WriteLine(this.name + " started");
             Console.WriteLine(this.name + " started");
             DataReceivedEventHandler Logger = (s, e) =>
             {
@@ -128,7 +130,8 @@ namespace Manager
 
 #if DEBUG
             this.name = path + " " + args;
-            Log.WriteLine(this.name + " started");
+            lock (Log)
+                Log.WriteLine(this.name + " started");
             Console.WriteLine(this.name + " started");
             DataReceivedEventHandler Logger = (s, e) =>
             {
