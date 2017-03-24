@@ -23,6 +23,7 @@ class LowLevelCommunicator: # FIN
 		self.__ID = ID
 		self.__seq = 0
 		self.otherNodes = [] # [(ID,ADDR)...]
+		self.allOtherNodes = {} # {ID:ADDR, ...}
 		self.EOM = "<EOF>" # end of message
 		self.MAX_SEQ = 2**16
 		# self.pcapWriter = PcapWriter("sniffLog" + str(ID) + ".pcap", append=True, sync=True) for debugging
@@ -82,6 +83,7 @@ class LowLevelCommunicator: # FIN
 						for i in eval(",".join(splt[3:])): # list
 							if i not in self.otherNodes:
 								self.otherNodes.append(i) # (ID, ADDR), ADDR = (IP, PORT)
+						self.allOtherNodes.update(dict(self.otherNodes))
 					elif splt[2] == "m": # msg
 						if (splt[0], splt[1]) not in self.__rawMessages.keys(): # not recieved yet
 							self.__rawMessages[(int(splt[0]), int(splt[1]))] = ",".join(splt[3:]) # dict[ID, Seq] = data
@@ -221,4 +223,9 @@ class LowLevelCommunicator: # FIN
 		send(requestPac, verbose=False)
 
 	def getContacts(self):
-		return self.otherNodes[0:]
+		return self.otherNodes[0:] # copy
+
+	def getAllPossibleContacts(self): # return {ID:ADDR,...} for all nodes from all times
+		ret = self.__recvFromAddr.copy()
+		ret.update(self.allOtherNodes)
+		return ret

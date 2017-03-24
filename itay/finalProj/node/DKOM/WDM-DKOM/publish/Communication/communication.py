@@ -30,8 +30,11 @@ class Communication:
 		contacts = dict(self.__communicator.getContacts())
 		try:
 			return contacts[str(ID)]
-		except Exception as e:
-			raise e
+		except:
+			try:
+				return self.__communicator.getAllPossibleContacts()[str(ID)]
+			except Exception as e:
+				raise e
 
 	def refreshContacts(self, timeout = 0.2):
 		self.__communicator.refreshContacts()
