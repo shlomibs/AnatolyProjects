@@ -71,23 +71,23 @@ class DataController:
 	@staticmethod
 	def SendData(toId, nodeTaskId, data, toRepr=True):
 		if toRepr:
-			print DataController.SEND_CMD + toId + "," + nodeTaskId + "," + repr(data)
+			print DataController.SEND_CMD + toId + "," + nodeTaskId + "," + repr(data) + "\n",
 		else:
-			print DataController.SEND_CMD + toId + "," + nodeTaskId + "," + data # if the data is already formatted
+			print DataController.SEND_CMD + toId + "," + nodeTaskId + "," + data + "\n",# if the data is already formatted
 
 	@staticmethod
 	def StartProcess(data):
 		sourceNodeId, sourceNodeTaskId = data.split(",")[0:2]
 		tsk = Task(TaskType.TASK, sourceNodeId, sourceNodeTaskId)
 		DataController.tasks.append(tsk)
-		print DataController.START_PROCESS_CMD + str(tsk.id) + "," + ",".join(data.split(",")[2:]) # do not repr (c# is starting the process)
+		print DataController.START_PROCESS_CMD + str(tsk.id) + "," + ",".join(data.split(",")[2:]) + "\n", # do not repr (c# is starting the process)
 
 	@staticmethod
 	def Query(data):
 		fromId, nodeTaskId = data.split(",")[0:2] # take the first 2 vals (fromId, nodeTaskId, data)
 		tsk = Task(TaskType.QUERY, fromId, nodeTaskId)
 		DataController.tasks.append(tsk)
-		print DataController.QUERY_CMD + str(tsk.id) + "," + repr(",".join(data.split(",")[2:]))
+		print DataController.QUERY_CMD + str(tsk.id) + "," + repr(",".join(data.split(",")[2:])) + "\n",
 
 	@staticmethod
 	def _FindTaskByData(data): # if the complexity will be too high then turn it to dictionary

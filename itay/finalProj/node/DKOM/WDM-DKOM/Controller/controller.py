@@ -36,7 +36,7 @@ def main(): # FIN
 			toSend.append(IP(dst="127.0.0.1")/UDP(sport=6878, dport=dport)/triggerMsg) # 6878 = random port
 			toSend.append(IP(dst="127.0.0.1")/UDP(sport=6878, dport=dport)/EOM) # end message
 			send(toSend)#, verbose=False)
-			sleep(20) # wait for the server to start
+			sleep(2) # wait for the server to start
 		except Exception as e:
 			print "udp trigger exception: " + str(e)
 			print "traceback: " + traceback.format_exc() # debug
