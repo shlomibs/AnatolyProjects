@@ -104,8 +104,10 @@ class TasksManager:
 			self.__outputFunc(tsk.name + ": " + ",".join(splt[2:]))
 		elif msg[0] == Task.PROCESS_ENDED_CODE: # a sended task ended
 			splt = msg[1:].split(",")
-			tsk = next(tsk for tsk in self.currentTasks[splt[0]] if tsk.GetActiveCommandId() == int(splt[1])) # find the first that matches the criteria
-			nextCmd = tsk.GetNextCommand()
+			tsk = next((tsk for tsk in self.currentTasks[splt[0]] if tsk.GetActiveCommandId() == int(splt[1])), None) # find the first that matches the criteria
+			nextCmd = None
+			if tsk != None: # task found
+				nextCmd = tsk.GetNextCommand()
 			if nextCmd != None:
 				self.__sock.send(splt[0] + "," + nextCmd + "\n")
 				print "sended: " + splt[0] + "," + nextCmd

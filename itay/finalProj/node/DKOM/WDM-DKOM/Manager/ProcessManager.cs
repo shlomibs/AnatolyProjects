@@ -103,6 +103,7 @@ namespace Manager
                 //throw new Exception("db queries must be running in a seperate thread");
                 Thread dbThread = new Thread(DatabaseThread);
                 dbThread.Start();
+                return;
             }
             while (!this.shutdown)
             {
