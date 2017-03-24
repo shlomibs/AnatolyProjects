@@ -163,26 +163,27 @@ namespace Manager
                 Console.WriteLine("command was empty"); // temp
                 return;
             }
-            switch (e.Data[0])
+            string trimData = e.Data.TrimStart(); // stdin/out might add some spaces in the start
+            switch (trimData[0])
             {
                 case SEND_CMD:
-                    Console.WriteLine("send cmd: " + e.Data);
+                    Console.WriteLine("send cmd: " + trimData);
                     lock (this.mainProcesses[COMMUNICATION_PROCESS_IND])
-                        this.mainProcesses[COMMUNICATION_PROCESS_IND].SendData(e.Data.Substring(1)); // pass data without command
+                        this.mainProcesses[COMMUNICATION_PROCESS_IND].SendData(trimData.Substring(1)); // pass data without command
                         // NOTICE: the data is a filename with the data
                     break;
                 case START_PROCESS_CMD: // the data should be: <command type char><proccess identification string>,
-                    Console.WriteLine("start process cmd " + e.Data);
+                    Console.WriteLine("start process cmd " + trimData);
                     ProcessHandler newProc = new ProcessHandler(this.procHider);
                     lock (this.secondaryProcesses)
                         this.secondaryProcesses.Add(newProc);
-                    if(newProc.StartProcess(e.Data.Substring(1), this.mainProcesses[DECISIONS_PROCESS_IND])) // remove command character)
+                    if(newProc.StartProcess(trimData.Substring(1), this.mainProcesses[DECISIONS_PROCESS_IND])) // remove command character)
                     {
                         EventHandler exitHandler = (s, e2) =>
                         {
                             lock (this.mainProcesses[DECISIONS_PROCESS_IND])
-                                this.mainProcesses[DECISIONS_PROCESS_IND].SendData(ProcessManager.PROCESS_ENDED_CODE + e.Data.Split(',')[0].Substring(1));
-                            // equals to START_PROCESS_CMD + e.Data.Split(',')[0].Substring(1)
+                                this.mainProcesses[DECISIONS_PROCESS_IND].SendData(ProcessManager.PROCESS_ENDED_CODE + trimData.Split(',')[0].Substring(1));
+                            // equals to START_PROCESS_CMD + trimData.Split(',')[0].Substring(1)
                             lock (this.secondaryProcesses)
                                 this.secondaryProcesses.Remove(newProc);
                         };
@@ -191,36 +192,36 @@ namespace Manager
                     else // start  process failed
                     {
                         lock (this.mainProcesses[DECISIONS_PROCESS_IND])
-                            this.mainProcesses[DECISIONS_PROCESS_IND].SendData(ProcessManager.PROCESS_ENDED_CODE + e.Data.Split(',')[0].Substring(1));
-                        // equals to START_PROCESS_CMD + e.Data.Split(',')[0].Substring(1)
+                            this.mainProcesses[DECISIONS_PROCESS_IND].SendData(ProcessManager.PROCESS_ENDED_CODE + trimData.Split(',')[0].Substring(1));
+                        // equals to START_PROCESS_CMD + trimData.Split(',')[0].Substring(1)
                         lock (this.secondaryProcesses)
                             this.secondaryProcesses.Remove(newProc);
                     }
                     break;
                 case QUERY_CMD:
-                    Console.WriteLine("query cmd: " + e.Data);
+                    Console.WriteLine("query cmd: " + trimData);
                     lock(Queries)
                     {
-                        Queries.Enqueue(e.Data.Substring(1)); // the queued commands will be executed in another thread
+                        Queries.Enqueue(trimData.Substring(1)); // the queued commands will be executed in another thread
                     }
                     break;
                 case DISPLAY_CODE:
-                    Console.WriteLine("display code: " + e.Data);
+                    Console.WriteLine("display code: " + trimData);
                     if (!this.isAdminConnected)
                     {
-                        if (e.Data[1] != '\'' && e.Data[1] != '"') // not repr'd => try to connect from another controller
+                        if (trimData[1] != '\'' && trimData[1] != '"') // not repr'd => try to connect from another controller
                         {
                             Console.WriteLine("starting admin session");
                             isAdminConnected = true;
                             this.controllerProcess = new ProcessHandler(this.procHider);
-                            this.controllerProcess.StartProcess("python", @"-u ControllerConnection\controllerConnection.py " + e.Data.Substring(1), OnControllerRecieved);
+                            this.controllerProcess.StartProcess("python", @"-u ControllerConnection\controllerConnection.py " + trimData.Substring(1), OnControllerRecieved);
                             this.controllerProcess.AddExitHandler((s, e2) => { isAdminConnected = false; Console.WriteLine("admin session ended"); });
                         }
                         //else drop the message
                     }
                     else
                     {
-                        if (e.Data[1] != '\'' && e.Data[1] != '"') // not repr'd => try to connect from another controller
+                        if (trimData[1] != '\'' && trimData[1] != '"') // not repr'd => try to connect from another controller
                         {
                             Thread t = new Thread(() =>
                             {
@@ -232,12 +233,12 @@ namespace Manager
                         }
                         else
                             lock (this.controllerProcess)
-                                this.controllerProcess.SendData(e.Data.Substring(1));
+                                this.controllerProcess.SendData(trimData.Substring(1));
                     }
                     break;
                 default:
-                    Console.WriteLine("unknown cmd data: " + e.Data);
-                    throw new InvalidOperationException("Unknown command: " + e.Data);
+                    Console.WriteLine("unknown cmd data: " + e.Data + "\n\n trimmed: " + trimData);
+                    throw new InvalidOperationException("Unknown command: " + e.Data + "\n\n trimmed: " + trimData);
             }
         }
 
