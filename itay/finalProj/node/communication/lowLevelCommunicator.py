@@ -22,6 +22,7 @@ class LowLevelCommunicator: # FIN
 		self.__dirSerAddr = communicationUtils.GetDirServerAddr();
 		self.__ID = ID
 		self.__seq = 0
+		self.__recentMessagedIdSeq = [] # last 500 msgs (id,seq)
 		self.otherNodes = [] # [(ID,ADDR)...]
 		self.allOtherNodes = {} # {ID:ADDR, ...}
 		self.EOM = "<EOF>" # end of message
@@ -100,7 +101,11 @@ class LowLevelCommunicator: # FIN
 								self.otherNodes.append(i) # (ID, ADDR), ADDR = (IP, PORT)
 						self.allOtherNodes.update(dict(self.otherNodes))
 					elif splt[2] == "m": # msg
-						if (splt[0], splt[1]) not in self.__rawMessages.keys(): # not recieved yet
+						#if (splt[0], splt[1]) not in self.__rawMessages.keys(): # not recieved yet
+						if (splt[0], splt[1]) not in self.__recentMessagedIdSeq: # not recieved yet
+							self.__recentMessagedIdSeq.append((int(splt[0]), int(splt[1])))
+							if (self.__recentMessagedIdSeq) >= 500:
+								self.__recentMessagedIdSeq.pop(0) # remove oldest item
 							self.__rawMessages[(int(splt[0]), int(splt[1]))] = ",".join(splt[3:]) # dict[ID, Seq] = data
 						self.__sendRecievedResponse(splt)
 					else: # unimplemented packet type
