@@ -12,6 +12,7 @@ CLIENTS_LIST_CODE = 'c'
 toSendQueue = []
 lock = Lock() # lock for input queue
 printLock = Lock()
+CommunicatorQueueLog = open("comQueue.log", "w")
 def main():
 	global com
 	ID = getMacAsInt() # returns the main mac address as a 48 bit integer
@@ -23,12 +24,14 @@ def main():
 	sendingLoop()
 
 def inputLoop():
-	global lock, toSendQueue
+	global lock, toSendQueue, CommunicatorQueueLog
 	try:
 		while True:
 			splt = raw_input().split(",")
 			msg = eval(",".join(splt[2:]))
 			lock.acquire()
+			CommunicatorQueueLog.write("inserted: " + splt[0] + ", " + msg[0] + splt[1] + "," + msg[1:] + "\n")
+			CommunicatorQueueLog.flush()
 			toSendQueue.append((splt[0], msg[0] + splt[1] + "," + msg[1:])) # according to format -> CODE + nodeTaskId + "," + data
 			lock.release()
 	except Exception as e:
@@ -62,7 +65,7 @@ def receivingLoop():
 		raise e
 
 def sendingLoop():
-	global lock, toSendQueue, com
+	global lock, toSendQueue, com, CommunicatorQueueLog
 	com.refreshContacts()
 	i = 0
 	try:
@@ -81,6 +84,8 @@ def sendingLoop():
 			while(len(toSendQueue) > 0):
 				lock.acquire()
 				toId, data = toSendQueue.pop(0)
+				CommunicatorQueueLog.write("removed: " + toId + ", " + data + "\n")
+				CommunicatorQueueLog.flush()
 				lock.release()
 				com.send(data, toId)
 	except Exception as e:
