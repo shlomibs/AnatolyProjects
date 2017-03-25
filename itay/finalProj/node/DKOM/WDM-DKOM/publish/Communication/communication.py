@@ -26,8 +26,9 @@ class Communication:
 
 	def getReceivedMessages(self): # getRecievedQuerriesAndTasks(): # FIN
 		QandT = self.__communicator.getReceivedMessages() #getRecievedQuerriesAndTasks()
-		self.__communicator.log.write("communication, recieved messages: " + str(QandT) + "\n")
-		self.__communicator.log.flush()
+		if len(QandT) > 0:
+			self.__communicator.log.write("communication, recieved messages: " + str(self.__encoder.decrypt(QandT)) + "\n")
+			self.__communicator.log.flush()
 		return self.__encoder.decrypt(QandT)
 
 	def getAddrById(self, ID):
