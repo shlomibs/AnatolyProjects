@@ -26,7 +26,7 @@ class LowLevelCommunicator: # FIN
 		self.allOtherNodes = {} # {ID:ADDR, ...}
 		self.EOM = "<EOF>" # end of message
 		self.MAX_SEQ = 2**16
-		self.__log = open("lowLevelCom.log", "w")
+		self.log = open("lowLevelCom.log", "w")
 		# self.pcapWriter = PcapWriter("sniffLog" + str(ID) + ".pcap", append=True, sync=True) for debugging
 
 	def start(self): # FIN
@@ -38,8 +38,8 @@ class LowLevelCommunicator: # FIN
 		if self.__isPortProtectionServiceStarted: return # already started
 		start_new_thread(self.__portProtectionService, (3,)) # 3 = default
 		self.__isPortProtectionServiceStarted = True
-		self.__log.write("port protection started\n")
-		self.__log.flush()
+		self.log.write("port protection started\n")
+		self.log.flush()
 
 	def __portProtectionService(self, gapBetweenPunches=3): # FIN
 		i = 0
@@ -49,8 +49,8 @@ class LowLevelCommunicator: # FIN
 			if i == 6 / 3:
 				self.requestContacts()
 			else:
-				self.__log.write("hole punching...\n")
-				self.__log.flush()
+				self.log.write("hole punching...\n")
+				self.log.flush()
 				holePunchPac = IP(dst=self.__holePunchingAddr[0])/UDP(sport=self.__port, dport=self.__holePunchingAddr[1])/str(self.__ID)
 				send(holePunchPac, verbose=False)
 			sleep(gapBetweenPunches)
@@ -59,15 +59,15 @@ class LowLevelCommunicator: # FIN
 		if self.__isSendedValidationThreadStarted: return # already started
 		start_new_thread(self.__sendedValidationThread, ())
 		self.__isSendedValidationThreadStarted = True
-		self.__log.write("sended messages validation started\n")
-		self.__log.flush()
+		self.log.write("sended messages validation started\n")
+		self.log.flush()
 	
 	def startRecievingThread(self): # FIN
 		if self.__isRecievingThreadStarted: return # already started
 		start_new_thread(self.__recievingThread, ())
 		self.__isRecievingThreadStarted = True
-		self.__log.write("recieving started\n")
-		self.__log.flush()
+		self.log.write("recieving started\n")
+		self.log.flush()
 
 	def __recievingThread(self): # FIN
 		start_new_thread(self.__sniffingThread,())
@@ -180,8 +180,8 @@ class LowLevelCommunicator: # FIN
 		while not self.__shutdown:
 			for i in self.__sendedAndNotResponded: # i = (seq, time(), pac)
 				if time() - i[1] >= self.__pacTimeout:
-					self.__log.write("re sended: " + str(i[2]) + "\n")
-					self.__log.flush()
+					self.log.write("re sended: " + str(i[2]) + "\n")
+					self.log.flush()
 					send(i[2], verbose = False)
 					i[1] = time()
 					# print "re-sent: " + str(i) # for debug
@@ -190,8 +190,8 @@ class LowLevelCommunicator: # FIN
 	def __sendTo(self, msg, to): # FIN
 		# to = (ip, port)
 		#to = self.getAddrById(toID)
-		self.__log.write("sending: " + msg + "\n")
-		self.__log.flush()
+		self.log.write("sending: " + msg + "\n")
+		self.log.flush()
 		msgIndicatorLen = len("m,") # indicates thats a message
 		maxIdAndSeqLen = len(str(2**48)) + len(str(self.MAX_SEQ))
 		maxPortLength = len(str(2**16))
@@ -216,8 +216,8 @@ class LowLevelCommunicator: # FIN
 		send(toSend, verbose = False)
 
 	def __sendRecievedResponse(self, pacDataSplt): # FIN
-		self.__log.write("sended recieved response to: " + str(pacDataSplt) + "\n")
-		self.__log.flush()
+		self.log.write("sended recieved response to: " + str(pacDataSplt) + "\n")
+		self.log.flush()
 		splt = pacDataSplt # pacData.split(",")
 		try:
 			to = self.__recvFromAddr[splt[0]] # self.getAddrById(int(splt[0]))
@@ -238,14 +238,14 @@ class LowLevelCommunicator: # FIN
 		sleep(1)
 
 	def refreshContacts(self):
-		self.__log.write("refreshed contacts\n")
-		self.__log.flush()
+		self.log.write("refreshed contacts\n")
+		self.log.flush()
 		self.otherNodes = []
 		self.requestContacts()
 
 	def requestContacts(self):
-		self.__log.write("requested for contacts\n")
-		self.__log.flush()
+		self.log.write("requested for contacts\n")
+		self.log.flush()
 		requestPac = IP(dst=self.__dirSerAddr[0])/UDP(sport=self.__port, dport=self.__dirSerAddr[1])/(">" + str(self.__ID))
 		send(requestPac, verbose=False)
 
