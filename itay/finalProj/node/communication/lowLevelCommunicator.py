@@ -25,6 +25,7 @@ class LowLevelCommunicator: # FIN
 		self.otherNodes = [] # [(ID,ADDR)...]
 		self.allOtherNodes = {} # {ID:ADDR, ...}
 		self.EOM = "<EOF>" # end of message
+		self.SOM = "<SOM>" # start of message
 		self.MAX_SEQ = 2**16
 		self.log = open("lowLevelCom.log", "w")
 		# self.pcapWriter = PcapWriter("sniffLog" + str(ID) + ".pcap", append=True, sync=True) for debugging
@@ -148,26 +149,31 @@ class LowLevelCommunicator: # FIN
 		isMsgValid = True
 		lastSeqId = sortedRawMessagesKeys[0] # first key[0] = first key id
 		lastKeys = [sortedRawMessagesKeys[0]] # initialize with the first key
-		msgParts = [self.__rawMessages[sortedRawMessagesKeys[0]]]
-		for i in sortedRawMessagesKeys[1:]:
+		msgParts = [] #[self.__rawMessages[sortedRawMessagesKeys[0]]]
+		for i in sortedRawMessagesKeys: #[1:]:
 			#print "i: ", type(i), " last: ", type(lastSeqId)
-			if lastSeqId[0] == i[0] and (lastSeqId[1] + 1) % self.MAX_SEQ == i[1] and self.__rawMessages[i] == self.EOM:
+			if self.__rawMessages[i] == self.SOM:
+				isMsgValid = True # reinitialize for the msg
+				lastKeys = [] # reinitialize for the msg
+				msgParts = [] # reinitialize for the msg
+			elif isMsgValid and lastSeqId[0] == i[0] and (lastSeqId[1] + 1) % self.MAX_SEQ == i[1] and self.__rawMessages[i] == self.EOM:
 				lastKeys.append(i)
 				if isMsgValid:
 					messages.append((i[0], "".join(msgParts))) # ID, msg
 					for key in lastKeys: # remove "used" raw messages
 						self.__rawMessages.pop(key)
-				else:
-					isMsgValid = True # reinitialize for the next msg
-				lastKeys = [] # reinitialize for the next msg
-				msgParts = [] # reinitialize for the next msg
-			elif lastSeqId[0] == i[0] and (lastSeqId[1] + 1) % self.MAX_SEQ == i[1]: # same id and next seq
+					isMsgValid = False
+				#else:
+				#	isMsgValid = True # reinitialize for the next msg
+				#lastKeys = [] # reinitialize for the next msg
+				#msgParts = [] # reinitialize for the next msg
+			elif isMsgValid and lastSeqId[0] == i[0] and (lastSeqId[1] + 1) % self.MAX_SEQ == i[1]: # same id and next seq
 				msgParts.append(self.__rawMessages[i])
 				lastKeys.append(i)
-			elif lastSeqId[0] != i[0]: # start of a msg from another node, ID changed
-				isMsgValid = True # reinitialize for the msg
-				lastKeys = [i] # reinitialize for the next msg
-				msgParts = [self.__rawMessages[i]] # reinitialize for the next msg
+			#elif lastSeqId[0] != i[0]: # start of a msg from another node, ID changed
+			#	isMsgValid = True # reinitialize for the msg
+			#	lastKeys = [i] # reinitialize for the next msg
+			#	msgParts = [self.__rawMessages[i]] # reinitialize for the next msg
 			else: # lastSeqId[0] == i[0] and lastSeqId[1] + 1 != i[1]
 				isMsgValid = False
 			lastSeqId = i
@@ -198,6 +204,9 @@ class LowLevelCommunicator: # FIN
 		dataPerPac = (508 - maxIdAndSeqLen - maxPortLength - msgIndicatorLen) # 508 = for sure safe length
 		numToSend = int(len(msg) / dataPerPac) + 1 # round down + 1 =~ round up
 		toSend = []
+		toSend.append(IP(dst=to[0])/UDP(sport=self.__port, dport=to[1])/(str(self.__ID) + "," + str(self.__seq) + ",m," + self.SOM)) # start message
+		self.__sendedAndNotResponded.append([self.__seq, time(), toSend[-1]])
+		self.__incSeq()
 		for i in xrange(numToSend - 1): # split data to packets with max len of "dataPerPac"
 			# ID,Seq,messageIndicator,data
 			# the response address would be found by the ID

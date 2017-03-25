@@ -238,6 +238,9 @@ namespace Manager
                     break;
                 default:
                     Console.WriteLine("unknown cmd data: " + e.Data + "\n\n trimmed: " + trimData);
+                    StreamWriter lsw = new StreamWriter("unknown cmd.hex");
+                    lsw.Write(e.Data + "\n" + trimData);
+                    lsw.Close();
                     throw new InvalidOperationException("Unknown command: " + e.Data + "\n\n trimmed: " + trimData);
             }
         }

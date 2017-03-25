@@ -2,6 +2,7 @@
 import sys
 from lowLevelCommunicator import LowLevelCommunicator # = *
 import communicationUtils
+from time import sleep
 
 if len(sys.argv) < 3:
     print "not enought arguments! the input should be:"
@@ -17,6 +18,19 @@ com.start()
 
 myIntIps = communicationUtils.GetMachineInternalIps()
 print "My internal Ips: " + str([i for i in myIntIps])
+
+print "waiting for contacts"
+#while len(com.getContacts()) == 0:
+#	print "c" + str(com.getContacts())
+#	sleep(4000)
+#print "c" + str(com.getContacts())
+to = ("10.0.0.8", 30232) #com.getContacts()[0][1]
+print "sending:"
+for i in xrange(100):
+	print i
+	com.sendTo(str(i), to)
+raw_input()
+exit()
 
 while True:
 	toSend = raw_input("ip:port:data >> ")
