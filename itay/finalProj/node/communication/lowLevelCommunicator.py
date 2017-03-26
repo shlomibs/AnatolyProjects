@@ -103,7 +103,7 @@ class LowLevelCommunicator: # FIN
 					elif splt[2] == "m": # msg
 						#if (splt[0], splt[1]) not in self.__rawMessages.keys(): # not recieved yet
 						if (splt[0], splt[1]) not in self.__recentMessagedIdSeq: # not recieved yet
-							self.__recentMessagedIdSeq.append((int(splt[0]), int(splt[1])))
+							self.__recentMessagedIdSeq.append((splt[0], splt[1]))
 							if (self.__recentMessagedIdSeq) >= 500:
 								self.__recentMessagedIdSeq.pop(0) # remove oldest item
 							self.__rawMessages[(int(splt[0]), int(splt[1]))] = ",".join(splt[3:]) # dict[ID, Seq] = data
