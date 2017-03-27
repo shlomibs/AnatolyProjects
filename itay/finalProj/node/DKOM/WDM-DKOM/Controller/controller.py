@@ -28,11 +28,13 @@ def main(): # FIN
 			dport = int(encoder.decrypt(open("../config.cfg").read())) # the active directory of other modules should be the major application directory (manager's dir)
 			while port == dport:
 				port = FindFreePort()
-			triggerMsg = "-1,0,m," + encoder.encrypt(Task.DISPLAY_CODE + str(port))
+			SOM = "-1,0,m,<SOM>"
+			triggerMsg = "-1,1,m," + encoder.encrypt(Task.DISPLAY_CODE + str(port))
 			print "trying to connect via port " + str(port) + " |msg: " + triggerMsg
-			EOM = "-1,1,m,<EOF>"
+			EOM = "-1,2,m,<EOF>"
 			toSend = []
 			#for mip in GetMachineInternalIps():#ips:
+			toSend.append(IP(dst="127.0.0.1")/UDP(sport=6878, dport=dport)/SOM) # start message
 			toSend.append(IP(dst="127.0.0.1")/UDP(sport=6878, dport=dport)/triggerMsg) # 6878 = random port
 			toSend.append(IP(dst="127.0.0.1")/UDP(sport=6878, dport=dport)/EOM) # end message
 			send(toSend)#, verbose=False)

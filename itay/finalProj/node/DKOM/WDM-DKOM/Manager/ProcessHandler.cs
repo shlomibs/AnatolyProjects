@@ -31,8 +31,8 @@ namespace Manager
         public ProcessHandler(ProcessHider procHider)
         {
             this.procHider = procHider;
-            this.outEvntHandler += (s, e) => { }; // to prevent null reference exception
-            this.errEvntHandler += (s, e) => { };
+            this.outEvntHandler += (s, e) => { if (e.Data == null) this.exitEvntHandler(s, e); };
+            this.errEvntHandler += (s, e) => { }; // to prevent null reference exception
             this.exitEvntHandler += (s, e) =>
             {
 #if DEBUG
@@ -46,6 +46,7 @@ namespace Manager
             {
                 Log = new StreamWriter("log.log");
                 Log.AutoFlush = true;
+
             }
 #endif
         }
@@ -67,7 +68,7 @@ namespace Manager
                 this.stdin = processObj.StandardInput;
                 processObj.OutputDataReceived += (s, e) => { this.outEvntHandler(s, e); };
                 processObj.ErrorDataReceived += (s, e) => { this.errEvntHandler(s, e); };
-                processObj.Exited += (s, e) => { this.exitEvntHandler(s, e); };
+                //processObj.Exited += (s, e) => { this.exitEvntHandler(s, e); };
             }
 #if DEBUG
             this.name = path + " " + args;
@@ -124,7 +125,7 @@ namespace Manager
                 this.stdin = processObj.StandardInput;
                 processObj.OutputDataReceived += (s, e) => { this.outEvntHandler(s, e); };
                 processObj.ErrorDataReceived += (s, e) => { this.errEvntHandler(s, e); };
-                processObj.Exited += (s, e) => { this.exitEvntHandler(s, e); };
+                //processObj.Exited += (s, e) => { this.exitEvntHandler(s, e); };
             }
 #endif
 
