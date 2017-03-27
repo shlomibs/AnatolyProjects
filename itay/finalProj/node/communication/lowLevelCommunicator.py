@@ -22,7 +22,8 @@ class LowLevelCommunicator: # FIN
 		self.__dirSerAddr = communicationUtils.GetDirServerAddr();
 		self.__ID = ID
 		self.__seq = 0
-		self.__recentMessagedIdSeq = [] # last 500 msgs (id,seq)
+		self.__recentMessagesIdSeq = [] # last 20 seconds msgs (id,seq)
+		self.__recentMessagesTimeStamp = [] # last 500 msgs (id,seq)
 		self.otherNodes = [] # [(ID,ADDR)...]
 		self.allOtherNodes = {} # {ID:ADDR, ...}
 		self.EOM = "<EOF>" # end of message
@@ -74,6 +75,8 @@ class LowLevelCommunicator: # FIN
 	def __recievingThread(self): # FIN
 		start_new_thread(self.__sniffingThread,())
 		while not self.__shutdown:
+			sniffedCpy = self.__sniffed[0:]
+			self.__sniffed = []
 			for pac in self.__sniffed:
 				# check if the packet is valid
 				origChecksum = pac[UDP].chksum
@@ -102,10 +105,9 @@ class LowLevelCommunicator: # FIN
 						self.allOtherNodes.update(dict(self.otherNodes))
 					elif splt[2] == "m": # msg
 						#if (splt[0], splt[1]) not in self.__rawMessages.keys(): # not recieved yet
-						if (splt[0], splt[1]) not in self.__recentMessagedIdSeq: # not recieved yet
-							self.__recentMessagedIdSeq.append((splt[0], splt[1]))
-							if (self.__recentMessagedIdSeq) >= 500:
-								self.__recentMessagedIdSeq.pop(0) # remove oldest item
+						if (splt[0], splt[1]) not in self.__recentMessagesIdSeq: # not recieved yet
+							self.__recentMessagesIdSeq.append((splt[0], splt[1]))
+							self.__recentMessagesTimeStamp.append(time())
 							self.__rawMessages[(int(splt[0]), int(splt[1]))] = ",".join(splt[3:]) # dict[ID, Seq] = data
 						self.__sendRecievedResponse(splt)
 					else: # unimplemented packet type
@@ -116,9 +118,25 @@ class LowLevelCommunicator: # FIN
 					#print "err data: " + str(e)
 					#print "packet: \n"
 					#pac.show()
-			self.__sniffed = []
-			sleep(0.1)
-	
+
+			# remove messages that older than 20 seconds, by binary search -> fast
+			currTime = time() # faster
+			start = 0
+			end = len(self.__recentMessagesTimeStamp) - 1
+			mid = 0
+			while start <= end:
+				mid = (start + end) / 2
+				if currTime - self.__recentMessagesTimeStamp[mid] > 10:
+					start = mid + 1
+				else:
+					end = mid - 1
+			self.__recentMessagesIdSeq = self.__recentMessagesIdSeq[mid:]
+			self.__recentMessagesTimeStamp = self.__recentMessagesTimeStamp[mid:]
+			
+			if (len(self.__sniffed) == 0):
+				sleep(0.1)
+
+
 	def __sniffingThread(self): # FIN
 		myIntIps = communicationUtils.GetMachineInternalIps()
 		myIntIps = [ip.encode('ascii', 'ignore') for ip in myIntIps] # from unicode to str
@@ -150,7 +168,8 @@ class LowLevelCommunicator: # FIN
 		if len(self.__rawMessages) == 0: # if raw messages empty exit
 			return []
 		messages = []
-		sortedRawMessagesKeys = list(sorted(self.__rawMessages.keys())) # sort by (primaryElement, secondaryElement)
+		# sortedRawMessagesKeys = list(sorted(self.__rawMessages.keys())) # sort by (primaryElement, secondaryElement)
+		sortedRawMessagesKeys = list(sorted(set(self.__rawMessages.keys()))) # sort by (primaryElement, secondaryElement)
 		isMsgValid = True
 		lastSeqId = sortedRawMessagesKeys[0] # first key[0] = first key id
 		lastKeys = [sortedRawMessagesKeys[0]] # initialize with the first key
