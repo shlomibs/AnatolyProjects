@@ -77,7 +77,7 @@ class LowLevelCommunicator: # FIN
 		while not self.__shutdown:
 			sniffedCpy = self.__sniffed[0:]
 			self.__sniffed = []
-			for pac in self.__sniffed:
+			for pac in sniffedCpy: # self.__sniffed:
 				# check if the packet is valid
 				origChecksum = pac[UDP].chksum
 				del pac[UDP].chksum
