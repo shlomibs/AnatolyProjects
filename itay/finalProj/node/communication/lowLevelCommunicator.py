@@ -39,18 +39,19 @@ class LowLevelCommunicator: # FIN
 	
 	def startPortProtectionService(self): # FIN
 		if self.__isPortProtectionServiceStarted: return # already started
-		start_new_thread(self.__portProtectionService, (3,)) # 3 = default
+		start_new_thread(self.__portProtectionService, ())
 		self.__isPortProtectionServiceStarted = True
 		self.log.write("port protection started\n")
 		self.log.flush()
 
-	def __portProtectionService(self, gapBetweenPunches=3): # FIN
+	def __portProtectionService(self, gapBetweenPunches=1): # FIN
 		i = 0
 		while not self.__shutdown:
 		# optional: maybe block any connection that attemps to bind or use that port
 			i += 1
-			if i == 6 / 3:
+			if i == 2:
 				self.requestContacts()
+				i = 0
 			else:
 				self.log.write("hole punching...\n")
 				self.log.flush()
@@ -136,7 +137,6 @@ class LowLevelCommunicator: # FIN
 			if (len(self.__sniffed) == 0):
 				sleep(0.1)
 
-
 	def __sniffingThread(self): # FIN
 		myIntIps = communicationUtils.GetMachineInternalIps()
 		myIntIps = [ip.encode('ascii', 'ignore') for ip in myIntIps] # from unicode to str
@@ -169,7 +169,7 @@ class LowLevelCommunicator: # FIN
 			return []
 		messages = []
 		# sortedRawMessagesKeys = list(sorted(self.__rawMessages.keys())) # sort by (primaryElement, secondaryElement)
-		sortedRawMessagesKeys = list(sorted(set(self.__rawMessages.keys()))) # sort by (primaryElement, secondaryElement)
+		sortedRawMessagesKeys = list(sorted(self.__rawMessages.keys())) # sort by (primaryElement, secondaryElement)
 		isMsgValid = True
 		lastSeqId = sortedRawMessagesKeys[0] # first key[0] = first key id
 		lastKeys = [sortedRawMessagesKeys[0]] # initialize with the first key

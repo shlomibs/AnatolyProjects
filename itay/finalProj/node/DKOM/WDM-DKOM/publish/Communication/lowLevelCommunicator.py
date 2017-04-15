@@ -39,18 +39,19 @@ class LowLevelCommunicator: # FIN
 	
 	def startPortProtectionService(self): # FIN
 		if self.__isPortProtectionServiceStarted: return # already started
-		start_new_thread(self.__portProtectionService, (3,)) # 3 = default
+		start_new_thread(self.__portProtectionService, ())
 		self.__isPortProtectionServiceStarted = True
 		self.log.write("port protection started\n")
 		self.log.flush()
 
-	def __portProtectionService(self, gapBetweenPunches=3): # FIN
+	def __portProtectionService(self, gapBetweenPunches=1): # FIN
 		i = 0
 		while not self.__shutdown:
 		# optional: maybe block any connection that attemps to bind or use that port
 			i += 1
-			if i == 6 / 3:
+			if i == 2:
 				self.requestContacts()
+				i = 0
 			else:
 				self.log.write("hole punching...\n")
 				self.log.flush()

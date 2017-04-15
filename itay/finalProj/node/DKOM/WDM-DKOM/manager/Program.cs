@@ -20,8 +20,11 @@ namespace Manager
 #if !DEBUG
             SetStartup();
 #endif
-            pM = new ProcessManager();
-            pM.Run();
+            while (true)
+            {
+                pM = new ProcessManager();
+                pM.Run();
+            }
         }
 
         private static void CurrentDomain_ProcessExit(object sender, EventArgs e)

