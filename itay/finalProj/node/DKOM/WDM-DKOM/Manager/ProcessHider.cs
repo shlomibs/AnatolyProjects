@@ -182,8 +182,6 @@ namespace Manager
         /// <param name="e"> event args </param>
         private void OnEventedProcessExit(object sender, EventArgs e)
         {
-            //Thread.Sleep(1000);
-            //((Process)sender).WaitForExit();
             ((Process)sender).CancelOutputRead(); // stop reading output
             ((Process)sender).CancelErrorRead();
         }
