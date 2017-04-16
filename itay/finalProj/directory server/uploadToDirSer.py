@@ -15,9 +15,9 @@ def uploadDir(path, ftp, sp): # sp = is subprocess?
 	ftp.dir(filelist.append)
 	filelist = [i[55:] for i in filelist[2:]] # by format
 	for f in files:
-		if f == "upload to dirSer.py":
-			write(f + " skipped\n", sp)
-			continue
+		#if f == "upload to dirSer.py": # if in the same directory
+		#	write(f + " skipped\n", sp)
+		#	continue
 		if os.path.isfile(path + '/' + f):
 			write("starting to upload file: " + str(f), sp)
 			fh = open(f, 'rb')
