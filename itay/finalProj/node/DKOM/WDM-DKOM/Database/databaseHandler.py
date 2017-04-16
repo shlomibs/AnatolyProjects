@@ -17,7 +17,7 @@ class DatabaseHandler:
 			cursor.execute(qry)
 			data = []
 			if "SELECT" in qry.upper().split(" "): # if get data
-				data = cur.fetchall()
+				data = cur.fetchall() # maybe not only for select
 				conn.commit() # for beening safe
 			else: # no need to return data
 				conn.commit() # for beening safe
