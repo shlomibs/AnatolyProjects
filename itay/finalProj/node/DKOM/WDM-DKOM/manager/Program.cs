@@ -13,9 +13,6 @@ namespace Manager
         private const string FRIENDLY_NAME = "Microsoft Background Manager";
         static void Main(string[] args)
         {
-            //Console.WriteLine("for debugging: press any key to start");
-            //Console.ReadKey();
-            // act according to args
             AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
 #if !DEBUG
             SetStartup();

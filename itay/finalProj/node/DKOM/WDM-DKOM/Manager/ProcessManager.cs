@@ -53,7 +53,7 @@ namespace Manager
 #endif
                 procHider.HideProc(Process.GetCurrentProcess());
             databaseFile = NetworkInterface.GetAllNetworkInterfaces().Where(nic => nic.OperationalStatus == OperationalStatus.Up)
-                .Select(nic => nic.GetPhysicalAddress().ToString()).Last();
+                .Select(nic => nic.GetPhysicalAddress().ToString()).Last(); // to know the difference between different node's databases
         }
 
         /// <summary>
