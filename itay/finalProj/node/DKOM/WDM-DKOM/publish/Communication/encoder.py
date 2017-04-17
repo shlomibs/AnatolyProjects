@@ -10,7 +10,7 @@ class Encoder: # encryption with xor (list of values) and base64
 			key /= 256
 
 	def decrypt(self, msgs): # in format [(ID, msg)...]
-		return msgs # debug
+		# return msgs # debug
 		if(type(msgs) == type(list())):
 			retLst = []
 			for item in msgs:
