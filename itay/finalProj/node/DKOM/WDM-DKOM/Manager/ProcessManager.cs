@@ -114,7 +114,7 @@ namespace Manager
                     }
                     lock (this.mainProcesses[DATABASE_PROCESS_IND])
                     {
-                        string query = data.Substring(data.IndexOf(','));
+                        string query = data.Substring(data.IndexOf(',') + 1);
                         string taskId = data.Substring(0, data.IndexOf(','));
 
                         DataReceivedEventHandler resultHandler = null;

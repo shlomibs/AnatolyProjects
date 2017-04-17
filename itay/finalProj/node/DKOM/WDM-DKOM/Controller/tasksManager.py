@@ -25,7 +25,7 @@ class TasksManager:
 			self.currentTasks[node].append(tsk)
 			cmnd = tsk.GetNextCommand()
 			self.__sock.send(node + "," + cmnd + "\n")
-			#print "sended: " + node + "," + cmnd
+			print "sended: " + node + "," + cmnd
 
 	def ExecCmd(self, cmd, args): # command line like in cmd
 		task = Task(TaskType.CMD, cmd, args)
@@ -34,7 +34,7 @@ class TasksManager:
 			self.currentTasks[node].append(tsk)
 			cmnd = tsk.GetNextCommand()
 			self.__sock.send(node + "," + cmnd + "\n")
-			#print "sended: " + node + "," + cmnd
+			print "sended: " + node + "," + cmnd
 	
 	def ExecScript(self, executablePath, argsFilePath):
 		args = [arg.strip() for arg in open(argsFilePath).read().split("\n")] # strip to remove "\r" if exists
@@ -47,7 +47,7 @@ class TasksManager:
 			self.currentTasks[node].append(tsk)
 			cmnd = tsk.GetNextCommand()
 			self.__sock.send(node + "," + cmnd + "\n")
-			#print "sended: " + node + "," + cmnd
+			print "sended: " + node + "," + cmnd
 		if len(tasks) > 0:
 			self.pendingTasks += tasks
 
@@ -98,7 +98,7 @@ class TasksManager:
 						self.currentTasks[node].append(tsk)
 						cmnd = tsk.GetNextCommand()
 						self.__sock.send(node + "," + cmnd + "\n")
-						#print "sended: " + node + "," + cmnd
+						print "sended: " + node + "," + cmnd
 		elif msg[0] == Task.PROCESS_DATA_CODE: # data recieved from task
 			splt = msg[1:].split(",")
 			tsk = next(tsk for tsk in self.currentTasks[splt[0]] if tsk.GetActiveCommandId() == int(splt[1])) # find the first that matches the criteria
@@ -111,7 +111,7 @@ class TasksManager:
 				nextCmd = tsk.GetNextCommand()
 			if nextCmd != None:
 				self.__sock.send(splt[0] + "," + nextCmd + "\n")
-				#print "sended: " + splt[0] + "," + nextCmd
+				print "sended: " + splt[0] + "," + nextCmd
 			else: # None = task finished
 				newTsk = next((t for t in self.pendingTasks if t.missionId == tsk.missionId), None)
 				if newTsk != None:
@@ -119,7 +119,7 @@ class TasksManager:
 					self.currentTasks[splt[0]].append(newTsk)
 					cmnd = newTsk.GetNextCommand()
 					self.__sock.send(splt[0] + "," + cmnd + "\n")
-					#print "sended: " + splt[0] + "," + cmnd
+					print "sended: " + splt[0] + "," + cmnd
 		elif msg[0] == Task.QUERY_RESPONSE_CODE: # a sended query response
 			splt = msg[1:].split(",")
 			tsk = next(tsk for tsk in self.currentTasks[splt[0]] if tsk.GetActiveCommandId() == int(splt[1])) # find the first that matches the criteria
