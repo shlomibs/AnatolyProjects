@@ -72,7 +72,7 @@ def sendingLoop():
 		while True:
 			i += 1
 			if len(toSendQueue) == 0:
-				if(i > 10*100): # approximatly 10 secomds
+				if(i > 10*100): # approximatly 10 seconds
 					printLock.acquire()
 					print repr(CLIENTS_LIST_CODE + repr(com.getContacts()))
 					printLock.release()

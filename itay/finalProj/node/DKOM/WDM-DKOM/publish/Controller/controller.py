@@ -103,7 +103,7 @@ def Bash(sock): # FIN
 	global taskManager
 	BashOutput(bashHelp)
 	BashOutput("initializing . . .\n")
-	taskManager = TasksManager(BashOutput, sock)
+	taskManager = TasksManager(sock, BashOutput)
 	BashOutput("initialized\n")
 	inp = ""
 	while inp.lower() not in ["exit", "quit", "escape"]:

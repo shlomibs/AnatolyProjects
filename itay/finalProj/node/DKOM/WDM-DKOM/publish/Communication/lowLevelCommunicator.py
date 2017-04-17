@@ -137,7 +137,6 @@ class LowLevelCommunicator: # FIN
 			if (len(self.__sniffed) == 0):
 				sleep(0.1)
 
-
 	def __sniffingThread(self): # FIN
 		myIntIps = communicationUtils.GetMachineInternalIps()
 		myIntIps = [ip.encode('ascii', 'ignore') for ip in myIntIps] # from unicode to str
@@ -170,7 +169,7 @@ class LowLevelCommunicator: # FIN
 			return []
 		messages = []
 		# sortedRawMessagesKeys = list(sorted(self.__rawMessages.keys())) # sort by (primaryElement, secondaryElement)
-		sortedRawMessagesKeys = list(sorted(set(self.__rawMessages.keys()))) # sort by (primaryElement, secondaryElement)
+		sortedRawMessagesKeys = list(sorted(self.__rawMessages.keys())) # sort by (primaryElement, secondaryElement)
 		isMsgValid = True
 		lastSeqId = sortedRawMessagesKeys[0] # first key[0] = first key id
 		lastKeys = [sortedRawMessagesKeys[0]] # initialize with the first key

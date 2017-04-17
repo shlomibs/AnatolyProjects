@@ -3,7 +3,7 @@ from base64 import b64encode, b64decode
 
 class Encoder: # encryption with xor (list of values) and base64
 	def __init__(self, key):
-		# key = string
+		# key = 1024bit integer
 		self.__keys = []
 		while key != 0:
 			self.__keys.append(int(key%256))
@@ -28,7 +28,7 @@ class Encoder: # encryption with xor (list of values) and base64
 		return newMsg
 		
 	def encrypt(self, msg): # type(msg) = string
-		return msg # debug
+		#return msg # debug
 		newMsg = ""
 		i = 0
 		for ch in msg:
