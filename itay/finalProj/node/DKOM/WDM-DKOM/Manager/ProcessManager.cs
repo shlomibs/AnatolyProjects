@@ -120,6 +120,7 @@ namespace Manager
                         DataReceivedEventHandler resultHandler = null;
                         resultHandler = (s, e) =>
                         {
+                            Console.WriteLine("db output recieved:" + e.Data);
                             if (e.Data == null) // precaution
                                 return;
                             lock (this.mainProcesses[DATABASE_PROCESS_IND]) lock (this.mainProcesses[DECISIONS_PROCESS_IND])
