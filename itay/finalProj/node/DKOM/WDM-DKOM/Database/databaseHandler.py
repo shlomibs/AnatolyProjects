@@ -11,19 +11,19 @@ class DatabaseHandler:
 			#return
 		self._isExecutingQuery = True
 		try:
-			conn = sql.connect(self._dbFile) # creates a db if it doesnt exists
-			cursor = con.cursor()
+			connection = sql.connect(self._dbFile) # creates a db if it doesnt exists
+			cursor = connection.cursor()
 			
 			cursor.execute(qry)
 			data = []
-			if "SELECT" in qry.upper().split(" "): # if get data
-				data = cur.fetchall() # maybe not only for select
-				conn.commit() # for beening safe
-			else: # no need to return data
-				conn.commit() # for beening safe
-			conn.close();
+			#if "SELECT" in qry.upper().split(" "): # if get data
+			data = cursor.fetchall() # maybe not only for select
+			connection.commit() # for beening safe
+			connection.close();
 			self._isExecutingQuery = False
 			return data
-		except sql.Error, e:
-			print "Error %s:" % e.args[0]
-			raise e
+		except Exception as e: # sql.Error, e:
+			return e
+			#print str(e)
+			#print "Error %s:" % e.args[0]
+			#raise e

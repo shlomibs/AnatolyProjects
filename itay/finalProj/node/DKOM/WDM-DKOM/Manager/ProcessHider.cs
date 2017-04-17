@@ -134,7 +134,7 @@ namespace Manager
             stdin = p.StandardInput;
             p.OutputDataReceived += (s, e) => { outEvnt(s, e); };
             p.ErrorDataReceived += (s, e) => { errEvnt(s, e); };
-            p.Exited += (s, e) => { exitEvnt(s, e); };
+            //p.Exited += (s, e) => { exitEvnt(s, e); };
 
             if (p == null)
                 return null;
@@ -161,7 +161,7 @@ namespace Manager
             stdin = p.StandardInput;
             p.OutputDataReceived += (s, e) => { outEvnt(s, e); };
             p.ErrorDataReceived += (s, e) => { errEvnt(s, e); };
-            p.Exited += (s, e) => { exitEvnt(s, e); };
+            //p.Exited += (s, e) => { exitEvnt(s, e); };
 
             if (p == null)
                 return null;
