@@ -15,9 +15,9 @@ class DatabaseHandler:
 			cursor = connection.cursor()
 			
 			cursor.execute(qry)
-			data = []
+			#data = []
 			#if "SELECT" in qry.upper().split(" "): # if get data
-			data = cursor.fetchall() # maybe not only for select
+			data = [row for row in cursor.fetchall()] # maybe not only for select
 			connection.commit() # for beening safe
 			connection.close();
 			self._isExecutingQuery = False
