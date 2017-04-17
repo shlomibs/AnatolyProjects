@@ -120,7 +120,7 @@ namespace Manager
                         DataReceivedEventHandler resultHandler = null;
                         resultHandler = (s, e) =>
                         {
-                            if (String.IsNullOrEmpty(e.Data))
+                            if (e.Data == null) // precaution
                                 return;
                             lock (this.mainProcesses[DATABASE_PROCESS_IND]) lock (this.mainProcesses[DECISIONS_PROCESS_IND])
                                 {
@@ -137,7 +137,7 @@ namespace Manager
                         while (IsBusy)
                         {
                             Thread.Sleep(sleepCounter);
-                            sleepCounter = sleepCounter * 2 < 10000 ? sleepCounter * 2 : 10000; // preventing it from reaching to too big numbers
+                            sleepCounter = sleepCounter * 2 < 10000 ? sleepCounter * 2 : 1000; // preventing it from reaching to too big numbers
                         }
                     }
                 }
