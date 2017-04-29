@@ -112,34 +112,34 @@ namespace Manager
                     {
                         data = this.Queries.Dequeue();
                     }
+                    string query = data.Substring(data.IndexOf(',') + 1);
+                    string taskId = data.Substring(0, data.IndexOf(','));
+
+                    DataReceivedEventHandler resultHandler = null;
+                    resultHandler = (s, e) =>
+                    {
+                        Console.WriteLine("db output recieved:" + e.Data);
+                        if (e.Data == null) // precaution
+                                return;
+                        lock (this.mainProcesses[DATABASE_PROCESS_IND]) lock (this.mainProcesses[DECISIONS_PROCESS_IND])
+                            {
+                                this.mainProcesses[DATABASE_PROCESS_IND].RemoveOutputHandler(resultHandler); // it's working (removing the ptr and not null)
+                                this.mainProcesses[DECISIONS_PROCESS_IND].SendData(QUERY_RESPONSE_CODE + taskId + "," + e.Data);
+                            }
+                        IsBusy = false;
+                    };
+
+                    IsBusy = true;
                     lock (this.mainProcesses[DATABASE_PROCESS_IND])
                     {
-                        string query = data.Substring(data.IndexOf(',') + 1);
-                        string taskId = data.Substring(0, data.IndexOf(','));
-
-                        DataReceivedEventHandler resultHandler = null;
-                        resultHandler = (s, e) =>
-                        {
-                            Console.WriteLine("db output recieved:" + e.Data);
-                            if (e.Data == null) // precaution
-                                return;
-                            lock (this.mainProcesses[DATABASE_PROCESS_IND]) lock (this.mainProcesses[DECISIONS_PROCESS_IND])
-                                {
-                                    this.mainProcesses[DATABASE_PROCESS_IND].RemoveOutputHandler(resultHandler); // it's working (removing the ptr and not null)
-                                    this.mainProcesses[DECISIONS_PROCESS_IND].SendData(QUERY_RESPONSE_CODE + taskId + "," + e.Data);
-                                }
-                            IsBusy = false;
-                        };
-
-                        IsBusy = true;
                         this.mainProcesses[DATABASE_PROCESS_IND].AddOutputHandler(resultHandler);
                         this.mainProcesses[DATABASE_PROCESS_IND].SendData(query);
-                        int sleepCounter = 1;
-                        while (IsBusy)
-                        {
-                            Thread.Sleep(sleepCounter);
-                            sleepCounter = sleepCounter * 2 < 10000 ? sleepCounter * 2 : 1000; // preventing it from reaching to too big numbers
-                        }
+                    }
+                    int sleepCounter = 1;
+                    while (IsBusy)
+                    {
+                        Thread.Sleep(sleepCounter);
+                        sleepCounter = sleepCounter * 2 < 10000 ? sleepCounter * 2 : 1000; // preventing it from reaching to too big numbers
                     }
                 }
                 Thread.Sleep(100);

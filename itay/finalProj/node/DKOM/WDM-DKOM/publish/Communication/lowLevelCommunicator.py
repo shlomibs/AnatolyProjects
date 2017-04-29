@@ -225,7 +225,8 @@ class LowLevelCommunicator: # FIN
 		msgIndicatorLen = len("m,") # indicates thats a message
 		maxIdAndSeqLen = len(str(2**48)) + len(str(self.MAX_SEQ))
 		maxPortLength = len(str(2**16))
-		dataPerPac = (508 - maxIdAndSeqLen - maxPortLength - msgIndicatorLen) # 508 = for sure safe length
+		safePacLength = 2**16 / 6 # 508
+		dataPerPac = (safePacLength - maxIdAndSeqLen - maxPortLength - msgIndicatorLen) # 508 = for sure safe length
 		numToSend = int(len(msg) / dataPerPac) + 1 # round down + 1 =~ round up
 		toSend = []
 		toSend.append(IP(dst=to[0])/UDP(sport=self.__port, dport=to[1])/(str(self.__ID) + "," + str(self.__seq) + ",m," + self.SOM)) # start message

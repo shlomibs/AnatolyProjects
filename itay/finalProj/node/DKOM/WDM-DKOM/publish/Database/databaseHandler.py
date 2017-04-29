@@ -23,6 +23,7 @@ class DatabaseHandler:
 			self._isExecutingQuery = False
 			return data
 		except Exception as e: # sql.Error, e:
+			self._isExecutingQuery = False
 			return e
 			#print str(e)
 			#print "Error %s:" % e.args[0]
