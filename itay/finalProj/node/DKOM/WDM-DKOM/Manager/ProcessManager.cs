@@ -35,7 +35,9 @@ namespace Manager
         private Queue<string> Queries;
         private bool shutdown;
         private bool isAdminConnected;
+        private bool isDbBusy;
         private int mainThreadId;
+        private string dbData;
         #endregion
 
         public ProcessManager()
@@ -46,6 +48,7 @@ namespace Manager
             Queries = new Queue<string>();
             shutdown = false;
             isAdminConnected = false;
+            isDbBusy = false;
             mainThreadId = Thread.CurrentThread.ManagedThreadId;
             Directory.CreateDirectory("temp"); // for output files or executables i.e. python code or batch files
 #if (CHECK_OS)
@@ -83,7 +86,7 @@ namespace Manager
             // python -u = python unbuffered -> disable the need for sys.stdout.flush() after every print (like doing it automatically)
             if (!this.mainProcesses[COMMUNICATION_PROCESS_IND].StartProcess("python", @"-u Communication\communicator.py", this.OnCommunicationReceived) ||
                 !this.mainProcesses[DECISIONS_PROCESS_IND].StartProcess("python" , @"-u Decider\decider.py", this.OnDecisionRecieved) ||
-                !this.mainProcesses[DATABASE_PROCESS_IND].StartProcess("python", @"-u Database\database.py " + databaseFile))
+                !this.mainProcesses[DATABASE_PROCESS_IND].StartProcess("python", @"-u Database\database.py " + databaseFile, this.OnDataBaseRecieved))
                 Environment.Exit(-1); // could not start main processes
 
             DatabaseThread(); // starts the thread if it is in the main thread
@@ -106,7 +109,7 @@ namespace Manager
                 // lock is not needed because Count returns a variable and not counts the queries
                 while (!this.shutdown && this.Queries.Count > 0) // while not empty
                 {
-                    bool IsBusy = false;
+                    this.dbData = "";
                     string data;
                     lock (this.Queries)
                     {
@@ -115,35 +118,45 @@ namespace Manager
                     string query = data.Substring(data.IndexOf(',') + 1);
                     string taskId = data.Substring(0, data.IndexOf(','));
 
-                    DataReceivedEventHandler resultHandler = null;
-                    resultHandler = (s, e) =>
-                    {
-                        Console.WriteLine("db output recieved:" + e.Data);
-                        if (e.Data == null) // precaution
-                                return;
-                        lock (this.mainProcesses[DATABASE_PROCESS_IND]) lock (this.mainProcesses[DECISIONS_PROCESS_IND])
-                            {
-                                this.mainProcesses[DATABASE_PROCESS_IND].RemoveOutputHandler(resultHandler); // it's working (removing the ptr and not null)
-                                this.mainProcesses[DECISIONS_PROCESS_IND].SendData(QUERY_RESPONSE_CODE + taskId + "," + e.Data);
-                            }
-                        IsBusy = false;
-                    };
+                    //DataReceivedEventHandler resultHandler = null;
+                    //resultHandler = (s, e) =>
+                    //{
+                    //    Console.WriteLine("db output recieved:" + e.Data);
+                    //    if (e.Data == null) // precaution
+                    //            return;
+                    //    lock (this.mainProcesses[DATABASE_PROCESS_IND])
+                    //        this.mainProcesses[DATABASE_PROCESS_IND].RemoveOutputHandler(resultHandler); // it's working (removing the ptr and not null)
+                    //    lock (this.mainProcesses[DECISIONS_PROCESS_IND])
+                    //        this.mainProcesses[DECISIONS_PROCESS_IND].SendData(QUERY_RESPONSE_CODE + taskId + "," + e.Data);
+                    //    this.isDbBusy = false;
+                    //};
 
-                    IsBusy = true;
+                    this.isDbBusy = true;
                     lock (this.mainProcesses[DATABASE_PROCESS_IND])
                     {
-                        this.mainProcesses[DATABASE_PROCESS_IND].AddOutputHandler(resultHandler);
+                        //this.mainProcesses[DATABASE_PROCESS_IND].AddOutputHandler(resultHandler);
                         this.mainProcesses[DATABASE_PROCESS_IND].SendData(query);
                     }
                     int sleepCounter = 1;
-                    while (IsBusy)
+                    while (this.isDbBusy)
                     {
                         Thread.Sleep(sleepCounter);
                         sleepCounter = sleepCounter * 2 < 10000 ? sleepCounter * 2 : 1000; // preventing it from reaching to too big numbers
                     }
+                    lock (this.mainProcesses[DECISIONS_PROCESS_IND])
+                        this.mainProcesses[DECISIONS_PROCESS_IND].SendData(QUERY_RESPONSE_CODE + taskId + "," + this.dbData);
                 }
                 Thread.Sleep(100);
             }
+        }
+
+        private void OnDataBaseRecieved(object sender, DataReceivedEventArgs e)
+        {
+            Console.WriteLine("db output recieved:" + e.Data);
+            if (e.Data == null) // precaution
+                return;
+            this.dbData = e.Data;
+            this.isDbBusy = false;
         }
 
         private void OnCommunicationReceived(object sender, DataReceivedEventArgs e)

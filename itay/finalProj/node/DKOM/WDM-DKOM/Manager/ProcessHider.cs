@@ -182,8 +182,8 @@ namespace Manager
         /// <param name="e"> event args </param>
         private void OnEventedProcessExit(object sender, EventArgs e)
         {
-            ((Process)sender).CancelOutputRead(); // stop reading output
-            ((Process)sender).CancelErrorRead();
+            //((Process)sender).CancelOutputRead(); // stop reading output
+            //((Process)sender).CancelErrorRead();
         }
     }
 }
