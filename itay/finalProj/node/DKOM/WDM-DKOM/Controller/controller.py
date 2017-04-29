@@ -80,7 +80,7 @@ def NodeDataProcessing():
 
 	for msg in data:
 		decMsg = eval(msg)
-		print "received: " + decMsg
+		#print "received: " + decMsg
 		taskManager.MessageReceived(decMsg)
 
 #region bash
@@ -88,7 +88,7 @@ def NodeDataProcessing():
 bashHelp ="""
 commands:
 cmd <command> [arg1 [arg2 [arg3...]]]
-query <query-syntax (repr'd = with \r,\n,\t... and surrounded by '' or "" by the format)>
+query <query-syntax (repr'd = with \\r,\\n,\\t... and surrounded by '' or "" by the format)>
 script <executable-path> <args-file-path>
 nodes
 """[1:] # remove the first \n
