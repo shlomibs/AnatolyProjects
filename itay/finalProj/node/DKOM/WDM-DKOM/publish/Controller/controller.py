@@ -96,7 +96,7 @@ nodes
 def BashOutput(msg): # FIN
 	global printLock
 	printLock.acquire()
-	print msg,
+	print msg
 	printLock.release()
 
 def Bash(sock): # FIN
@@ -105,10 +105,14 @@ def Bash(sock): # FIN
 	BashOutput("initializing . . .\n")
 	taskManager = TasksManager(sock, BashOutput)
 	BashOutput("initialized\n")
-	inp = ""
+	#inp = ""
+	inp = raw_input()
 	while inp.lower() not in ["exit", "quit", "escape"]:
+		if inp.lower() in ["h", "help", "?"]:
+			BashOutput(bashHelp)
+		else:
+			taskManager.ExecFromBash(inp)
 		inp = raw_input()
-		taskManager.ExecFromBash(inp)
 	taskManager.OnExit()
 	BashOutput("exited\n")
 

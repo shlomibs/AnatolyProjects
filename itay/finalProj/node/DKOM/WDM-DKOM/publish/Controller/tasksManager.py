@@ -47,7 +47,7 @@ class TasksManager:
 			self.currentTasks[node].append(tsk)
 			cmnd = tsk.GetNextCommand()
 			self.__sock.send(node + "," + cmnd + "\n")
-			print "sended: " + node + "," + cmnd
+			#print "sended: " + node + "," + cmnd
 		if len(tasks) > 0:
 			self.pendingTasks += tasks
 

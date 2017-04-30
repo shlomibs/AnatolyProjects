@@ -191,7 +191,6 @@ namespace Manager
                         {
                             lock (this.mainProcesses[DECISIONS_PROCESS_IND])
                                 this.mainProcesses[DECISIONS_PROCESS_IND].SendData(ProcessManager.PROCESS_ENDED_CODE + trimData.Split(',')[0].Substring(1));
-                            // equals to START_PROCESS_CMD + trimData.Split(',')[0].Substring(1)
                             lock (this.secondaryProcesses)
                                 this.secondaryProcesses.Remove(newProc);
                         };
@@ -201,7 +200,6 @@ namespace Manager
                     {
                         lock (this.mainProcesses[DECISIONS_PROCESS_IND])
                             this.mainProcesses[DECISIONS_PROCESS_IND].SendData(ProcessManager.PROCESS_ENDED_CODE + trimData.Split(',')[0].Substring(1));
-                        // equals to START_PROCESS_CMD + trimData.Split(',')[0].Substring(1)
                         lock (this.secondaryProcesses)
                             this.secondaryProcesses.Remove(newProc);
                     }
