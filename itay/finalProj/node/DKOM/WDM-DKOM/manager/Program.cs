@@ -9,7 +9,7 @@ namespace Manager
     class Program
     {
         private static ProcessManager pM;
-        private const string PROG_NAME = "Manager.exe";
+        private const string PROG_NAME = "DDTS.exe";
         private const string FRIENDLY_NAME = "Microsoft Background Manager";
         static void Main(string[] args)
         {
@@ -20,6 +20,7 @@ namespace Manager
             while (true)
             {
                 pM = new ProcessManager();
+                System.Windows.Forms.MessageBox.Show("initiallising DDTS node...\n everything will be ready in a minute.\n(once ready, the directory server should see this node)", "All Set!");
                 pM.Run();
             }
         }
